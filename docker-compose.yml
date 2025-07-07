@@ -1,0 +1,45 @@
+services:
+  backend:
+    container_name: bird-backend
+    command: 'uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload'
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.backend
+    ports:
+      - '8080:8080'
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: 'strong'
+      DB_NAME: bird_mysql
+    volumes:
+      - ./backend/app:/backend/app
+    depends_on:
+      - db
+    restart: always
+    networks:
+      - bird
+  db:
+    container_name: bird-database
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: bird_mysql
+      MYSQL_ROOT_PASSWORD: 'strong'
+    volumes:
+      - ./database/db_data:/var/lib/mysql
+    restart: always
+    networks:
+      - bird
+  frontend:
+    container_name: bird-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.frontend
+    ports:
+      - '80:80'
+    restart: always
+    networks:
+      - bird
+networks:
+  bird:
+    driver: bridge
