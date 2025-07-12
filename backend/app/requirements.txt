@@ -1,8 +1,5 @@
 requests
 fastapi[standard]
+sqlalchemy
 pydantic
-uvicorn
-mysql-connector-python
-httpx
-pymysql
-cryptography
+typing

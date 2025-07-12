@@ -1,46 +1,78 @@
-import { useEffect, useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+export default function TableControls() {
+  const createTable = async () => {
+    const res = await fetch(`/api/collections/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        table_name: 'my_table',
+        columns: [
+          { name: 'id', type: 'Integer', primary_key: true },
+          { name: 'name', type: 'String' },
+        ],
+      }),
+    });
 
-function App() {
-  const [count, setCount] = useState(0);
+    const data = await res.json();
+    console.log('Created Table:', data);
+  };
 
-  useEffect(() => {
-    const getData = async () => {
-      const response = await fetch('/api');
-      const json = await response.json();
-      console.log(json.tables);
-      console.log(json.columns);
-    };
+  const addRecord = async () => {
+    const res = await fetch(`/api/collections/my_table/records`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        values: {
+          id: 1,
+          name: 'Example',
+        },
+      }),
+    });
 
-    getData();
-  });
+    const data = await res.json();
+    console.log('Added Record:', data);
+  };
+
+  const deleteRecord = async () => {
+    await fetch(`api/collections/my_table/records/1`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        table_name: 'my_table',
+        filters: { id: 1 },
+      }),
+    });
+
+    console.log('Deleted Record');
+  };
+
+  const deleteTable = async () => {
+    await fetch(`/api/collections/my_table`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    console.log('Deleted Table');
+  };
+
+  const selectTable = async () => {
+    const res = await fetch('/api/collections/my_table/records', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const data = await res.json();
+    console.log('Selected Rows:', data.records);
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <button onClick={createTable}>Create Table</button>
+      <button onClick={selectTable}>Select</button>
+      <button onClick={addRecord}>Add Record</button>
+      <button onClick={deleteRecord}>Delete Record</button>
+      <button onClick={deleteTable}>Delete Table</button>
     </>
   );
 }
-
-export default App;

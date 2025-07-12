@@ -1,8 +1,15 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-import pymysql.cursors
+from typing import Annotated
+from sqlalchemy.orm import Session
+
+from . import models
+from .database import engine
+
+from .routes import collections
 
 app = FastAPI()
+models.Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:80",
@@ -19,44 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-def get_connection():
-    return pymysql.connect(
-        host='db',
-        user='root',
-        password='strong',
-        database='bird_mysql',
-        cursorclass=pymysql.cursors.DictCursor
-    )
+app.include_router(collections.router)
 
 @app.get("/api")
-def upload_file():
-    conn = get_connection()
-    try:
-        with conn.cursor() as cursor:
-            # Create table if not exists
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    name VARCHAR(100),
-                    email VARCHAR(100)
-                )
-            """)
-            conn.commit()
-
-            # Add column 'age' only if it does not exist (simplified example)
-            cursor.execute("SHOW COLUMNS FROM users LIKE 'age'")
-            if cursor.fetchone() is None:
-                cursor.execute("ALTER TABLE users ADD COLUMN age INT")
-                conn.commit()
-
-            # Show tables
-            cursor.execute("SHOW TABLES")
-            tables = cursor.fetchall()
-
-            # Show columns
-            cursor.execute("SHOW COLUMNS FROM users")
-            columns = cursor.fetchall()
-    finally:
-        conn.close()
-
-    return {"tables": tables, "columns": columns}
+def hello_world():
+    return {"message:" "Hello World"}
