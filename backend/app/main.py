@@ -3,10 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Annotated
 from sqlalchemy.orm import Session
 
-from . import models
-from .database import engine
+from .models import models
+from .database.database import engine
 
-from .routes import collections
+from .routes import collections, records
 
 app = FastAPI()
 models.Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(collections.router)
+app.include_router(records.router)
 
 @app.get("/api")
 def hello_world():

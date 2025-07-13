@@ -3,3 +3,5 @@ fastapi[standard]
 sqlalchemy
 pydantic
 typing
+uuid
+sqlalchemy_utils
