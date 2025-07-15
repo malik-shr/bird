@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from typing import Optional, Dict, Any
 import uuid
+import bcrypt
 
 from ..schemas.schemas import CreateRecordRequest, UpdateRecordRequest
 from ..database.database import get_db, validate_columns, get_table, parse_filter_expression
@@ -71,31 +72,36 @@ def list_records(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get records: {e}")
 
-
 def create_record(
     collection_name: str, 
     request: CreateRecordRequest,
-    db: Session = Depends(get_db) 
+    db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
     """Create a new record in a collection."""
     try:
         table = get_table(collection_name, db)
-        
-        # Auto-generate UUID for ID if not provided
+
+        # Convert request to dict and assign UUID
         values = dict(request.values)
         values['id'] = str(uuid.uuid4())
-            
+
         # Validate columns
         validate_columns(table, list(values.keys()))
-        
+
+        password = values.get("password")
+        if password:
+            # bcrypt requires bytes; hashpw returns hashed bytes
+            hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+            values["password"] = hashed.decode("utf-8")  # store as string in DB
         stmt = table.insert().values(**values)
         db.execute(stmt)
         db.commit()
-        
+
         return {
             "message": "Record created successfully",
-            "values": values
+            "values": {k: v for k, v in values.items() if k != "password"}  # don't return hashed password
         }
+
     except HTTPException:
         raise
     except Exception as e:

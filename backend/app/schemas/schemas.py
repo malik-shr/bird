@@ -10,6 +10,7 @@ class ColumnDefinition(BaseModel):
 class CollectionCreateRequest(BaseModel):
     table_name: str
     columns: List[ColumnDefinition]
+    type: str
 
 class CreateRecordRequest(BaseModel):
     values: Dict[str, Any]

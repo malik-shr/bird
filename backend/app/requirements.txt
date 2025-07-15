@@ -5,3 +5,4 @@ pydantic
 typing
 uuid
 sqlalchemy_utils
+bcrypt

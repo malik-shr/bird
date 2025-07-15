@@ -5,6 +5,7 @@ from .models import models
 from .database.database import engine
 from .apis.collection import bind_collection_api
 from .apis.record import bind_record_api
+from .apis import auth
 
 class Bird(FastAPI):
     def __init__(self):
@@ -39,6 +40,7 @@ class Bird(FastAPI):
         
         self.include_route(bind_record_api())
         self.include_route(bind_collection_api())
+        self.include_route(auth.router)
 
     def include_route(self, router: APIRouter):
         self.include_router(router)

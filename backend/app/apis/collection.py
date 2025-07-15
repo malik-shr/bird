@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 
 from ..schemas.schemas import CollectionCreateRequest
 from ..database.database import metadata, get_db, SQLALCHEMY_TYPE_MAP, get_table
+from .record import create_record
 
 def bind_collection_api():
     router = APIRouter(
@@ -63,6 +64,8 @@ def create_collection(request: CollectionCreateRequest, db: Session = Depends(ge
         # Create table using SQLAlchemy
         new_table = Table(request.table_name, metadata, *columns)
         new_table.create(db.bind)
+
+        create_record("collections", {"name": request.table_name,"type": request.type})
         
         return {
             "message": f"Collection '{request.table_name}' created successfully",
