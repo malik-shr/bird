@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .models import models
 from .database.database import engine
-from .routes import collections, records
+from .apis.collection import bind_collection_api
+from .apis.record import bind_record_api
 
 class Bird(FastAPI):
     def __init__(self):
@@ -36,8 +37,10 @@ class Bird(FastAPI):
         def hello_world():
             return {"message": "Hello World"}
         
-        self.include_route(collections.router)
-        self.include_route(records.router)
+        self.include_route(bind_record_api())
+        self.include_route(bind_collection_api())
 
     def include_route(self, router: APIRouter):
         self.include_router(router)
+
+    
