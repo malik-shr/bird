@@ -12,7 +12,7 @@ engine = create_engine(URL_DATABASE)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
-metadata = MetaData()
+Metadata = MetaData()
 
 SQLALCHEMY_TYPE_MAP = {
     "Integer": Integer,
@@ -33,7 +33,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 def get_table(table_name: str, db: Session):
     try:
-        table = Table(table_name, metadata, autoload_with=db.bind)
+        table = Table(table_name, Metadata, autoload_with=db.bind)
         return table
     except Exception as e:
         raise HTTPException(status_code=404, detail=f"Table '{table_name}' not found")

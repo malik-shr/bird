@@ -1,40 +1,42 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from ..database.database import Base
-from sqlalchemy_utils import UUIDType
-import uuid
+from ..database.database import Metadata
+from ..core.collection_model import Field, new_collection
 
-class User(Base):
-    __tablename__ = 'users'
-    
-    id = Column(String(36), primary_key=True)  
-    username = Column(String(50), unique=True, nullable=False, index=True)
-    email = Column(String(255), unique=True, nullable=True, index=True)
-    password = Column(String(255), nullable=False)  
+user_table = new_collection(
+    "users",
+    "auth"
+)
 
-class CollectionType(Base):
-    __tablename__ = 'collection_types'
-    
-    id = Column(String(36), primary_key=True)
-    type = Column(String(50), unique=True, nullable=False, index=True)
+collection_meta_table = new_collection(
+    "collections_meta",
+    "base",
+    [
+        Field("name", "String", required=True, index=True),
+        Field("type", "String", required=True, index=True),
+        Field("description", "String"),
+        Field("require_auth", "Boolean", required=True),
+        Field("system", "Boolean", required=True)
+    ]
+)
 
-class Collection(Base):
-    __tablename__ = 'collections'
+field_meta_table = new_collection(
+    "fields_meta",
+    "base",
+    [
+        Field("name", "String", required=True, index=True),
+        Field("type", "String", required=True, index=True),
+        Field("collection", "String", required=True, index=True),
+        Field("secure", "Boolean", required=True),
+        Field("system", "Boolean", required=True, index=True),
+        Field("hidden", "Boolean", required=True, index=True),
+        Field("required", "Boolean", required=True, index=True),
+        Field("primary_key", "Boolean", required=True, index=True),
+        Field("index", "Boolean", required=True, index=True),
+    ]
+)
     
-    id = Column(String(36), primary_key=True)
-    name = Column(String(100), unique=True, nullable=False, index=True)
-    type = Column(String(36), ForeignKey(CollectionType.id), nullable=False)
-    
-class ColumnType(Base):
-    __tablename__ = 'column_types'
-    
-    id = Column(String(36), primary_key=True)
-    type = Column(String(50), unique=True, nullable=False, index=True)
+system_tables = {
+    user_table,
+    collection_meta_table,
+    field_meta_table,
+}
 
-class Column(Base):  
-    __tablename__ = 'columns' 
-    
-    id = Column(String(36), primary_key=True)
-    collection = Column(String(36), ForeignKey(Collection.id), nullable=False, index=True)
-    column = Column(String(100), nullable=False, index=True)  
-    type = Column(String(36), ForeignKey(ColumnType.id), nullable=False)

@@ -4,8 +4,8 @@ from typing import Dict, Any, List, Optional
 class ColumnDefinition(BaseModel):
     name: str
     type: str
-    nullable: Optional[bool] = True  # or False, depending on your default preference
-    primary_key: bool = False  # default to False
+    nullable: Optional[bool] = True  
+    primary_key: bool = False  
 
 class CollectionCreateRequest(BaseModel):
     table_name: str
