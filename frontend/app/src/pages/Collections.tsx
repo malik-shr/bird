@@ -4,7 +4,7 @@ import { bird } from '../lib/lib';
 const Collections = () => {
   const [collections, setCollections] = useState<any[]>([]);
 
-  const [columns, setColumns] = useState([
+  const [columns, setColumns] = useState<any[]>([
     { name: 'id', type: 'String', nullable: false, primary_key: true },
   ]);
   const [tableName, setTableName] = useState('');
@@ -49,9 +49,16 @@ const Collections = () => {
     const tableData = {
       table_name: tableName,
       columns: columns,
+      type: 'base',
     };
 
-    await bird.collections.create(tableData.table_name, tableData.columns);
+    await bird.collections.create(
+      tableData.table_name,
+      tableData.columns.slice(1, tableData.columns.length),
+      tableData.type
+    );
+
+    console.log(tableData);
 
     await refreshCollections();
   };
@@ -79,6 +86,7 @@ const Collections = () => {
 
           <div className="mb-4">
             <h3>Fields:</h3>
+
             {columns.map((column, index) => (
               <div key={index} className="mb-2 p-2 border">
                 <div className="flex gap-2 items-center">

@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import inspect, engine
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException
+from sqlalchemy import select, Table
 from typing import List, Dict, Any
 
-from ..schemas.schemas import CollectionCreateRequest
-from ..database.database import Metadata, get_db, get_table
+from .schemas.schemas import CollectionCreateRequest 
+from ..database.database import Metadata, Engine
 from ..core.collection_model import Field, new_collection
+
+from ..core.store import Collections
 
 def bind_collection_api():
     router = APIRouter(
@@ -21,13 +22,15 @@ def bind_collection_api():
 
     return router
 
-
-def list_collections(db: Session = Depends(get_db)) -> Dict[str, List[str]]:
+def list_collections():
     """Get all collections."""
     try:
-        inspector = inspect(db.bind)
-        tables = inspector.get_table_names()
-        return {"collections": tables}
+        with Engine.begin() as conn:
+            collections_meta_table = Table("collections_meta", Metadata, autoload_with=Engine)
+            result = conn.execute(select(collections_meta_table.c.name))
+            # Extract only the name values
+            collections = [row["name"] for row in result.mappings()]
+            return {"collections": collections}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list collections: {e}")
 
@@ -35,11 +38,6 @@ def list_collections(db: Session = Depends(get_db)) -> Dict[str, List[str]]:
 def create_collection(request: CollectionCreateRequest) -> Dict[str, Any]:
     """Create a new collection."""
     try:
-        # Check if table already exists
-        inspector = inspect(engine)
-        if request.table_name in inspector.get_table_names():
-            raise HTTPException(status_code=400, detail=f"Collection '{request.table_name}' already exists")
-        
         fields = []
         for column in request.columns:
             fields.append(
@@ -47,15 +45,16 @@ def create_collection(request: CollectionCreateRequest) -> Dict[str, Any]:
                     name = column.name, 
                     type = column.type,
                     secure = False,
-                    is_system = False,
-                    hidden=False,
-                    required=column.nullable,
-                    primary_key=column.primary_key
+                    system = False,
+                    hidden = False,
+                    required = not column.nullable,
+                    primary_key = column.primary_key
                 )
             )
         
         collection = new_collection(request.table_name, request.type, fields)
-        collection.create()
+        collection.create_table()
+        collection.insert_metadata()
         
         return {
             "message": f"Collection '{request.table_name}' created successfully",
@@ -67,19 +66,20 @@ def create_collection(request: CollectionCreateRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Failed to create collection: {e}")
 
 
-def collection_columns(collection_name: str, db: Session = Depends(get_db)) -> Dict[str, List[Dict[str, Any]]]:
+def collection_columns(collection_name: str) -> Dict[str, List[Dict[str, Any]]]:
     """Get collection schema/columns."""
     try:
-        table = get_table(collection_name, db)
-        
+        collection = Collections[collection_name]
+        for field in collection.fields:
+            print(field.name)
         columns = [
             {
-                "name": col.name,
-                "type": str(col.type),
-                "nullable": col.nullable,
-                "primary_key": col.primary_key
+                "name": field.name,
+                "type": field.type,
+                "required": field.required,
+                "primary_key": field.primary_key
             }
-            for col in table.columns
+            for field in collection.fields
         ]
         
         return {"columns": columns}
@@ -89,15 +89,12 @@ def collection_columns(collection_name: str, db: Session = Depends(get_db)) -> D
         raise HTTPException(status_code=500, detail=f"Failed to get columns: {e}")
 
 
-def delete_collection(collection_name: str, db: Session = Depends(get_db)) -> Dict[str, str]:
+def delete_collection(collection_name: str) -> Dict[str, str]:
     """Delete a collection."""
     try:
-        table = get_table(collection_name, db)
-        table.drop(db.bind)
-        
-        # Remove from metadata to avoid conflicts
-        if collection_name in Metadata.tables:
-            Metadata.remove(Metadata.tables[collection_name])
+        collection = Collections[collection_name]
+
+        collection.delete()
         
         return {"message": f"Collection '{collection_name}' deleted successfully"}
     except HTTPException:

@@ -3,7 +3,8 @@ from typing import List
 from typing import List
 from sqlalchemy import Table, Column, insert, select
 
-from ..database.database import SQLALCHEMY_TYPE_MAP, Metadata, engine
+from ..database.database import Metadata, Engine
+from ..utils.utils import SQLALCHEMY_TYPE_MAP
 import uuid
 from .store import Collections, Fields
 
@@ -37,32 +38,31 @@ class Field:
             index=self.index
         )
     
-    def insert_metadata(self, collection_id):
-        fields_meta_table = Table("fields_meta", Metadata, autoload_with=engine)
+    def insert_metadata(self, collection_id, conn):
+        fields_meta_table = Table("fields_meta", Metadata, autoload_with=Engine)
         
-        with engine.begin() as conn:
-            existing_field = conn.execute(
-                select(fields_meta_table.c.id)
-                .where(fields_meta_table.c.name == self.name)
-                .where(fields_meta_table.c.collection == collection_id)
-            ).first()
-                            
-            if not existing_field:
-                conn.execute(
-                    insert(fields_meta_table).values(
-                        id=self.id,
-                        name = self.name,
-                        type = self.type,
-                        collection = collection_id,
-                        secure = self.secure,
-                        system = self.system,
-                        hidden = self.hidden,
-                        required = self.required,
-                        primary_key = self.primary_key,
-                        index = self.index
-                    )
+        existing_field = conn.execute(
+            select(fields_meta_table.c.id)
+            .where(fields_meta_table.c.name == self.name)
+            .where(fields_meta_table.c.collection == collection_id)
+        ).first()
+                        
+        if not existing_field:
+            conn.execute(
+                insert(fields_meta_table).values(
+                    id = self.id,
+                    name = self.name,
+                    type = self.type,
+                    collection = collection_id,
+                    secure = self.secure,
+                    system = self.system,
+                    hidden = self.hidden,
+                    required = self.required,
+                    primary_key = self.primary_key,
+                    index = self.index
                 )
-                Fields[self.name] = self
+            )
+            Fields[self.name] = self
 
 class Collection:
     def __init__(self, name: str, type_: str, fields: List[Field], system = False, id: str = None):
@@ -74,6 +74,7 @@ class Collection:
         )
         self.system = system
         self.id = id
+        self.reservedFields = ["id"]
         if id == None:
             self.id = str(uuid.uuid4())
 
@@ -82,19 +83,21 @@ class Collection:
 
     def create_table(self):
         new_table = Table(self.name, Metadata, *self.columns())
-        new_table.create(bind=engine, checkfirst=True)
+        new_table.create(bind=Engine, checkfirst=True)
 
-    def insert_metadata(self):
-        collections_meta_table = Table("collections_meta", Metadata, autoload_with=engine)
-        
-        with engine.begin() as conn:
-            # Check if collection already exists in metadata
-            existing = conn.execute(
+    def exists(self, conn):
+        collections_meta_table = Table("collections_meta", Metadata, autoload_with=Engine)
+        return conn.execute(
                 select(collections_meta_table.c.name)
                 .where(collections_meta_table.c.name == self.name)
             ).first()
 
-            if not existing:
+    def insert_metadata(self):
+        collections_meta_table = Table("collections_meta", Metadata, autoload_with=Engine)
+        
+        with Engine.begin() as conn:
+            # Check if collection already exists in metadata
+            if not self.exists(conn):
                 conn.execute(
                     insert(collections_meta_table).values(
                         id=self.id,
@@ -107,21 +110,21 @@ class Collection:
                 )
                 Collections[self.name] = self
      
-            for field in self.fields:
-                field.insert_metadata(self.id)
+                for field in self.fields:
+                    field.insert_metadata(self.id, conn)
 
     def delete(self):
         if getattr(self, 'system', False):
             raise PermissionError(f"Cannot delete system collection: {self.name}")
 
         # Drop the actual collection table
-        table_to_drop = Table(self.name, Metadata, autoload_with=engine)
-        table_to_drop.drop(bind=engine, checkfirst=True)
+        table_to_drop = Table(self.name, Metadata, autoload_with=Engine)
+        table_to_drop.drop(bind=Engine, checkfirst=True)
 
         # Delete from collections_meta
-        collections_table = Table("collections_meta", Metadata, autoload_with=engine)
-        fields_table = Table("fields_meta", Metadata, autoload_with=engine)
-        with engine.begin() as conn:
+        collections_table = Table("collections_meta", Metadata, autoload_with=Engine)
+        fields_table = Table("fields_meta", Metadata, autoload_with=Engine)
+        with Engine.begin() as conn:
             delete_stmt = (
                 collections_table.delete()
                 .where(collections_table.c.name == self.name)
@@ -134,8 +137,9 @@ class Collection:
             )
 
 class AuthCollection(Collection):
-    def __init__(self, name, type_, fields):
-        super().__init__(name, type_, fields)
+    def __init__(self, name, type_, fields, system, id):
+        super().__init__(name, type_, fields, system, id)
+        self.reservedFields += ["username, email, password"]
         self.fields += [
             Field("username", "String"),
             Field("email", "String"),
@@ -149,9 +153,9 @@ class ViewCollection(Collection):
     pass
 
 # Factory
-def new_collection(name, type_, fields = []):
+def new_collection(name, type_, fields = [], system = False, id = None):
     return {
         "base": BaseCollection,
         "auth": AuthCollection,
         "view": ViewCollection
-    }.get(type_, Collection)(name, type_, fields)
+    }.get(type_, Collection)(name, type_, fields, system, id)

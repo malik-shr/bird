@@ -4,7 +4,6 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from typing import Annotated
 from sqlalchemy.orm import Session
 from .record import list_records
-from ..database.database import get_db
 
 router = APIRouter(
     prefix="/api/auth",
@@ -16,12 +15,11 @@ security = HTTPBasic()
 
 def get_current_username(
     credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-    db: Session = Depends(get_db)
 ):
     username = credentials.username
     password = credentials.password.encode("utf-8")
 
-    records = list_records("users", 1, fields = "password", filter = f"username={username}", db = db)
+    records = list_records("users", 1, fields = "password", filter = f"username={username}")
     user = records["records"][0]
 
     if user is None or not bcrypt.checkpw(password, user["password"].encode("utf-8")):

@@ -1,4 +1,4 @@
-from .bird import Bird
+from .core.bird import Bird
 
 app = Bird()
 app.start()

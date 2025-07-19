@@ -3,13 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from sqlalchemy import select, Table
 
-from .models.models import system_tables
-from .database.database import Metadata, engine
-from .apis.collection import bind_collection_api
-from .apis.record import bind_record_api
-from .apis import auth
-from .core.collection_model import new_collection, Field
-from .core.store import Fields, Collections
+from ..models.models import system_tables
+from ..database.database import Metadata, Engine
+from ..apis.collection import bind_collection_api
+from ..apis.record import bind_record_api
+from ..apis import auth
+from .collection_model import new_collection, Field
+from .store import Fields, Collections
 
 class Bird(FastAPI):
     def __init__(self):
@@ -27,9 +27,9 @@ class Bird(FastAPI):
             table.insert_metadata()           
 
     def _setup_metadata(self):
-        with engine.begin() as conn:
-            collections_meta_table = Table("collections_meta", Metadata, autoload_with=engine)
-            fields_meta_table = Table("fields_meta", Metadata, autoload_with=engine)
+        with Engine.begin() as conn:
+            collections_meta_table = Table("collections_meta", Metadata, autoload_with=Engine)
+            fields_meta_table = Table("fields_meta", Metadata, autoload_with=Engine)
 
             collections_meta_data = conn.execute(
                 select(
@@ -66,11 +66,10 @@ class Bird(FastAPI):
                 fields_meta = field_meta_data.mappings().all()
 
                 for field_meta in fields_meta:
-                    field =                         Field(
+                    field = Field(
                             id = field_meta.id,
                             name = field_meta.name,
                             type = field_meta.type,
-                            collection = collection_meta.id,
                             secure = field_meta.secure,
                             system = field_meta.system,
                             hidden = field_meta.hidden,
@@ -78,10 +77,18 @@ class Bird(FastAPI):
                             primary_key = field_meta.primary_key,
                             index = field_meta.index
                         )
-                    collection_fields.append(field)
+                    
                     Fields[field_meta.name] = field
+                    
+                    if(field.name != "id" and field.name != "username" and field.name != "password" and field.name != "email"):
+                        collection_fields.append(field)
+
                 
-                Collections[collection_meta.name] = new_collection(collection_meta.name, collection_meta.type, collection_fields)
+                Collections[collection_meta.name] = new_collection(
+                    collection_meta.name, collection_meta.type, 
+                    collection_fields, collection_meta.system, 
+                    collection_meta.id
+                )
                 
     def _setup_cors(self):
         origins = [

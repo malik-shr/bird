@@ -28,13 +28,14 @@ export default class CollectionService {
     }
   }
 
-  async create(table_name: string, columns: ColumnDefinition[]) {
+  async create(table_name: string, columns: ColumnDefinition[], type: string) {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,
         body: {
           table_name: table_name,
           columns: columns,
+          type: type,
         },
       });
 
