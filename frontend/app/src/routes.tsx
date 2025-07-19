@@ -1,7 +1,6 @@
 import { type ReactElement } from 'react';
 import Home from './pages/Home';
-import Collections from './pages/Collections';
-import Collection from './pages/Colection';
+import Settings from './pages/Settings';
 
 interface IRoute {
   path: string;
@@ -14,12 +13,8 @@ const routes: IRoute[] = [
     component: <Home />,
   },
   {
-    path: '/collections',
-    component: <Collections />,
-  },
-  {
-    path: '/collections/:collectionName',
-    component: <Collection />,
+    path: '/settings',
+    component: <Settings />,
   },
 ];
 

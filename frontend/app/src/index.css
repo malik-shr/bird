@@ -1,3 +1,36 @@
 @import 'tailwindcss';
 @import 'tailwindcss';
 @plugin "daisyui";
+
+@plugin "daisyui/theme" {
+  name: 'light';
+  default: true;
+
+  --color-base-200: #f2f2f2;
+
+  --color-primary: #63b3ed;
+  --color-primary-content: white;
+  --color-secondary: #3960ff;
+  --color-secondary-content: oklch(98% 0.016 73.684);
+  --color-base-content: #333333;
+  --color-success: oklch(65% 0.25 140);
+  --color-success-content: oklch(98% 0.01 140);
+  --color-info: oklch(70% 0.2 220);
+  --color-info-content: oklch(98% 0.01 220);
+  --color-warning: oklch(80% 0.25 80);
+  --color-warning-content: oklch(20% 0.05 80);
+  --color-error: oklch(65% 0.3 30);
+  --color-error-content: oklch(98% 0.01 30);
+}
+
+body,
+html {
+  font-family: 'Poppins', sans-serif;
+  background: #f2f2f2;
+  height: 100%;
+}
+
+#root {
+  width: 100vw;
+  height: 100%;
+}

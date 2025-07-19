@@ -60,7 +60,6 @@ def list_records(
             
             # Convert rows to dictionaries
             records = [dict(row._mapping) for row in result]
-        
             return {
                 "records": records,
                 "count": len(records),
