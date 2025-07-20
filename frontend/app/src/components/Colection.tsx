@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router';
 import { bird } from '../lib/lib';
-import RecordSidebar from './RecordSidebar';
+import RecordSidebar from './drawer/RecordSidebar';
 
 interface IColumn {
   name: string;
@@ -49,21 +48,10 @@ const Collection = ({ collectionName }: CollectionProps) => {
     <div>
       <h1 className="text-3xl font-bold mb-10">{collectionName}</h1>
 
-      <div className="drawer drawer-end">
-        <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
-        <div className="drawer-content flex justify-end m-5">
-          <label
-            htmlFor="my-drawer-4"
-            className="drawer-button btn btn-primary"
-          >
-            Create Record
-          </label>
-        </div>
-        <RecordSidebar
-          collectionName={collectionName}
-          refreshRecords={refreshRecords}
-        />
-      </div>
+      <RecordSidebar
+        collectionName={collectionName}
+        refreshRecords={refreshRecords}
+      />
 
       <div>
         <table className="w-full">

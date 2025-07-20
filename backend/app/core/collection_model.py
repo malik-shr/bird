@@ -68,10 +68,7 @@ class Collection:
     def __init__(self, name: str, type_: str, fields: List[Field], system = False, id: str = None):
         self.name = name
         self.collection_type = type_
-        self.fields = list(fields)
-        self.fields.append(
-            Field("id", "String", secure=True, system=True, hidden=False, required=True, primary_key=True, index=True)
-        )
+        self.fields = [Field("id", "String", secure=True, system=True, hidden=False, required=True, primary_key=True, index=True)] + list(fields)
         self.system = system
         self.id = id
         self.reservedFields = ["id"]
@@ -139,8 +136,7 @@ class Collection:
 class AuthCollection(Collection):
     def __init__(self, name, type_, fields, system, id):
         super().__init__(name, type_, fields, system, id)
-        self.reservedFields += ["username, email, password"]
-        self.fields += [
+        self.fields +=  [
             Field("username", "String"),
             Field("email", "String"),
             Field("password", "String", secure=True, hidden=True, required=True)

@@ -39,16 +39,16 @@ def create_collection(request: CollectionCreateRequest) -> Dict[str, Any]:
     """Create a new collection."""
     try:
         fields = []
-        for column in request.columns:
+        for field in request.fields:
             fields.append(
                 Field(
-                    name = column.name, 
-                    type = column.type,
-                    secure = False,
+                    name = field.name, 
+                    type = field.type,
+                    secure = field.secure,
                     system = False,
-                    hidden = False,
-                    required = not column.nullable,
-                    primary_key = column.primary_key
+                    hidden = field.hidden,
+                    required = field.required,
+                    primary_key = field.primary_key
                 )
             )
         

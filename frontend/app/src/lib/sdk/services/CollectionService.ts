@@ -34,7 +34,7 @@ export default class CollectionService {
         method: SendMethod.POST,
         body: {
           table_name: table_name,
-          columns: columns,
+          fields: columns,
           type: type,
         },
       });

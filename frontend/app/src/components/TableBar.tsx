@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { bird } from '../lib/lib';
+import CollectionSidebar from './drawer/CollectionSidebar';
 
 interface TableBarProps {
   activeCollection: string;
@@ -38,7 +39,7 @@ const TableBar = ({ activeCollection, setActiveCollection }: TableBarProps) => {
         </button>
       ))}
 
-      <button className="btn btn-primary text-white">Create Collection</button>
+      <CollectionSidebar refreshCollections={refreshCollections} />
     </div>
   );
 };
