@@ -20,10 +20,14 @@ const Input = ({
   placeholder,
 }: InputType) => {
   return (
-    <div className="bg-gray-200 py-2 px-4 focus-within:bg-gray-300 w-full rounded-md">
+    <div
+      className={`bg-gray-200 py-2 px-4 focus-within:bg-gray-300 w-full rounded-md" ${
+        disabled ? 'text-gray-500' : ''
+      }`}
+    >
       <label htmlFor={id}>{label}</label>
       <input
-        value={value}
+        value={value || ''}
         type={type}
         name={name}
         id={id}

@@ -12,7 +12,10 @@ interface DropdownProps {
 const Dropdown = ({ fields, setFields }: DropdownProps) => {
   const [open, setOpen] = useState(false);
 
-  const toggleDropdown = () => setOpen(!open);
+  const toggleDropdown = (e: any) => {
+    e.preventDefault();
+    setOpen(!open);
+  };
 
   const addField = (e: any, type: string) => {
     e.preventDefault();

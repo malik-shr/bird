@@ -5,6 +5,11 @@ import Input from '../Input';
 interface RecordSidebarProps {
   collectionName: string;
   refreshRecords: () => void;
+  isDrawerOpen: boolean;
+  toggle: () => void;
+  toggleCreate: () => void;
+  isNew: boolean;
+  selectedRecord: Record<string, any>;
 }
 
 interface IColumn {
@@ -17,11 +22,14 @@ interface IColumn {
 const RecordSidebar = ({
   collectionName,
   refreshRecords,
+  isDrawerOpen,
+  toggle,
+  isNew,
+  toggleCreate,
+  selectedRecord,
 }: RecordSidebarProps) => {
   const [columns, setColumns] = useState<IColumn[]>([]);
   const [formData, setFormData] = useState<any>({});
-  const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const toggle = () => setDrawerOpen(!isDrawerOpen);
 
   const getColumns = async () => {
     const data = await bird.collections.columns(collectionName);
@@ -29,8 +37,15 @@ const RecordSidebar = ({
 
     // Initialize formData, skipping the "id" column
     const initialFormData = data.reduce((acc: any, column: any) => {
+      if (!isNew && selectedRecord) {
+        acc[column.name] = selectedRecord[column.name];
+        return acc;
+      }
       if (column.name !== 'id') {
         acc[column.name] = ''; // or null, or a default value
+      }
+      if (column.type === 'Boolean') {
+        acc[column.name] = false;
       }
       return acc;
     }, {});
@@ -38,36 +53,39 @@ const RecordSidebar = ({
     setFormData(initialFormData);
   };
 
-  const handleChange = (e: any) => {
-    const name = e.target.name;
-    const value = e.target.value;
-    setFormData((values: any) => ({ ...values, [name]: value }));
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, type, checked, value } = event.target;
+
+    setFormData((prev: any) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+
+    console.log(formData);
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    await bird.collection(collectionName).create(formData);
-    await refreshRecords();
+    try {
+      if (selectedRecord.id && selectedRecord) {
+        await bird
+          .collection(collectionName)
+          //@ts-ignore
+          .update(selectedRecord.id, selectedRecord);
+      } else {
+        await bird.collection(collectionName).create(formData);
+      }
+      await refreshRecords();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
-    const fetchColumns = async () => {
-      const data = await bird.collections.columns(collectionName);
-      setColumns(data);
-
-      const initialFormData = data.reduce((acc: any, column: any) => {
-        if (column.name !== 'id') {
-          acc[column.name] = '';
-        }
-        return acc;
-      }, {});
-      setFormData(initialFormData);
-    };
-
     if (collectionName) {
-      fetchColumns();
+      getColumns();
     }
-  }, [collectionName]);
+  }, [collectionName, selectedRecord]);
 
   const getInputType = (type: string) => {
     if (type === 'Integer' || type == 'Float') {
@@ -95,13 +113,22 @@ const RecordSidebar = ({
         />
       );
     } else if (column.type === 'Boolean') {
-      return <></>;
+      return (
+        <div className="flex gap-2">
+          <input
+            id={column.name}
+            name={column.name}
+            type="checkbox"
+            className="toggle"
+            checked={formData[column.name]}
+            onChange={handleChange}
+          />
+          <label htmlFor={column.name}>{column.name}</label>
+        </div>
+      );
     }
   };
 
-  useEffect(() => {
-    getColumns();
-  }, []);
   return (
     <div className="drawer drawer-end">
       <input
@@ -109,7 +136,7 @@ const RecordSidebar = ({
         type="checkbox"
         className="drawer-toggle"
         checked={isDrawerOpen}
-        onClick={toggle}
+        onChange={toggleCreate}
       />
       <div className="drawer-content flex justify-end m-5">
         <label
@@ -131,7 +158,9 @@ const RecordSidebar = ({
           onSubmit={handleSubmit}
         >
           <div className="flex flex-col mt-5 gap-10">
-            <h3 className="text-xl font-bold">+ Create Record</h3>
+            <h3 className="text-xl font-bold">
+              {isNew ? '+ Create Record' : 'Edit Record'}
+            </h3>
             <ul className="flex flex-col gap-5 overflow-auto max-h-[calc(100vh-150px)]">
               {columns.map((column) => (
                 <div key={column.name} className="w-full">
@@ -144,7 +173,7 @@ const RecordSidebar = ({
           <div className="mb-5">
             <input
               className="btn btn-secondary text-white w-full"
-              value="Create Record"
+              value={isNew ? 'Create Record' : 'Update Record'}
               type="submit"
               onClick={toggle}
             />
