@@ -2,31 +2,27 @@ import { useEffect, useState } from 'react';
 import { bird } from '../../lib/lib';
 import Dropdown from './Dropdown';
 import { type IField } from '../../utils/utils';
-import CollectionCreateInput from '../CollectionCreateInput';
 import Input from '../Input';
+import { useCollection } from '../../providers/CollectionContext';
+import CollectionCreateField from './CollectionCreateField';
 
-interface CollectionSidebarType {
-  refreshCollections: () => void;
-  setActiveCollection: (collection: string) => void;
-  isDrawerOpen: boolean;
-  toggle: () => void;
-  toggleCreate: () => void;
-  isNew: boolean;
-  selectedCollection: string;
-}
+interface CollectionSidebarType {}
 
-const CollectionSidebar = ({
-  refreshCollections,
-  setActiveCollection,
-  isDrawerOpen,
-  toggle,
-  toggleCreate,
-  isNew,
-  selectedCollection,
-}: CollectionSidebarType) => {
+const CollectionSidebar = ({}: CollectionSidebarType) => {
   const [fields, setFields] = useState<IField[]>([]);
   const [tableName, setTableName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+
+  const {
+    refreshCollections,
+    setActiveCollection,
+    activeCollection,
+    isDrawerOpen,
+    isNew,
+    toggleCreate,
+    toggle,
+    deleteCollection,
+  } = useCollection();
 
   const handleChange = async (e: any, index: number) => {
     const { name, value, type, checked } = e.target;
@@ -81,17 +77,11 @@ const CollectionSidebar = ({
     }
   };
 
-  const deleteCollection = async (name: string) => {
-    await bird.collections.delete(name);
-    await refreshCollections();
-  };
-
   useEffect(() => {
     const fetchFields = async () => {
-      if (selectedCollection !== '') {
-        console.log(selectedCollection);
+      if (activeCollection !== '') {
         const collectionFields = await bird.collections.columns(
-          selectedCollection
+          activeCollection
         );
         setFields(collectionFields);
       } else {
@@ -109,7 +99,7 @@ const CollectionSidebar = ({
     };
 
     fetchFields();
-  }, [selectedCollection]);
+  }, [activeCollection]);
 
   return (
     <div className="drawer drawer-end">
@@ -138,12 +128,18 @@ const CollectionSidebar = ({
         >
           <div className="flex flex-col mt-5 gap-10">
             <div className="flex justify-between">
-              <h3 className="text-xl font-bold mb-3">
-                {isNew ? '+ Create Collection' : 'Edit Collection'}
+              <h3 className="text-lg mb-3">
+                {isNew ? (
+                  <span>+ Create Collection</span>
+                ) : (
+                  <span>
+                    Edit <b>{activeCollection}</b> Collection
+                  </span>
+                )}
               </h3>
               <button
                 className="text-red-500 hover:text-red-600 cursor-pointer"
-                onClick={() => deleteCollection(selectedCollection)}
+                onClick={() => deleteCollection(activeCollection)}
               >
                 Delete
               </button>
@@ -170,7 +166,7 @@ const CollectionSidebar = ({
               </div>
               <div className="flex flex-col mb-5 w-full">
                 {fields.map((field, i) => (
-                  <CollectionCreateInput
+                  <CollectionCreateField
                     key={field.name}
                     field={field}
                     index={i}

@@ -1,35 +1,25 @@
 import { useEffect, useState } from 'react';
 import { bird } from '../../lib/lib';
 import Input from '../Input';
+import type { IField } from '../../utils/utils';
+import { useRecord } from '../../providers/RecordContext';
 
 interface RecordSidebarProps {
   collectionName: string;
-  refreshRecords: () => void;
-  isDrawerOpen: boolean;
-  toggle: () => void;
-  toggleCreate: () => void;
-  isNew: boolean;
-  selectedRecord: Record<string, any>;
 }
 
-interface IColumn {
-  name: string;
-  type: string;
-  nullable: boolean;
-  primary_key: boolean;
-}
-
-const RecordSidebar = ({
-  collectionName,
-  refreshRecords,
-  isDrawerOpen,
-  toggle,
-  isNew,
-  toggleCreate,
-  selectedRecord,
-}: RecordSidebarProps) => {
-  const [columns, setColumns] = useState<IColumn[]>([]);
+const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
+  const [columns, setColumns] = useState<IField[]>([]);
   const [formData, setFormData] = useState<any>({});
+
+  const {
+    selectedRecord,
+    isNew,
+    refreshRecords,
+    isDrawerOpen,
+    toggle,
+    toggleCreate,
+  } = useRecord();
 
   const getColumns = async () => {
     const data = await bird.collections.columns(collectionName);
@@ -75,7 +65,7 @@ const RecordSidebar = ({
       } else {
         await bird.collection(collectionName).create(formData);
       }
-      await refreshRecords();
+      await refreshRecords(collectionName);
     } catch (e) {
       console.log(e);
     }
@@ -94,7 +84,7 @@ const RecordSidebar = ({
     return 'text';
   };
 
-  const renderInput = (column: IColumn) => {
+  const renderInput = (column: IField) => {
     if (
       column.type == 'Integer' ||
       column.type === 'String' ||

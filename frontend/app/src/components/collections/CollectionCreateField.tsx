@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
-import { fieldIconMap, type IField } from '../utils/utils';
 import { useState } from 'react';
+import { fieldIconMap, type IField } from '../../utils/utils';
 
 interface CollectionCreateFieldProps {
   field: IField;

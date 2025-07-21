@@ -10,7 +10,7 @@
 
   --color-primary: #63b3ed;
   --color-primary-content: white;
-  --color-secondary: #3960ff;
+  --color-secondary: black;
   --color-secondary-content: oklch(98% 0.016 73.684);
   --color-base-content: #333333;
   --color-success: oklch(65% 0.25 140);
@@ -27,10 +27,5 @@ body,
 html {
   font-family: 'Poppins', sans-serif;
   background: #f2f2f2;
-  height: 100%;
-}
-
-#root {
-  width: 100vw;
   height: 100%;
 }
