@@ -1,3 +1,5 @@
+import { Icon } from '@iconify/react/dist/iconify.js';
+
 interface InputType {
   value: string;
   type: string;
@@ -6,7 +8,9 @@ interface InputType {
   label: string;
   disabled?: boolean;
   placeholder?: string;
+  required: boolean;
   handleChange?: (e: any) => void;
+  icon: string;
 }
 
 const Input = ({
@@ -18,6 +22,8 @@ const Input = ({
   handleChange,
   disabled,
   placeholder,
+  required,
+  icon,
 }: InputType) => {
   return (
     <div
@@ -25,7 +31,11 @@ const Input = ({
         disabled ? 'text-gray-500' : ''
       }`}
     >
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id} className="flex items-center gap-1">
+        <Icon icon={icon} />
+        <span>{label} </span>
+        <span className="text-red-600">{required ? '*' : ''}</span>
+      </label>
       <input
         value={value || ''}
         type={type}

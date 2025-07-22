@@ -1,12 +1,13 @@
 import { createContext, type ReactNode, useContext, useState } from 'react';
 import { bird } from '../lib/lib';
+import type { Collection } from '../types/types';
 
 export type CollectionContextType = {
-  collections: any[];
+  collections: Collection[];
   isDrawerOpen: boolean;
   isNew: boolean;
-  activeCollection: string;
-  setActiveCollection: (collection: string) => void;
+  activeCollection: Collection | null;
+  setActiveCollection: (collection: Collection | null) => void;
   toggle: () => void;
   toggleEdit: () => Promise<void>;
   toggleCreate: () => void;
@@ -19,9 +20,11 @@ const CollectionContext = createContext<CollectionContextType | null>(null);
 export const CollectionProvider = ({ children }: { children: ReactNode }) => {
   const [isNew, setIsNew] = useState<boolean>(true);
   const [isDrawerOpen, setDrawerOpen] = useState(false);
-  const [activeCollection, setActiveCollection] = useState<string>('');
+  const [activeCollection, setActiveCollection] = useState<Collection | null>(
+    null
+  );
 
-  const [collections, setCollections] = useState<any[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
 
   const toggle = () => setDrawerOpen(!isDrawerOpen);
 
@@ -36,15 +39,21 @@ export const CollectionProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const refreshCollections = async () => {
-    const data = await bird.collections.list();
-    setCollections(data);
-    if (activeCollection === '') {
-      setActiveCollection(data[0]);
+    try {
+      const data = await bird.collections.list();
+      setCollections(data);
+
+      if (!activeCollection) {
+        setActiveCollection(data[0]);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
   const deleteCollection = async (name: string) => {
     await bird.collections.delete(name);
+    setActiveCollection(collections[0]);
     await refreshCollections();
   };
 

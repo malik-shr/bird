@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import RecordTable from '../components/records/RecordTable';
+import RecordTable from '../components/record/RecordTable';
 import { useCollection } from '../providers/CollectionContext';
-import TableBar from '../components/collections/TableBar';
+import TableBar from '../components/collection/TableBar';
 
 const Home = () => {
   const [loading, setLoading] = useState<boolean>(true);

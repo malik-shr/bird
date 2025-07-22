@@ -5,6 +5,7 @@ import { type IField } from '../../utils/utils';
 import Input from '../Input';
 import { useCollection } from '../../providers/CollectionContext';
 import CollectionCreateField from './CollectionCreateField';
+import { Icon } from '@iconify/react/dist/iconify.js';
 
 interface CollectionSidebarType {}
 
@@ -62,26 +63,35 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
         }
       }
 
-      await bird.collections.create(
+      const newCollection = await bird.collections.create(
         tableData.table_name,
         newFields,
         tableData.type
       );
 
-      console.log(tableData);
-
       await refreshCollections();
-      setActiveCollection(tableData.table_name);
+      setActiveCollection(newCollection);
     } catch (e) {
       console.log(e);
     }
   };
 
+  const handleCancel = (e: any) => {
+    e.preventDefault();
+    toggle();
+  };
+
+  const handleDelete = (e: any, name: string) => {
+    e.preventDefault();
+    deleteCollection(name);
+    toggle();
+  };
+
   useEffect(() => {
     const fetchFields = async () => {
-      if (activeCollection !== '') {
+      if (activeCollection && !isNew) {
         const collectionFields = await bird.collections.columns(
-          activeCollection
+          activeCollection.name
         );
         setFields(collectionFields);
       } else {
@@ -99,8 +109,9 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
     };
 
     fetchFields();
-  }, [activeCollection]);
+  }, [activeCollection, isNew]);
 
+  if (!activeCollection) return null;
   return (
     <div className="drawer drawer-end">
       <input
@@ -111,9 +122,12 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
         onChange={toggleCreate}
       />
       <div className="drawer-content">
-        {/* Page content here */}
-        <label htmlFor="my-drawer-6" className="drawer-button btn btn-primary">
-          Create Collection
+        <label
+          htmlFor="my-drawer-6"
+          className="drawer-button btn btn-primary w-full mt-5 flex items-center gap-2"
+        >
+          <Icon icon="ri:add-line" />
+          <span>Create Collection</span>
         </label>
       </div>
       <div className="drawer-side ">
@@ -133,13 +147,13 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
                   <span>+ Create Collection</span>
                 ) : (
                   <span>
-                    Edit <b>{activeCollection}</b> Collection
+                    Edit <b>{activeCollection.name}</b> Collection
                   </span>
                 )}
               </h3>
               <button
                 className="text-red-500 hover:text-red-600 cursor-pointer"
-                onClick={() => deleteCollection(activeCollection)}
+                onClick={(e) => handleDelete(e, activeCollection.name)}
               >
                 Delete
               </button>
@@ -154,14 +168,18 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
                   id="tableName"
                   handleChange={handleChangeName}
                   label="Name"
+                  required={true}
+                  icon={''}
                 />
                 <Input
                   value={description}
                   name="description"
                   type="text"
-                  id="description"
+                  id="description-create"
                   handleChange={handleChangeDescription}
                   label="Description"
+                  required={false}
+                  icon={''}
                 />
               </div>
               <div className="flex flex-col mb-5 w-full">
@@ -180,10 +198,13 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
             </ul>
           </div>
 
-          <div className="mb-5">
+          <div className="mb-5 flex gap-5">
+            <button className="btn btn-base flex-1" onClick={handleCancel}>
+              Cancel
+            </button>
             <input
               type="submit"
-              className="btn btn-primary w-full"
+              className="btn btn-neutral flex-1"
               onClick={toggle}
               value={isNew ? 'Create Collection' : 'Update Collection'}
             />

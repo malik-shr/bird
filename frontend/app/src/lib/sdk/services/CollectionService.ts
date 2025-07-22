@@ -39,7 +39,7 @@ export default class CollectionService {
         },
       });
 
-      return data;
+      return data.collection;
     } catch (e) {
       console.log(e);
     }

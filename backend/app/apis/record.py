@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, Table
+from sqlalchemy import select, Table, and_
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import NoSuchTableError
+
 from typing import Optional, Dict, Any
 import uuid
 import bcrypt
@@ -34,40 +36,70 @@ def list_records(
     """List records from a collection with optional filtering and field selection."""
     try:
         table = Table(collection_name, Metadata, autoload_with=Engine)
-        
-        # Field selection
-        if fields:
-            field_list = [field.strip() for field in fields.split(',')]
-            validate_columns(table, field_list)
-            selected_columns = [table.c[field] for field in field_list]
-            stmt = select(*selected_columns).select_from(table)
-        else:
-            stmt = select(*table.columns).select_from(table)
-        
-        # Filtering
-        if filter:
-            try:
-                where_condition = parse_filter_expression(filter, table)
-                stmt = stmt.where(where_condition)
-            except ValueError as e:
-                raise HTTPException(status_code=400, detail=str(e))
-        
-        # Apply limit and offset
-        stmt = stmt.limit(limit).offset(offset)
+        collections_meta_table = Table("collections_meta", Metadata, autoload_with=Engine)
+        field_meta_table = Table("fields_meta", Metadata, autoload_with=Engine)
+
         with Engine.begin() as conn:
+            if fields:
+                # Manual field selection
+                field_list = [field.strip() for field in fields.split(',')]
+                validate_columns(table, field_list)
+                selected_columns = [table.c[field] for field in field_list]
+            else:
+                # Query fieldmeta to find non-hidden fields
+                meta_query = (
+                    select(field_meta_table.c.name)
+                    .select_from(
+                        field_meta_table.join(
+                            collections_meta_table,
+                            field_meta_table.c.collection == collections_meta_table.c.id
+                        )
+                    )
+                    .where(
+                        and_(
+                            collections_meta_table.c.name == collection_name,
+                            field_meta_table.c.hidden == False
+                        )
+                    )
+                )
+                
+                fields = conn.execute(meta_query)
+                visible_fields = [field.name for field in fields]
+                
+                if not visible_fields:
+                    raise HTTPException(status_code=400, detail="No visible fields for this collection.")
+                
+                selected_columns = [table.c[field] for field in visible_fields if field in table.c]
+            
+            # Build main SELECT statement
+            stmt = select(*selected_columns).select_from(table)
+            
+            # Filtering
+            if filter:
+                try:
+                    where_condition = parse_filter_expression(filter, table)
+                    stmt = stmt.where(where_condition)
+                except ValueError as e:
+                    raise HTTPException(status_code=400, detail=str(e))
+            
+            # Apply limit and offset
+            stmt = stmt.limit(limit).offset(offset)
+
             # Execute query
             result = conn.execute(stmt)
-            
-            # Convert rows to dictionaries
             records = [dict(row._mapping) for row in result]
+
             return {
                 "records": records,
                 "count": len(records),
                 "limit": limit,
                 "offset": offset
             }
+    
     except HTTPException:
         raise
+    except NoSuchTableError:
+        raise HTTPException(status_code=404, detail=f"Collection '{collection_name}' does not exist.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get records: {e}")
 

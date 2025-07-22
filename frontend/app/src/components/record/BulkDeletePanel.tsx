@@ -17,7 +17,9 @@ const BulkDeletePanel = ({
 
   const deleteRecords = async () => {
     for (const id of checkedItems) {
-      deleteRecord(id, activeCollection);
+      if (activeCollection) {
+        deleteRecord(id, activeCollection?.name);
+      }
     }
     setCheckedItems([]);
     setIsCheckAll(false);

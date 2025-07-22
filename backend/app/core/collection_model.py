@@ -66,12 +66,14 @@ class Field:
 
 class Collection:
     def __init__(self, name: str, type_: str, fields: List[Field], system = False, id: str = None):
-        self.name = name
-        self.collection_type = type_
-        self.fields = [Field("id", "String", secure=True, system=True, hidden=False, required=True, primary_key=True, index=True)] + list(fields)
-        self.system = system
         self.id = id
-        self.reservedFields = ["id"]
+        self.name = name
+        self.type = type_
+        self.description = ""
+        self.require_auth = False
+        self.system = system
+        self.fields = [Field("id", "String", secure=False, system=True, hidden=False, required=True, primary_key=True, index=True)] + list(fields)
+        
         if id == None:
             self.id = str(uuid.uuid4())
 
@@ -99,7 +101,7 @@ class Collection:
                     insert(collections_meta_table).values(
                         id=self.id,
                         name=self.name,
-                        type=self.collection_type,
+                        type=self.type,
                         description="",
                         require_auth=False,
                         system=self.system,
@@ -148,10 +150,14 @@ class BaseCollection(Collection):
 class ViewCollection(Collection):
     pass
 
+class SystemCollection(Collection):
+    pass
+
 # Factory
 def new_collection(name, type_, fields = [], system = False, id = None):
     return {
         "base": BaseCollection,
         "auth": AuthCollection,
-        "view": ViewCollection
+        "view": ViewCollection,
+        "system": SystemCollection,
     }.get(type_, Collection)(name, type_, fields, system, id)

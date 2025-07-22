@@ -1,6 +1,6 @@
-import { Icon } from '@iconify/react/dist/iconify.js';
+import { getIcon, Icon } from '@iconify/react/dist/iconify.js';
 import { useState } from 'react';
-import { fieldIconMap, type IField } from '../../utils/utils';
+import { fieldIconMap, getFieldIcon, type IField } from '../../utils/utils';
 
 interface CollectionCreateFieldProps {
   field: IField;
@@ -56,7 +56,7 @@ const CollectionCreateField = ({
         <div className="flex items-center gap-2 w-full">
           <div className="w-full text-md p-2 flex items-center gap-2 focus-within:bg-gray-300 rounded">
             <label htmlFor={`name-${index}`}>
-              <Icon icon={fieldIconMap[field.type]} />
+              <Icon icon={getFieldIcon(field)} />
             </label>
             <input
               disabled={disabled}

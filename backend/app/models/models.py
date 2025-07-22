@@ -8,19 +8,20 @@ user_table = new_collection(
 
 collection_meta_table = new_collection(
     "collections_meta",
-    "base",
+    "system",
     [
         Field("name", "String", required=True, index=True),
         Field("type", "String", required=True, index=True),
         Field("description", "String"),
         Field("require_auth", "Boolean", required=True),
         Field("system", "Boolean", required=True)
-    ]
+    ],
+    system=True
 )
 
 field_meta_table = new_collection(
     "fields_meta",
-    "base",
+    "system",
     [
         Field("name", "String", required=True, index=True),
         Field("type", "String", required=True, index=True),
@@ -31,7 +32,8 @@ field_meta_table = new_collection(
         Field("required", "Boolean", required=True, index=True),
         Field("primary_key", "Boolean", required=True, index=True),
         Field("index", "Boolean", required=True, index=True),
-    ]
+    ],
+    system=True
 )
     
 system_tables = {

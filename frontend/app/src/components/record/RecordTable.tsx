@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import RecordSidebar from './RecordSidebar';
-import type { IField } from '../../utils/utils';
+import { getFieldIcon, type IField } from '../../utils/utils';
 import { useRecord } from '../../providers/RecordContext';
 import { useCollection } from '../../providers/CollectionContext';
 import { Icon } from '@iconify/react/dist/iconify.js';
@@ -19,10 +19,12 @@ const RecordTable = ({}: RecordTableProps) => {
   const { activeCollection, toggleEdit } = useCollection();
 
   const getColumns = async () => {
-    const response = await fetch(`/api/collections/${activeCollection}`);
-    const data = await response.json();
+    if (activeCollection) {
+      const response = await fetch(`/api/collections/${activeCollection.name}`);
+      const data = await response.json();
 
-    setColumns(data.columns);
+      setColumns(data.columns);
+    }
   };
 
   const handleSelectAll = (e: any) => {
@@ -51,16 +53,18 @@ const RecordTable = ({}: RecordTableProps) => {
   };
 
   useEffect(() => {
-    getColumns();
-    refreshRecords(activeCollection);
+    if (activeCollection) {
+      getColumns();
+      refreshRecords(activeCollection.name);
+    }
   }, [activeCollection]);
 
-  if (!columns) return null;
+  if (!columns || !activeCollection) return null;
 
   return (
     <div className="w-full p-5 border-1 border-gray-300 rounded-2xl shadow-sm">
       <div className="flex items-center gap-2 mb-10">
-        <h2 className="text-2xl font-bold">{activeCollection}</h2>
+        <h2 className="text-2xl font-bold">{activeCollection.name}</h2>
         <button onClick={toggleEdit}>
           <div className="rounded-full hover:bg-gray-300 p-2">
             <Icon icon="ri:settings-3-line" className="text-2xl" />
@@ -68,7 +72,7 @@ const RecordTable = ({}: RecordTableProps) => {
         </button>
       </div>
 
-      <RecordSidebar collectionName={activeCollection} />
+      <RecordSidebar collectionName={activeCollection.name} />
 
       <div>
         <table className="w-full">
@@ -94,9 +98,18 @@ const RecordTable = ({}: RecordTableProps) => {
                     />
                   </label>
                 </th>
-                {columns.map((column) => (
-                  <th key={column.name}>{column.name}</th>
-                ))}
+                {columns
+                  .filter((col) => !col.hidden)
+                  .map((column) => (
+                    <th key={column.name}>
+                      <div className="flex gap-2 items-center">
+                        <span>
+                          <Icon icon={getFieldIcon(column)} />
+                        </span>
+                        <span>{column.name}</span>
+                      </div>
+                    </th>
+                  ))}
                 <th></th>
               </tr>
             </thead>
@@ -108,7 +121,7 @@ const RecordTable = ({}: RecordTableProps) => {
                   record={record}
                   handleCheck={handleCheck}
                   checkedItems={checkedItems}
-                  collectionName={activeCollection}
+                  collectionName={activeCollection.name}
                 />
               ))}
             </tbody>

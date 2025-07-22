@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { bird } from '../../lib/lib';
 import Input from '../Input';
-import type { IField } from '../../utils/utils';
+import { fieldIconMap, getFieldIcon, type IField } from '../../utils/utils';
 import { useRecord } from '../../providers/RecordContext';
+import { getIcon, Icon } from '@iconify/react/dist/iconify.js';
 
 interface RecordSidebarProps {
   collectionName: string;
@@ -50,8 +51,6 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-
-    console.log(formData);
   };
 
   const handleSubmit = async (e: any) => {
@@ -61,7 +60,7 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
         await bird
           .collection(collectionName)
           //@ts-ignore
-          .update(selectedRecord.id, selectedRecord);
+          .update(selectedRecord.id, formData);
       } else {
         await bird.collection(collectionName).create(formData);
       }
@@ -71,49 +70,59 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
     }
   };
 
+  const handleCancel = (e: any) => {
+    e.preventDefault();
+    toggle();
+  };
+
   useEffect(() => {
     if (collectionName) {
       getColumns();
     }
   }, [collectionName, selectedRecord]);
 
-  const getInputType = (type: string) => {
-    if (type === 'Integer' || type == 'Float') {
+  const getInputType = (field: IField) => {
+    if (field.secure) {
+      return 'password';
+    }
+    if (field.type === 'Integer' || field.type == 'Float') {
       return 'number';
     }
     return 'text';
   };
 
-  const renderInput = (column: IField) => {
+  const renderInput = (field: IField) => {
     if (
-      column.type == 'Integer' ||
-      column.type === 'String' ||
-      column.type === 'Float'
+      field.type == 'Integer' ||
+      field.type === 'String' ||
+      field.type === 'Float'
     ) {
       return (
         <Input
-          value={formData[column.name]}
-          type={getInputType(column.type)}
-          name={column.name}
-          id={column.name}
-          label={column.name}
-          handleChange={column.name !== 'id' ? handleChange : undefined}
-          placeholder={column.name === 'id' ? 'Autogeneration' : ''}
-          disabled={column.name === 'id'}
+          value={formData[field.name]}
+          type={getInputType(field)}
+          name={field.name}
+          id={field.name}
+          label={field.name}
+          handleChange={field.name !== 'id' ? handleChange : undefined}
+          placeholder={field.name === 'id' ? 'Autogeneration' : ''}
+          disabled={field.name === 'id'}
+          icon={getFieldIcon(field)}
+          required={field.required}
         />
       );
-    } else if (column.type === 'Boolean') {
+    } else if (field.type === 'Boolean') {
       return (
         <div className="flex gap-2">
           <input
-            id={column.name}
-            name={column.name}
+            id={field.name}
+            name={field.name}
             type="checkbox"
             className="toggle"
-            checked={formData[column.name]}
+            checked={formData[field.name]}
             onChange={handleChange}
           />
-          <label htmlFor={column.name}>{column.name}</label>
+          <label htmlFor={field.name}>{field.name}</label>
         </div>
       );
     }
@@ -132,8 +141,9 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
         <label
           htmlFor="my-drawer-4"
           aria-label="close sidebar"
-          className="drawer-button btn btn-secondary"
+          className="drawer-button btn btn-secondary flex items-center gap-2"
         >
+          <Icon icon="ri:add-line" />
           Create Record
         </label>
       </div>
@@ -160,9 +170,12 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
             </ul>
           </div>
 
-          <div className="mb-5">
+          <div className="mb-5 flex gap-5">
+            <button className="btn btn-base flex-1" onClick={handleCancel}>
+              Cancel
+            </button>
             <input
-              className="btn btn-secondary text-white w-full"
+              className="btn btn-secondary text-white flex-1"
               value={isNew ? 'Create Record' : 'Update Record'}
               type="submit"
               onClick={toggle}

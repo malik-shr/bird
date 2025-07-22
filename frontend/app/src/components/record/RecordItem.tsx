@@ -17,9 +17,12 @@ const RecordItem = ({
   checkedItems,
   collectionName,
 }: RecordItemType) => {
-  const { deleteRecord, toggleEdit } = useRecord();
+  const { toggleEdit } = useRecord();
   return (
-    <tr>
+    <tr
+      className="hover:bg-gray-200 cursor-pointer"
+      onClick={() => toggleEdit(record.id, collectionName)}
+    >
       <th>
         <label>
           <input
@@ -32,21 +35,20 @@ const RecordItem = ({
           />
         </label>
       </th>
-      {columns.map((column: any) => (
-        <td key={column.name} className="px-4 py-3 text-sm">
-          {record[column.name] !== null && record[column.name] !== undefined ? (
-            String(record[column.name])
-          ) : (
-            <span className="text-gray-400">null</span>
-          )}
-        </td>
-      ))}
+      {columns
+        .filter((col) => !col.hidden)
+        .map((column: IField) => (
+          <td key={column.name} className="px-4 py-3 text-sm">
+            {record[column.name] !== null &&
+            record[column.name] !== undefined ? (
+              String(record[column.name])
+            ) : (
+              <span className="text-gray-400">null</span>
+            )}
+          </td>
+        ))}
       <td className="text-sm">
-        <button onClick={() => toggleEdit(record.id, collectionName)}>
-          <div className="rounded-full hover:bg-gray-300 p-2">
-            <Icon icon="ri:arrow-right-line" className="text-lg" />
-          </div>
-        </button>
+        <Icon icon="ri:arrow-right-line" className="text-lg" />
       </td>
     </tr>
   );
