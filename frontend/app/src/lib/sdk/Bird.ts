@@ -1,3 +1,4 @@
+import { AuthService } from './services/AuthService';
 import CollectionService from './services/CollectionService';
 import RecordService from './services/RecordService';
 
@@ -17,12 +18,14 @@ export enum SendMethod {
 export default class Bird {
   url: string;
   collections: CollectionService;
+  auth: AuthService;
 
   private recordServices: { [key: string]: RecordService } = {};
 
   constructor(url: string) {
     this.url = url;
     this.collections = new CollectionService(this);
+    this.auth = new AuthService();
   }
 
   collection(collectionName: string) {

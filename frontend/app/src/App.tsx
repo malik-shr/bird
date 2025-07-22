@@ -1,8 +1,8 @@
-import { Routes, Route } from 'react-router';
+import { Routes, Route, useLocation } from 'react-router';
 import routes from './routes.tsx';
 import MenuBar from './components/MenuBar.tsx';
-import type { ReactNode } from 'react';
-import Header from './components/Header.tsx';
+import { useEffect, type ReactNode } from 'react';
+import Navbar from './components/Navbar.tsx';
 
 function App() {
   const routesHTML: Array<ReactNode> = routes.map((route) => {
@@ -15,16 +15,26 @@ function App() {
     );
   });
 
+  const location = useLocation();
+
   return (
     <div className="flex flex-col p-2">
-      <Header />
-      <div className="flex pt-15">
-        <MenuBar />
-
+      {location.pathname === '/login' || location.pathname === '/register' ? (
         <main className="px-5 w-full">
           <Routes>{routesHTML}</Routes>
         </main>
-      </div>
+      ) : (
+        <div>
+          <Navbar />
+          <div className="flex pt-15">
+            <MenuBar />
+
+            <main className="px-5 w-full">
+              <Routes>{routesHTML}</Routes>
+            </main>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
