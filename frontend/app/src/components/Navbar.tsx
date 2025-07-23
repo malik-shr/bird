@@ -1,14 +1,31 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
-import { useState } from 'react';
-import { NavLink } from 'react-router';
+import { useEffect, useState } from 'react';
+import { NavLink, useNavigate } from 'react-router';
+import { useAuth } from '../providers/AuthProvider';
+import { bird } from '../lib/lib';
 
 const Navbar = () => {
-  const [isAuth, setIsAuth] = useState(false);
+  const { currentUser } = useAuth();
+
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    await bird.auth.logout();
+    navigate('/login');
+  };
+
+  useEffect(() => {
+    const verify = async () => {
+      const result = await bird.auth.verify();
+      navigate(result ? '/' : '/login');
+    };
+    verify();
+  }, []);
 
   return (
     <div className="w-full p-5 border-1 border-gray-300 rounded-2xl shadow-sm flex justify-between items-center">
       <h1 className="text-3xl font-bold">Bird</h1>{' '}
-      {isAuth ? (
+      {currentUser ? (
         <div className="dropdown dropdown-end">
           <div tabIndex={0} role="button" className="cursor-pointer">
             <div className="flex justify-center items-center bg-white p-3 rounded-full text-2xl">
@@ -19,16 +36,12 @@ const Navbar = () => {
             tabIndex={0}
             className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
           >
-            <li>
-              <a className="justify-between">
-                Profile
-                <span className="badge">New</span>
-              </a>
-            </li>
-            <li>
-              <a>Settings</a>
-            </li>
-            <li>
+            <span className="mb-2">
+              <h4>{currentUser.email}</h4>
+              <span>@{currentUser.username}</span>
+            </span>
+
+            <li onClick={logout}>
               <a>Logout</a>
             </li>
           </ul>

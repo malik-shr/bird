@@ -1,3 +1,4 @@
+import type { User } from '../../../types/types';
 import type Bird from '../Bird';
 import { SendMethod } from '../Bird';
 
@@ -35,15 +36,18 @@ export class AuthService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/verify_token`, {
         method: SendMethod.GET,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      return data;
     } catch (e) {
       localStorage.removeItem('token');
     }
   }
 
-  logout() {
+  async logout() {
     localStorage.removeItem('token');
   }
-
-  isAuth() {}
 }

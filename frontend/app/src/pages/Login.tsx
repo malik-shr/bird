@@ -1,15 +1,19 @@
 import { useState, type FormEventHandler } from 'react';
-import { NavLink } from 'react-router';
+import { NavLink, useNavigate } from 'react-router';
 import { bird } from '../lib/lib';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  const navigate = useNavigate();
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
 
     bird.auth.login(email, password);
+
+    navigate('/');
   };
 
   return (
