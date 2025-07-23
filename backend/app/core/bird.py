@@ -7,7 +7,7 @@ from ..models.models import system_tables
 from .database import Metadata, Engine
 from ..apis.collection import bind_collection_api
 from ..apis.record import bind_record_api
-from ..apis import auth
+from ..apis.auth import bind_auth_api
 from .collection_model import new_collection, Field
 from .store import Fields, Collections
 
@@ -113,7 +113,7 @@ class Bird(FastAPI):
         
         self.include_route(bind_record_api())
         self.include_route(bind_collection_api())
-        self.include_route(auth.router)
+        self.include_route(bind_auth_api())
 
     def include_route(self, router: APIRouter):
         self.include_router(router)

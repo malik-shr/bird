@@ -12,8 +12,6 @@ from ..utils.utils import validate_columns, parse_filter_expression
 
 import uuid
 
-
-
 def bind_record_api() -> None:
     router = APIRouter(
         prefix="/api/collections/{collection_name}",
@@ -125,7 +123,6 @@ def create_record(
         if password:
             hashed_password = get_password_hash(password)
             values["password"] = hashed_password
-            print(hashed_password)
         
         stmt = table.insert().values(**values)
 

@@ -99,7 +99,6 @@ def collection_columns(collection_name: str) -> Dict[str, List[Dict[str, Any]]]:
             for field in collection.fields
         ]
         
-        print(columns)
         return {"columns": columns}
     except HTTPException:
         raise
