@@ -25,7 +25,7 @@ export default class Bird {
   constructor(url: string) {
     this.url = url;
     this.collections = new CollectionService(this);
-    this.auth = new AuthService();
+    this.auth = new AuthService(this);
   }
 
   collection(collectionName: string) {
@@ -41,16 +41,26 @@ export default class Bird {
 
   async send(path: string, options: SendOptions) {
     try {
+      let body = undefined;
+
+      if (options.body) {
+        const contentType = options.headers?.['Content-Type'] || '';
+
+        if (contentType.includes('application/json')) {
+          body = JSON.stringify(options.body);
+        } else {
+          body = options.body; // Assume already stringified (e.g., form data)
+        }
+      }
+
       const response = await fetch(path, {
         method: options.method,
         headers: {
-          'Content-Type': 'application/json',
-          ...options.headers, // Allow additional headers to be passed
+          ...options.headers,
         },
-        body: options.body ? JSON.stringify(options.body) : undefined,
+        body,
       });
 
-      // Check if response is ok before trying to parse JSON
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -58,7 +68,6 @@ export default class Bird {
       const data = await response.json();
       return data;
     } catch (e) {
-      // Properly handle different error types
       if (e instanceof Error) {
         throw new Error(`Request failed: ${e.message}`);
       }

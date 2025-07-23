@@ -20,6 +20,9 @@ export default class CollectionService {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.GET,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       return data.collections;
@@ -32,6 +35,9 @@ export default class CollectionService {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: {
           table_name: table_name,
           fields: columns,
@@ -49,6 +55,9 @@ export default class CollectionService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${collectionName}`, {
         method: SendMethod.GET,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       return data.columns;
@@ -61,6 +70,9 @@ export default class CollectionService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${collectionName}`, {
         method: SendMethod.DELETE,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       return data.message;

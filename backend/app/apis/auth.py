@@ -18,7 +18,7 @@ def bind_auth_api():
     )
     
     router.post("/token", response_model=Token)(login_for_access_token)
-    router.get("/users/me/", response_model=User)(read_users_me)
+    router.get("/verify_token", response_model=User)(verify_token)
     router.get("/users/me/items")(read_own_items)
 
     return router
@@ -104,8 +104,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     return {"access_token": access_token, "token_type": "bearer"}
 
-
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+async def verify_token(current_user: User = Depends(get_current_active_user)):
     return current_user
 
 async def read_own_items(current_user: User = Depends(get_current_active_user)):

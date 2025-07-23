@@ -15,6 +15,9 @@ export default class RecordService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${id}`, {
         method: SendMethod.GET,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       return data.record;
@@ -27,6 +30,9 @@ export default class RecordService {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.GET,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       return data.records;
@@ -39,6 +45,9 @@ export default class RecordService {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: {
           values: values,
         },
@@ -54,6 +63,9 @@ export default class RecordService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${id}`, {
         method: SendMethod.PATCH,
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: {
           values: values,
         },
@@ -69,6 +81,9 @@ export default class RecordService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${id}`, {
         method: SendMethod.DELETE,
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
       return data.message;
