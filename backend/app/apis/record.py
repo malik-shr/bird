@@ -1,15 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, Table, and_
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import NoSuchTableError
 
 from typing import Optional, Dict, Any
-import uuid
-import bcrypt
 
-from .schemas.schemas import CreateRecordRequest, UpdateRecordRequest
-from ..database.database import Metadata, Engine
+from ..core.database import Metadata, Engine
+from ..core.auth import get_password_hash
+
+from .schemas.record import CreateRecordRequest, UpdateRecordRequest
 from ..utils.utils import validate_columns, parse_filter_expression
+
+import uuid
+
+
 
 def bind_record_api() -> None:
     router = APIRouter(
@@ -120,9 +123,9 @@ def create_record(
 
         password = values.get("password")
         if password:
-            # bcrypt requires bytes; hashpw returns hashed bytes
-            hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-            values["password"] = hashed.decode("utf-8")  # store as string in DB
+            hashed_password = get_password_hash(password)
+            values["password"] = hashed_password
+            print(hashed_password)
         
         stmt = table.insert().values(**values)
 

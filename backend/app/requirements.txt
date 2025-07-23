@@ -1,8 +1,10 @@
 requests
 fastapi[standard]
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
 sqlalchemy
 pydantic
 typing
 uuid
 sqlalchemy_utils
-bcrypt

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
+from typing import List, Optional
 
 class FieldDefinition(BaseModel):
     name: str
@@ -13,9 +13,3 @@ class CollectionCreateRequest(BaseModel):
     table_name: str
     fields: List[FieldDefinition]
     type: str
-
-class CreateRecordRequest(BaseModel):
-    values: Dict[str, Any]
-
-class UpdateRecordRequest(BaseModel):
-    values: Dict[str, Any]

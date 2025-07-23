@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from sqlalchemy import select, Table
 from typing import List, Dict, Any
 
-from .schemas.schemas import CollectionCreateRequest 
-from ..database.database import Metadata, Engine
+from .schemas.collection import CollectionCreateRequest 
+from ..core.database import Metadata, Engine
 from ..core.collection_model import Field, new_collection
 
 from ..core.store import Collections
@@ -37,7 +37,6 @@ def list_collections():
                 ).order_by(collections_meta_table.c.system)
             ).all()
             collections = [dict(row._mapping) for row in result]
-            
             return {"collections": collections}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to list collections: {e}")
@@ -100,6 +99,7 @@ def collection_columns(collection_name: str) -> Dict[str, List[Dict[str, Any]]]:
             for field in collection.fields
         ]
         
+        print(columns)
         return {"columns": columns}
     except HTTPException:
         raise

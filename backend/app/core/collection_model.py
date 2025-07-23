@@ -3,7 +3,7 @@ from typing import List
 from typing import List
 from sqlalchemy import Table, Column, insert, select
 
-from ..database.database import Metadata, Engine
+from .database import Metadata, Engine
 from ..utils.utils import SQLALCHEMY_TYPE_MAP
 import uuid
 from .store import Collections, Fields
@@ -139,9 +139,11 @@ class AuthCollection(Collection):
     def __init__(self, name, type_, fields, system, id):
         super().__init__(name, type_, fields, system, id)
         self.fields +=  [
-            Field("username", "String"),
+            Field("username", "String", required=True),
             Field("email", "String"),
-            Field("password", "String", secure=True, hidden=True, required=True)
+            Field("password", "String", secure=True, hidden=True, required=True),
+            Field("disabled", "Boolean"),
+            Field("role", "Integer", required=True)
         ]
 
 class BaseCollection(Collection):

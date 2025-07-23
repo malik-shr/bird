@@ -1,4 +1,4 @@
-from ..database.database import Metadata
+from ..core.database import Metadata
 from ..core.collection_model import Field, new_collection
 
 user_table = new_collection(

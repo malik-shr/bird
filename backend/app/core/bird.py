@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, Table
 
 from ..models.models import system_tables
-from ..database.database import Metadata, Engine
+from .database import Metadata, Engine
 from ..apis.collection import bind_collection_api
 from ..apis.record import bind_record_api
 from ..apis import auth
@@ -80,7 +80,7 @@ class Bird(FastAPI):
                     
                     Fields[field_meta.name] = field
                     
-                    if(field.name != "id" and field.name != "username" and field.name != "password" and field.name != "email"):
+                    if(field.name != "id" and field.name != "username" and field.name != "password" and field.name != "email" and field.name != "disabled" and field.name != "role"):
                         collection_fields.append(field)
 
                 
