@@ -1,6 +1,18 @@
+import { LengthRow } from '../db/models';
 import { db } from './db';
 import Field from './Field';
 import { Collections } from './store';
+
+const idField = new Field({
+  name: 'id',
+  type: 'String',
+  secure: false,
+  system: true,
+  hidden: false,
+  required: true,
+  primary_key: true,
+  unique: true,
+});
 
 export default class Collection {
   name: string;
@@ -23,36 +35,7 @@ export default class Collection {
     this.name = name;
     this.type = type;
     this.description = description;
-
-    const idField = new Field({
-      name: 'id',
-      type: 'String',
-      secure: false,
-      system: true,
-      hidden: false,
-      required: true,
-      primary_key: true,
-    });
-
     this.fields = fields;
-
-    if (type === 'auth') {
-      const authFields = [
-        new Field({ name: 'username', type: 'String', required: true }),
-        new Field({ name: 'email', type: 'String' }),
-        new Field({
-          name: 'password',
-          type: 'String',
-          secure: true,
-          hidden: true,
-          required: true,
-        }),
-        new Field({ name: 'disabled', type: 'Boolean' }),
-        new Field({ name: 'role', type: 'Integer', required: true }),
-      ];
-
-      this.fields = [...authFields, ...this.fields];
-    }
 
     this.fields = [idField, ...this.fields];
 
@@ -67,37 +50,42 @@ export default class Collection {
   }
 
   exists() {
-    const query = db.query(
-      `SELECT COUNT(*) AS length FROM collections_meta c WHERE c.name = $name`
-    );
+    const query = db
+      .query(
+        `SELECT COUNT(*) AS length FROM collections_meta WHERE name = $name`
+      )
+      .as(LengthRow);
 
-    const result = query.get({ $name: self.name }) as
-      | { length: number }
-      | undefined;
-    const length = result?.length ?? 0;
-    return length !== 0;
+    const result = query.get({ $name: this.name });
+
+    if (result) {
+      return result.length !== 0;
+    }
+
+    return false;
   }
 
   createTable() {
     let fieldsString = '';
+    const primary_keys: string[] = [];
 
-    for (let i = 0; i < this.fields.length; i++) {
-      if (i < this.fields.length - 1) {
-        fieldsString += `${this.fields[i].string()},\n`;
-        continue;
+    for (const field of this.fields) {
+      fieldsString += `${field.string()},\n`;
+      if (field.primary_key) {
+        primary_keys.push(field.name);
       }
-
-      fieldsString += this.fields[i].string();
     }
 
     const createStatement = `
-        CREATE TABLE IF NOT EXISTS ${this.name}(
-            ${fieldsString}
-        )
-    `;
+      CREATE TABLE IF NOT EXISTS ${this.name}(
+          ${fieldsString}
+          PRIMARY KEY(${primary_keys.join(', ')})
+      )
+  `;
 
     db.run(createStatement);
   }
+
   delete() {
     const deleteStatement = db.query(`
       DELETE FROM collections_meta AS c WHERE c.name = $name;

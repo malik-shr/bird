@@ -1,14 +1,35 @@
 import Collection from '../core/Collection';
 import Field from '../core/Field';
 
-const users = new Collection('users', 'auth', '');
+const users = new Collection('users', 'auth', '', [
+  new Field({
+    name: 'username',
+    type: 'String',
+    required: true,
+    unique: true,
+  }),
+  new Field({ name: 'email', type: 'String', unique: true }),
+  new Field({
+    name: 'password',
+    type: 'String',
+    secure: true,
+    hidden: true,
+    required: true,
+  }),
+  new Field({ name: 'disabled', type: 'Boolean' }),
+  new Field({ name: 'role', type: 'Integer', required: true }),
+]);
 
 const collectionsMeta = new Collection(
   'collections_meta',
   'system',
   '',
   [
-    new Field({ name: 'name', type: 'String', required: true }),
+    new Field({
+      name: 'name',
+      type: 'String',
+      required: true,
+    }),
     new Field({ name: 'type', type: 'String', required: true }),
     new Field({ name: 'description', type: 'String' }),
     new Field({ name: 'require_auth', type: 'Boolean', required: true }),
@@ -22,7 +43,11 @@ const fieldsMeta = new Collection(
   'system',
   '',
   [
-    new Field({ name: 'name', type: 'String', required: true }),
+    new Field({
+      name: 'name',
+      type: 'String',
+      required: true,
+    }),
     new Field({ name: 'type', type: 'String', required: true }),
     new Field({
       name: 'collection',

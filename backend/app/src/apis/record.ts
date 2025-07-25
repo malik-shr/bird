@@ -1,83 +1,38 @@
-import Elysia, { t } from 'elysia';
-import { db } from '../core/db';
-
-const RecordUpsertBody = t.Object({
-  values: t.Record(t.String(), t.Any()),
-});
+import Elysia from 'elysia';
+import { listRecords } from './handlers/record/listRecords';
+import {
+  createRecord,
+  RecordUpsertBody,
+  updateRecord,
+} from './handlers/record/upsertRecord';
+import { getRecord } from './handlers/record/getRecord';
+import { deleteRecord } from './handlers/record/deleteRecord';
 
 export const recordApi = new Elysia({
   prefix: '/api/collections/:collection_name/records',
 })
-  .get('/', ({ params }) => {
-    const query = db.query(`SELECT * FROM ${params.collection_name}`);
+  .get('/', ({ params: { collection_name } }) => listRecords(collection_name))
 
-    const records = query.all();
-
-    return { records: records };
-  })
   .post(
     '/',
-    async ({ body, params }) => {
-      body.values['id'] = crypto.randomUUID();
-      const keys = Object.keys(body.values);
-      const placeholders = keys.map(() => '?').join(', ');
-
-      if (body.values['password']) {
-        body.values['password'] = await Bun.password.hash(
-          body.values['password'],
-          'bcrypt'
-        );
-      }
-
-      const insertSQL = `INSERT INTO ${params.collection_name} (${keys.join(
-        ', '
-      )}) VALUES (${placeholders})`;
-
-      db.run(insertSQL, Object.values(body.values));
-
-      return { message: 'Successfully created Record' };
-    },
+    async ({ body: { values }, params: { collection_name } }) =>
+      await createRecord(values, collection_name),
     {
       body: RecordUpsertBody,
     }
   )
-  .get('/:id', ({ params }) => {
-    const query = db.query(
-      `SELECT * FROM ${params.collection_name} WHERE id=$id`
-    );
-    const record = query.get({
-      $id: params.id,
-    });
 
-    return { record: record };
-  })
+  .get('/:id', ({ params: { collection_name, id } }) =>
+    getRecord(collection_name, id)
+  )
+
   .patch(
     '/:id',
-    ({ body, params }) => {
-      const setClause = Object.keys(body.values)
-        .map((key) => `${key} = ?`)
-        .join(', ');
-
-      const sql = `UPDATE ${params.collection_name} SET ${setClause} WHERE id = ?`;
-      const values = [...Object.values(body.values), params.id];
-
-      db.run(sql, values);
-
-      return { message: 'Succesfully updated Record' };
-    },
+    ({ body: { values }, params: { collection_name, id } }) =>
+      updateRecord(values, collection_name, id),
     { body: RecordUpsertBody }
   )
-  .delete('/:id', ({ params }) => {
-    try {
-      const query = db.query(
-        `DELETE FROM ${params.collection_name} WHERE id = $id`
-      );
 
-      query.run({
-        $id: params.id,
-      });
-    } catch (e) {
-      console.log(e);
-    }
-    return { message: 'Succesfully deleted Record' };
-  });
+  .delete('/:id', ({ params: { collection_name, id } }) =>
+    deleteRecord(collection_name, id)
+  );

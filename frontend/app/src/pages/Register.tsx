@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { bird } from '../lib/lib';
+import { useNavigate } from 'react-router';
 
 const Register = () => {
   const [email, setEmail] = useState<string>('');
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -17,6 +20,8 @@ const Register = () => {
       disabled: false,
       role: 5,
     });
+
+    navigate('/login');
   };
 
   return (

@@ -1,6 +1,6 @@
 import Elysia from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { predefined_collections } from '../db/schemas';
+import { predefined_collections } from '../db/tables';
 import { db } from './db';
 import Field from './Field';
 import Collection from './Collection';
@@ -8,12 +8,12 @@ import { Collections, Fields } from './store';
 import { recordApi } from '../apis/record';
 import { collectionApi } from '../apis/collection';
 import { authApi } from '../apis/auth';
+import { FieldRow } from '../db/models';
 
 export class Bird extends Elysia {
   constructor() {
     super();
 
-    // ✅ Apply CORS first
     this.use(cors());
 
     this.setupDatabase();
@@ -34,7 +34,16 @@ export class Bird extends Elysia {
   private setupMetadata() {
     const query = db
       .query(
-        `SELECT id, name, type, require_auth, description, system FROM collections_meta`
+        `
+        SELECT 
+          id, 
+          name, 
+          type,
+          description,  
+          require_auth, 
+          system 
+        FROM collections_meta
+        `
       )
       .as(Collection);
 
@@ -46,18 +55,37 @@ export class Bird extends Elysia {
       const query = db
         .query(
           `
-            SELECT 
-                id, name, type, secure, system, hidden, required, primary_key
-            FROM fields_meta f 
-            WHERE f.collection = $collectionMeta_id
+          SELECT 
+              id,
+              name, 
+              type, 
+              secure, 
+              system, 
+              hidden, 
+              required, 
+              primary_key
+          FROM 
+            fields_meta f 
+          WHERE 
+            f.collection = $collectionMeta_id
         `
         )
-        .as(Field);
+        .as(FieldRow);
 
       const fieldMetas = query.all({ $collectionMeta_id: collectionMeta.id });
 
       for (const fieldMeta of fieldMetas) {
-        Fields.set(fieldMeta.name, fieldMeta);
+        const field = new Field({
+          id: fieldMeta.id,
+          name: fieldMeta.name,
+          type: fieldMeta.type,
+          secure: fieldMeta.secure,
+          system: fieldMeta.system,
+          required: fieldMeta.required,
+          primary_key: fieldMeta.primary_key,
+          unique: fieldMeta.unique,
+        });
+        Fields.set(fieldMeta.name, field);
         if (
           fieldMeta.name !== 'id' &&
           fieldMeta.name !== 'username' &&
@@ -66,19 +94,18 @@ export class Bird extends Elysia {
           fieldMeta.name !== 'disabled' &&
           fieldMeta.name !== 'role'
         ) {
-          collectionFields.push(fieldMeta);
+          collectionFields.push(field);
         }
       }
 
-      Collections.set(
+      const collection = new Collection(
         collectionMeta.name,
-        new Collection(
-          collectionMeta.name,
-          collectionMeta.type,
-          collectionMeta.description,
-          collectionFields
-        )
+        collectionMeta.type,
+        collectionMeta.description,
+        collectionFields
       );
+
+      Collections.set(collectionMeta.name, collection);
     }
   }
 
@@ -108,6 +135,10 @@ export class Bird extends Elysia {
 
   start() {
     this.listen(3000);
-    console.log('Server is listening on Port http://localhost:3000');
+    console.log(
+      '\x1b[32m%s\x1b[0m %s',
+      '✅ Server is listening on:',
+      'http://localhost:3000'
+    );
   }
 }
