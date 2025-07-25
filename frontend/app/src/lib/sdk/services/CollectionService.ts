@@ -7,6 +7,13 @@ type ColumnDefinition = {
   primary_key: boolean;
 };
 
+type RuleData = {
+  viewRule: number;
+  createRule: number;
+  updateRule: number;
+  deleteRule: number;
+};
+
 export default class CollectionService {
   bird: Bird;
   baseUrl: string;
@@ -31,7 +38,12 @@ export default class CollectionService {
     }
   }
 
-  async create(table_name: string, columns: ColumnDefinition[], type: string) {
+  async create(
+    table_name: string,
+    columns: ColumnDefinition[],
+    type: string,
+    ruleData: RuleData
+  ) {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,
@@ -42,6 +54,7 @@ export default class CollectionService {
           table_name: table_name,
           fields: columns,
           type: type,
+          ruleData: ruleData,
         },
       });
 
@@ -60,7 +73,7 @@ export default class CollectionService {
         },
       });
 
-      return data.columns;
+      return data.fields;
     } catch (e) {
       console.log(e);
     }

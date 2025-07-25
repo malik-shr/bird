@@ -16,16 +16,25 @@ const FieldDefinition = t.Object({
   primary_key: t.Boolean(),
 });
 
+export const RuleData = t.Object({
+  viewRule: t.Integer(),
+  createRule: t.Integer(),
+  updateRule: t.Integer(),
+  deleteRule: t.Integer(),
+});
+
 export const CollectionCreateBody = t.Object({
   table_name: t.String(),
   fields: t.Array(FieldDefinition),
   type: t.String(),
+  ruleData: RuleData,
 });
 
 export async function createCollection(
   table_name: string,
   fields: Static<typeof FieldDefinition>[],
-  type: string
+  type: string,
+  ruleData: Static<typeof RuleData>
 ) {
   const collectionFields: Field[] = [];
 
@@ -40,7 +49,12 @@ export async function createCollection(
     );
   }
 
-  const collection = new Collection(table_name, type, '', collectionFields);
+  const collection = new Collection({
+    name: table_name,
+    type: type,
+    fields: collectionFields,
+    ruleData: ruleData,
+  });
   collection.createTable();
   collection.insertMetaData();
 

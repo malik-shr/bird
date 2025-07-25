@@ -12,8 +12,8 @@ export const collectionApi = new Elysia({ prefix: '/api/collections' })
 
   .post(
     '/',
-    async ({ body: { table_name, fields, type } }) =>
-      await createCollection(table_name, fields, type),
+    async ({ body: { table_name, fields, type, ruleData } }) =>
+      await createCollection(table_name, fields, type, ruleData),
     {
       body: CollectionCreateBody,
     }

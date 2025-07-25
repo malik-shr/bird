@@ -1,7 +1,6 @@
 import { t } from 'elysia';
-import { db } from '../../../core/db';
-import { UserRow } from '../../../db/models';
 import { JWTPayloadSpec } from '@elysiajs/jwt';
+import { getUser } from '../../../utils/utils';
 
 export const loginBody = t.Object({
   username: t.String(),
@@ -31,23 +30,12 @@ export async function login(
 
     if (!isPasswordCorrect) throw new Error('Invalid password');
 
-    const token = await jwt_auth.sign({ id: foundUser.id });
+    const token = await jwt_auth.sign({ username: foundUser.username });
 
     return { access_token: token };
   } catch (e) {
     console.log(e);
   }
-}
-
-function getUser(username: string) {
-  const query = db
-    .query(
-      'SELECT id, username, email, password, disabled, role FROM users WHERE username = $username'
-    )
-    .as(UserRow);
-  const user = query.get({ $username: username });
-
-  return user;
 }
 
 async function verifyPassword(password: string, hash: string) {

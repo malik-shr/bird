@@ -13,8 +13,6 @@ export class AuthService {
 
   async login(username: string, password: string) {
     try {
-      console.log(username);
-      console.log(password);
       const data = await this.bird.send(`${this.baseUrl}/login`, {
         method: SendMethod.POST,
         headers: {
@@ -22,8 +20,6 @@ export class AuthService {
         },
         body: { username: username, password: password },
       });
-
-      console.log(data.access_token);
 
       localStorage.setItem('token', String(data.access_token));
     } catch (error) {
@@ -33,7 +29,6 @@ export class AuthService {
 
   async verify() {
     const token = localStorage.getItem('token');
-    console.log(token);
 
     if (!token) {
       throw new Error('No token found');
@@ -47,7 +42,7 @@ export class AuthService {
         },
       });
 
-      return data;
+      return data.activeUser;
     } catch (e) {
       console.error('Verification failed', e);
       localStorage.removeItem('token');

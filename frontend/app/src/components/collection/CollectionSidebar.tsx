@@ -7,13 +7,27 @@ import { useCollection } from '../../providers/CollectionContext';
 import CollectionCreateField from './CollectionCreateField';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import Sidebar from '../Sidebar';
+import AuthRules from './AuthRules';
 
-interface CollectionSidebarType {}
-
-const CollectionSidebar = ({}: CollectionSidebarType) => {
+const CollectionSidebar = () => {
   const [fields, setFields] = useState<IField[]>([]);
   const [tableName, setTableName] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+
+  const [ruleData, setRuleData] = useState({
+    viewRule: 0,
+    createRule: 0,
+    updateRule: 0,
+    deleteRule: 0,
+  });
+
+  const handleRuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setRuleData((prev) => ({
+      ...prev,
+      [name]: Number(value),
+    }));
+  };
 
   const {
     refreshCollections,
@@ -67,7 +81,8 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
       const newCollection = await bird.collections.create(
         tableData.table_name,
         newFields,
-        tableData.type
+        tableData.type,
+        ruleData
       );
 
       await refreshCollections();
@@ -142,43 +157,65 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
             </button>
           </div>
 
-          <ul className="flex flex-col justify-center items-start">
-            <div className="flex flex-col mb-8 w-full gap-4">
-              <Input
-                value={tableName}
-                name="tableName"
-                type="text"
-                id="tableName"
-                handleChange={handleChangeName}
-                label="Name"
-                required={true}
-                icon={''}
-              />
-              <Input
-                value={description}
-                name="description"
-                type="text"
-                id="description-create"
-                handleChange={handleChangeDescription}
-                label="Description"
-                required={false}
-                icon={''}
-              />
-            </div>
-            <div className="flex flex-col mb-5 w-full">
-              {fields.map((field, i) => (
-                <CollectionCreateField
-                  key={field.name}
-                  field={field}
-                  index={i}
-                  handleChange={handleChange}
-                  disabled={field.name === 'id'}
-                />
-              ))}
+          <div className="flex flex-col mb-8 w-full gap-4">
+            <Input
+              value={tableName}
+              name="tableName"
+              type="text"
+              id="tableName"
+              handleChange={handleChangeName}
+              label="Name"
+              required={true}
+              icon={''}
+            />
+            <Input
+              value={description}
+              name="description"
+              type="text"
+              id="description-create"
+              handleChange={handleChangeDescription}
+              label="Description"
+              required={false}
+              icon={''}
+            />
+          </div>
+          <div className="tabs tabs-lift">
+            <input
+              type="radio"
+              name="my_tabs_3"
+              className="tab"
+              aria-label="Fields"
+              defaultChecked
+            />
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <div className="flex flex-col mb-5 w-full">
+                {fields.map((field, i) => (
+                  <CollectionCreateField
+                    key={field.name}
+                    field={field}
+                    index={i}
+                    handleChange={handleChange}
+                    disabled={field.name === 'id'}
+                  />
+                ))}
+              </div>
+
+              <Dropdown fields={fields} setFields={setFields} />
             </div>
 
-            <Dropdown fields={fields} setFields={setFields} />
-          </ul>
+            <input
+              type="radio"
+              name="my_tabs_3"
+              className="tab"
+              aria-label="Auth Rules"
+            />
+            <div className="tab-content bg-base-100 border-base-300 p-6">
+              <AuthRules
+                handleRuleChange={handleRuleChange}
+                ruleData={ruleData}
+              />
+            </div>
+          </div>
         </div>
 
         <div className="mb-5 flex gap-5">

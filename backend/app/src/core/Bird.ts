@@ -1,6 +1,5 @@
 import Elysia from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { predefined_collections } from '../db/tables';
 import { db } from './db';
 import Field from './Field';
 import Collection from './Collection';
@@ -8,7 +7,8 @@ import { Collections, Fields } from './store';
 import { recordApi } from '../apis/record';
 import { collectionApi } from '../apis/collection';
 import { authApi } from '../apis/auth';
-import { FieldRow } from '../db/models';
+import { predefined_collections } from '../db/tables';
+import { AuthRuleRow, FieldRow } from '../db/models';
 
 export class Bird extends Elysia {
   constructor() {
@@ -65,7 +65,7 @@ export class Bird extends Elysia {
               required, 
               primary_key
           FROM 
-            fields_meta f 
+            fields_meta AS f 
           WHERE 
             f.collection = $collectionMeta_id
         `
@@ -98,14 +98,40 @@ export class Bird extends Elysia {
         }
       }
 
-      const collection = new Collection(
-        collectionMeta.name,
-        collectionMeta.type,
-        collectionMeta.description,
-        collectionFields
-      );
+      const authRulesQuery = db
+        .query(
+          `
+            SELECT
+              MAX(CASE WHEN rule = 'viewRule' THEN permission END) AS viewRule,
+              MAX(CASE WHEN rule = 'createRule' THEN permission END) AS createRule,
+              MAX(CASE WHEN rule = 'updateRule' THEN permission END) AS updateRule,
+              MAX(CASE WHEN rule = 'deleteRule' THEN permission END) AS deleteRule
+            FROM auth_rules
+            WHERE collection = $collectionMeta_id;
+          `
+        )
+        .as(AuthRuleRow);
 
-      Collections.set(collectionMeta.name, collection);
+      const authRules = authRulesQuery.get({
+        $collectionMeta_id: collectionMeta.id,
+      });
+
+      if (authRules) {
+        const collection = new Collection({
+          name: collectionMeta.name,
+          type: collectionMeta.type,
+          description: collectionMeta.description,
+          fields: collectionFields,
+          ruleData: {
+            viewRule: authRules.viewRule,
+            createRule: authRules.createRule,
+            updateRule: authRules.updateRule,
+            deleteRule: authRules.deleteRule,
+          },
+        });
+
+        Collections.set(collectionMeta.name, collection);
+      }
     }
   }
 
@@ -117,27 +143,11 @@ export class Bird extends Elysia {
     this.use(authApi);
   }
 
-  private async setupCors() {
-    const origins = [
-      'http://localhost:80',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:8080',
-    ];
-
-    this.use(
-      cors({
-        origin: origins,
-        allowedHeaders: ['Content-Type', 'Authorization'],
-      })
-    );
-  }
-
   start() {
     this.listen(3000);
     console.log(
       '\x1b[32m%s\x1b[0m %s',
-      '✅ Server is listening on:',
+      'Server is listening on:',
       'http://localhost:3000'
     );
   }

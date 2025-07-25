@@ -1,7 +1,9 @@
+import { Static } from 'elysia';
 import { LengthRow } from '../db/models';
 import { db } from './db';
 import Field from './Field';
 import { Collections } from './store';
+import { RuleData } from '../apis/handlers/collection/createCollection';
 
 const idField = new Field({
   name: 'id',
@@ -14,24 +16,37 @@ const idField = new Field({
   unique: true,
 });
 
+type CollectionProps = {
+  id?: string;
+  name: string;
+  type: string;
+  description?: string;
+  fields: Field[];
+  system?: boolean;
+  require_auth?: boolean;
+  ruleData: Static<typeof RuleData>;
+};
+
 export default class Collection {
+  id: string;
   name: string;
   type: string;
   description: string;
   fields: Field[];
   system: boolean;
   require_auth: boolean;
-  id: string | null;
+  ruleData: Static<typeof RuleData>;
 
-  constructor(
-    name: string,
-    type: string,
-    description: string = '',
-    fields: Field[] = [],
-    system: boolean = false,
-    require_auth: boolean = false,
-    id: string | null = null
-  ) {
+  constructor({
+    id = '',
+    name,
+    type,
+    description = '',
+    fields,
+    system = false,
+    require_auth = false,
+    ruleData,
+  }: CollectionProps) {
     this.name = name;
     this.type = type;
     this.description = description;
@@ -42,9 +57,11 @@ export default class Collection {
     this.system = system;
     this.require_auth = require_auth;
 
+    this.ruleData = ruleData;
+
     this.id = id;
 
-    if (id === null) {
+    if (id === '') {
       this.id = crypto.randomUUID();
     }
   }
@@ -72,7 +89,7 @@ export default class Collection {
     for (const field of this.fields) {
       fieldsString += `${field.string()},\n`;
       if (field.primary_key) {
-        primary_keys.push(field.name);
+        primary_keys.push(`${field.name}`);
       }
     }
 
@@ -103,10 +120,10 @@ export default class Collection {
     if (!this.exists()) {
       const query = db.query(
         `
-            INSERT INTO collections_meta 
-                (id, name, type, description, require_auth, system) 
-                VALUES 
-                ($id, $name, $type, $description, $require_auth, $system)
+          INSERT INTO collections_meta 
+              (id, name, type, description, require_auth, system) 
+              VALUES 
+              ($id, $name, $type, $description, $require_auth, $system)
         `
       );
 
@@ -123,7 +140,20 @@ export default class Collection {
         Collections.set(this.name, this);
 
         for (const field of this.fields) {
-          field.insertMetaData(this.id!);
+          field.insertMetaData(this.id);
+        }
+
+        for (const [key, value] of Object.entries(this.ruleData)) {
+          const query = db.query(
+            'INSERT INTO auth_rules (id, collection, rule, permission) VALUES ($id, $collection, $rule, $permission)'
+          );
+
+          query.run({
+            $id: crypto.randomUUID(),
+            $collection: this.id,
+            $rule: key,
+            $permission: value,
+          });
         }
       } catch (e) {
         console.log(e);

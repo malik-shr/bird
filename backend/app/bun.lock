@@ -4,7 +4,7 @@
     "": {
       "name": "app",
       "dependencies": {
-        "@elysiajs/cors": "1.3.2",
+        "@elysiajs/cors": "^1.3.3",
         "@elysiajs/jwt": "^1.3.2",
         "@elysiajs/swagger": "^1.3.1",
         "dotenv": "^17.2.0",
@@ -16,7 +16,7 @@
     },
   },
   "packages": {
-    "@elysiajs/cors": ["@elysiajs/cors@1.3.2", "", { "peerDependencies": { "elysia": ">= 1.3.0" } }, "sha512-auURNrlfBOLhJ022HgFiqNV8uEYa1Tw+l0P1pN9AqrpQgsrrbNSqaJvABYEolCCRsWJe7t5ndJPhVbECF3sRRw=="],
+    "@elysiajs/cors": ["@elysiajs/cors@1.3.3", "", { "peerDependencies": { "elysia": ">= 1.3.0" } }, "sha512-mYIU6PyMM6xIJuj7d27Vt0/wuzVKIEnFPjcvlkyd7t/m9xspAG37cwNjFxVOnyvY43oOd2I/oW2DB85utXpA2Q=="],
 
     "@elysiajs/jwt": ["@elysiajs/jwt@1.3.2", "", { "dependencies": { "jose": "^6.0.11" }, "peerDependencies": { "elysia": ">= 1.3.0" } }, "sha512-1Ysb+THWmwy/AKqn9Q1SaBeYK6f499VEVV0E+YifKQjadJT5W+0qKhncOdfqrb4NufUtd65BxULdPQGKJwYo1Q=="],
 

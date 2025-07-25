@@ -35,3 +35,10 @@ export class CollectionRow {
 export class LengthRow {
   length: number;
 }
+
+export class AuthRuleRow {
+  viewRule: number;
+  createRule: number;
+  updateRule: number;
+  deleteRule: number;
+}

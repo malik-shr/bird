@@ -3,7 +3,7 @@ import { LengthRow } from '../db/models';
 import { db } from './db';
 
 type FieldProps = {
-  id?: string | null;
+  id?: string;
   name: string;
   type: FieldType;
   secure?: boolean;
@@ -15,7 +15,7 @@ type FieldProps = {
 };
 
 export default class Field {
-  id: string | null;
+  id: string;
   name: string;
   type: FieldType;
   secure: boolean;
@@ -26,7 +26,7 @@ export default class Field {
   unique: boolean;
 
   constructor({
-    id = null,
+    id = '',
     name,
     type,
     secure = false,
@@ -45,22 +45,33 @@ export default class Field {
     this.primary_key = primary_key;
     this.unique = unique;
 
-    this.id = id ?? crypto.randomUUID();
+    this.id = id;
+
+    if (id === '') {
+      this.id = crypto.randomUUID();
+    }
   }
 
   exists(collection_id: string) {
-    const query = db
-      .query(
-        `SELECT COUNT(*) FROM fields_meta f WHERE f.name = $name AND f.collection = $collection`
-      )
-      .as(LengthRow);
-    const result = query.get({ $name: self.name, $collection: collection_id });
+    try {
+      const query = db
+        .query(
+          `SELECT COUNT(*) AS length FROM fields_meta AS f WHERE f.name = $name AND f.collection = $collection`
+        )
+        .as(LengthRow);
+      const result = query.get({
+        $name: this.name,
+        $collection: collection_id,
+      });
 
-    if (result) {
-      return result.length !== 0;
+      if (result) {
+        return result.length !== 0;
+      }
+
+      return false;
+    } catch (e) {
+      console.log(e);
     }
-
-    return false;
   }
 
   insertMetaData(collection_id: string) {
@@ -68,9 +79,9 @@ export default class Field {
       const query = db.query(
         `
             INSERT INTO fields_meta 
-                (id, name, type, collection, secure, system, hidden, primary_key, unique) 
+                (id, name, type, collection, secure, required, system, hidden, "primary_key", "unique") 
                 VALUES 
-                ($id, $name, $type, $collection, $secure, $system, $hidden, $primary_key, $unique)
+                ($id, $name, $type, $collection, $secure, $required, $system, $hidden, $primary_key, $unique)
         `
       );
 
@@ -81,6 +92,7 @@ export default class Field {
           $type: this.type,
           $collection: collection_id,
           $secure: this.secure,
+          $required: this.required,
           $system: this.system,
           $hidden: this.hidden,
           $primary_key: this.primary_key,
@@ -96,7 +108,7 @@ export default class Field {
     const notNull = this.required ? ' NOT NULL' : '';
     const unique = this.unique ? ' UNIQUE' : '';
 
-    const col = `${this.name} ${FieldTypes[this.type]}${notNull}${unique}`;
+    const col = `"${this.name}" ${FieldTypes[this.type]}${notNull}${unique}`;
 
     return col.trim();
   }
