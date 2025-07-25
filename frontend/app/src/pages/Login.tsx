@@ -8,10 +8,10 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
 
-    bird.auth.login(email, password);
+    await bird.auth.login(email, password);
 
     navigate('/');
   };

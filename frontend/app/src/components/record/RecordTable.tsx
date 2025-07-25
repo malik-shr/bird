@@ -6,6 +6,7 @@ import { useCollection } from '../../providers/CollectionContext';
 import { Icon } from '@iconify/react/dist/iconify.js';
 import RecordItem from './RecordItem';
 import BulkDeletePanel from './BulkDeletePanel';
+import { bird } from '../../lib/lib';
 
 interface RecordTableProps {}
 
@@ -20,10 +21,9 @@ const RecordTable = ({}: RecordTableProps) => {
 
   const getColumns = async () => {
     if (activeCollection) {
-      const response = await fetch(`/api/collections/${activeCollection.name}`);
-      const data = await response.json();
+      const data = await bird.collections.columns(activeCollection.name);
 
-      setColumns(data.columns);
+      setColumns(data);
     }
   };
 
@@ -71,7 +71,16 @@ const RecordTable = ({}: RecordTableProps) => {
           </div>
         </button>
       </div>
-
+      <div className="drawer-content flex justify-end m-5">
+        <label
+          htmlFor="record-drawer"
+          aria-label="close sidebar"
+          className="drawer-button btn btn-secondary flex items-center gap-2"
+        >
+          <Icon icon="ri:add-line" />
+          Create Record
+        </label>
+      </div>
       <RecordSidebar collectionName={activeCollection.name} />
 
       <div>

@@ -4,6 +4,7 @@ import Input from '../Input';
 import { fieldIconMap, getFieldIcon, type IField } from '../../utils/utils';
 import { useRecord } from '../../providers/RecordContext';
 import { getIcon, Icon } from '@iconify/react/dist/iconify.js';
+import Sidebar from '../Sidebar';
 
 interface RecordSidebarProps {
   collectionName: string;
@@ -129,61 +130,37 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
   };
 
   return (
-    <div className="drawer drawer-end">
-      <input
-        id="my-drawer-4"
-        type="checkbox"
-        className="drawer-toggle"
-        checked={isDrawerOpen}
-        onChange={toggleCreate}
-      />
-      <div className="drawer-content flex justify-end m-5">
-        <label
-          htmlFor="my-drawer-4"
-          aria-label="close sidebar"
-          className="drawer-button btn btn-secondary flex items-center gap-2"
-        >
-          <Icon icon="ri:add-line" />
-          Create Record
-        </label>
-      </div>
-      <div className="drawer-side">
-        <label
-          htmlFor="my-drawer-4"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <form
-          className="menu bg-base-200 text-base-content min-h-full w-lg p-4 flex flex-col justify-between"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex flex-col mt-5 gap-10">
-            <h3 className="text-xl font-bold">
-              {isNew ? '+ Create Record' : 'Edit Record'}
-            </h3>
-            <ul className="flex flex-col gap-5 overflow-auto max-h-[calc(100vh-150px)]">
-              {columns.map((column) => (
-                <div key={column.name} className="w-full">
-                  {renderInput(column)}
-                </div>
-              ))}
-            </ul>
-          </div>
+    <Sidebar id="record-drawer" isOpen={isDrawerOpen} toggleOpen={toggleCreate}>
+      <form
+        className="menu bg-base-200 text-base-content min-h-full w-lg p-4 flex flex-col justify-between"
+        onSubmit={handleSubmit}
+      >
+        <div className="flex flex-col mt-5 gap-10">
+          <h3 className="text-xl font-bold">
+            {isNew ? '+ Create Record' : 'Edit Record'}
+          </h3>
+          <ul className="flex flex-col gap-5 overflow-auto max-h-[calc(100vh-150px)]">
+            {columns.map((column) => (
+              <div key={column.name} className="w-full">
+                {renderInput(column)}
+              </div>
+            ))}
+          </ul>
+        </div>
 
-          <div className="mb-5 flex gap-5">
-            <button className="btn btn-base flex-1" onClick={handleCancel}>
-              Cancel
-            </button>
-            <input
-              className="btn btn-secondary text-white flex-1"
-              value={isNew ? 'Create Record' : 'Update Record'}
-              type="submit"
-              onClick={toggle}
-            />
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="mb-5 flex gap-5">
+          <button className="btn btn-base flex-1" onClick={handleCancel}>
+            Cancel
+          </button>
+          <input
+            className="btn btn-secondary text-white flex-1"
+            value={isNew ? 'Create Record' : 'Update Record'}
+            type="submit"
+            onClick={toggle}
+          />
+        </div>
+      </form>
+    </Sidebar>
   );
 };
 

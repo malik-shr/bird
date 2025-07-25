@@ -38,10 +38,9 @@ export const RecordProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshRecords = async (collectionName: string) => {
     if (collectionName === '') return;
-    const response = await fetch(`/api/collections/${collectionName}/records`);
-    const data = await response.json();
+    const data = await bird.collection(collectionName).getList();
 
-    setRecords(data.records);
+    setRecords(data);
   };
 
   const deleteRecord = async (id: string, collectionName: string) => {

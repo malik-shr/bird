@@ -13,28 +13,34 @@ export class AuthService {
 
   async login(username: string, password: string) {
     try {
-      const body = new URLSearchParams();
-      body.append('username', username);
-      body.append('password', password);
-
-      const data = await this.bird.send(`${this.baseUrl}/token`, {
+      console.log(username);
+      console.log(password);
+      const data = await this.bird.send(`${this.baseUrl}/login`, {
         method: SendMethod.POST,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: { username: username, password: password },
       });
 
-      localStorage.setItem('token', data.access_token);
-      return data.token;
-    } catch (e) {
-      console.log(e);
+      console.log(data.access_token);
+
+      localStorage.setItem('token', String(data.access_token));
+    } catch (error) {
+      console.error('Login error:', error);
     }
   }
 
   async verify() {
     const token = localStorage.getItem('token');
+    console.log(token);
+
+    if (!token) {
+      throw new Error('No token found');
+    }
 
     try {
-      const data = await this.bird.send(`${this.baseUrl}/verify_token`, {
+      const data = await this.bird.send(`${this.baseUrl}/me`, {
         method: SendMethod.GET,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -43,7 +49,9 @@ export class AuthService {
 
       return data;
     } catch (e) {
+      console.error('Verification failed', e);
       localStorage.removeItem('token');
+      throw e;
     }
   }
 

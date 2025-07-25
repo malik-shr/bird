@@ -6,6 +6,7 @@ import Input from '../Input';
 import { useCollection } from '../../providers/CollectionContext';
 import CollectionCreateField from './CollectionCreateField';
 import { Icon } from '@iconify/react/dist/iconify.js';
+import Sidebar from '../Sidebar';
 
 interface CollectionSidebarType {}
 
@@ -113,105 +114,86 @@ const CollectionSidebar = ({}: CollectionSidebarType) => {
 
   if (!activeCollection) return null;
   return (
-    <div className="drawer drawer-end">
-      <input
-        id="my-drawer-6"
-        type="checkbox"
-        className="drawer-toggle"
-        checked={isDrawerOpen}
-        onChange={toggleCreate}
-      />
-      <div className="drawer-content">
-        <label
-          htmlFor="my-drawer-6"
-          className="drawer-button btn btn-primary w-full mt-5 flex items-center gap-2"
-        >
-          <Icon icon="ri:add-line" />
-          <span>Create Collection</span>
-        </label>
-      </div>
-      <div className="drawer-side ">
-        <label
-          htmlFor="my-drawer-6"
-          aria-label="close sidebar"
-          className="drawer-overlay"
-        ></label>
-        <form
-          className="menu bg-base-200 text-base-content min-h-full w-xl p-6 flex flex-col justify-between"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex flex-col mt-5 gap-10">
-            <div className="flex justify-between">
-              <h3 className="text-lg mb-3">
-                {isNew ? (
-                  <span>+ Create Collection</span>
-                ) : (
-                  <span>
-                    Edit <b>{activeCollection.name}</b> Collection
-                  </span>
-                )}
-              </h3>
-              <button
-                className="text-red-500 hover:text-red-600 cursor-pointer"
-                onClick={(e) => handleDelete(e, activeCollection.name)}
-              >
-                Delete
-              </button>
+    <Sidebar
+      id="collection-drawer"
+      isOpen={isDrawerOpen}
+      toggleOpen={toggleCreate}
+    >
+      <form
+        className="menu bg-base-200 text-base-content min-h-full w-xl p-6 flex flex-col justify-between"
+        onSubmit={handleSubmit}
+      >
+        <div className="flex flex-col mt-5 gap-10">
+          <div className="flex justify-between">
+            <h3 className="text-lg mb-3">
+              {isNew ? (
+                <span>+ Create Collection</span>
+              ) : (
+                <span>
+                  Edit <b>{activeCollection.name}</b> Collection
+                </span>
+              )}
+            </h3>
+            <button
+              className="text-red-500 hover:text-red-600 cursor-pointer"
+              onClick={(e) => handleDelete(e, activeCollection.name)}
+            >
+              Delete
+            </button>
+          </div>
+
+          <ul className="flex flex-col justify-center items-start">
+            <div className="flex flex-col mb-8 w-full gap-4">
+              <Input
+                value={tableName}
+                name="tableName"
+                type="text"
+                id="tableName"
+                handleChange={handleChangeName}
+                label="Name"
+                required={true}
+                icon={''}
+              />
+              <Input
+                value={description}
+                name="description"
+                type="text"
+                id="description-create"
+                handleChange={handleChangeDescription}
+                label="Description"
+                required={false}
+                icon={''}
+              />
+            </div>
+            <div className="flex flex-col mb-5 w-full">
+              {fields.map((field, i) => (
+                <CollectionCreateField
+                  key={field.name}
+                  field={field}
+                  index={i}
+                  handleChange={handleChange}
+                  disabled={field.name === 'id'}
+                />
+              ))}
             </div>
 
-            <ul className="flex flex-col justify-center items-start">
-              <div className="flex flex-col mb-8 w-full gap-4">
-                <Input
-                  value={tableName}
-                  name="tableName"
-                  type="text"
-                  id="tableName"
-                  handleChange={handleChangeName}
-                  label="Name"
-                  required={true}
-                  icon={''}
-                />
-                <Input
-                  value={description}
-                  name="description"
-                  type="text"
-                  id="description-create"
-                  handleChange={handleChangeDescription}
-                  label="Description"
-                  required={false}
-                  icon={''}
-                />
-              </div>
-              <div className="flex flex-col mb-5 w-full">
-                {fields.map((field, i) => (
-                  <CollectionCreateField
-                    key={field.name}
-                    field={field}
-                    index={i}
-                    handleChange={handleChange}
-                    disabled={field.name === 'id'}
-                  />
-                ))}
-              </div>
+            <Dropdown fields={fields} setFields={setFields} />
+          </ul>
+        </div>
 
-              <Dropdown fields={fields} setFields={setFields} />
-            </ul>
-          </div>
-
-          <div className="mb-5 flex gap-5">
-            <button className="btn btn-base flex-1" onClick={handleCancel}>
-              Cancel
-            </button>
-            <input
-              type="submit"
-              className="btn btn-neutral flex-1"
-              onClick={toggle}
-              value={isNew ? 'Create Collection' : 'Update Collection'}
-            />
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="mb-5 flex gap-5">
+          <button className="btn btn-base flex-1" onClick={handleCancel}>
+            Cancel
+          </button>
+          <input
+            type="submit"
+            className="btn btn-neutral flex-1"
+            onClick={toggle}
+            value={isNew ? 'Create Collection' : 'Update Collection'}
+          />
+        </div>
+      </form>
+    </Sidebar>
   );
 };
 

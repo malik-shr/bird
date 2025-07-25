@@ -26,7 +26,13 @@ export default class RecordService {
     }
   }
 
-  async getList(id: string, limit = 100, offset = 0, fields = [], filter = []) {
+  async getList(
+    id: string = '',
+    limit = 100,
+    offset = 0,
+    fields = [],
+    filter = []
+  ) {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.GET,
@@ -41,7 +47,7 @@ export default class RecordService {
     }
   }
 
-  async create(values = []) {
+  async create(values = {}) {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,

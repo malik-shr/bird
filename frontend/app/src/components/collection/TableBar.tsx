@@ -49,6 +49,15 @@ const TableBar = ({}: TableBarProps) => {
         </div>
       </div>
 
+      <div className="drawer-content">
+        <label
+          htmlFor="collection-drawer"
+          className="drawer-button btn btn-primary w-full mt-5 flex items-center gap-2"
+        >
+          <Icon icon="ri:add-line" />
+          <span>Create Collection</span>
+        </label>
+      </div>
       <CollectionSidebar />
     </div>
   );
