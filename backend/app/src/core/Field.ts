@@ -2,10 +2,17 @@ import { FieldType, FieldTypes } from '../apis/schemas/types';
 import { LengthRow } from '../db/models';
 import { db } from './db';
 
+type Option = {
+  value: number;
+  text: string;
+};
+
 type FieldProps = {
   id?: string;
   name: string;
   type: FieldType;
+  references?: null | string;
+  options?: null | Option[];
   secure?: boolean;
   system?: boolean;
   hidden?: boolean;
@@ -18,6 +25,8 @@ export default class Field {
   id: string;
   name: string;
   type: FieldType;
+  references: null | string;
+  options?: null | Option[];
   secure: boolean;
   system: boolean;
   hidden: boolean;
@@ -29,6 +38,8 @@ export default class Field {
     id = '',
     name,
     type,
+    references = null,
+    options = null,
     secure = false,
     system = false,
     hidden = false,
@@ -38,6 +49,8 @@ export default class Field {
   }: FieldProps) {
     this.name = name;
     this.type = type;
+    this.references = references;
+    this.options = options;
     this.secure = secure;
     this.system = system;
     this.hidden = hidden;
@@ -76,35 +89,57 @@ export default class Field {
 
   insertMetaData(collection_id: string) {
     if (!this.exists(collection_id)) {
-      const query = db.query(
+      const insertFieldMeta = db.query(
         `
             INSERT INTO fields_meta 
-                (id, name, type, collection, secure, required, system, hidden, "primary_key", "unique") 
+                ("id", "name", "type", "collection", "secure", "required", "references", "system", "hidden", "primary_key", "unique") 
                 VALUES 
-                ($id, $name, $type, $collection, $secure, $required, $system, $hidden, $primary_key, $unique)
+                ($id, $name, $type, $collection, $secure, $required, $references, $system, $hidden, $primary_key, $unique )
         `
       );
 
       try {
-        query.run({
+        insertFieldMeta.run({
           $id: this.id,
           $name: this.name,
           $type: this.type,
           $collection: collection_id,
           $secure: this.secure,
           $required: this.required,
+          $references: this.references,
           $system: this.system,
           $hidden: this.hidden,
           $primary_key: this.primary_key,
           $unique: this.unique,
         });
+
+        if (this.type === 'Select' && this.options) {
+          for (const option of this.options) {
+            const optionsQuery = db.query(
+              `
+              INSERT INTO select_options
+              (id, collection, field, text, value)
+              VALUES
+              ($id, $collection, $field, $text, $value)
+              `
+            );
+
+            optionsQuery.run({
+              $id: crypto.randomUUID(),
+              $collection: collection_id,
+              $field: this.id,
+              $text: option.text,
+              $value: option.value,
+            });
+          }
+        }
       } catch (e) {
         console.log(e);
       }
     }
   }
 
-  string() {
+  sql() {
     const notNull = this.required ? ' NOT NULL' : '';
     const unique = this.unique ? ' UNIQUE' : '';
 

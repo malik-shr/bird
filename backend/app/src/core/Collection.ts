@@ -1,7 +1,6 @@
 import { Static } from 'elysia';
 import { db } from './db';
 import Field from './Field';
-import { Collections } from './store';
 import { RuleData } from '../apis/handlers/collection/createCollection';
 import { LengthRow } from '../db/models';
 
@@ -86,7 +85,7 @@ export default class Collection {
     const primary_keys: string[] = [];
 
     for (const field of this.fields) {
-      fieldsString += `${field.string()},\n`;
+      fieldsString += `${field.sql()},\n`;
       if (field.primary_key) {
         primary_keys.push(`${field.name}`);
       }
@@ -100,19 +99,6 @@ export default class Collection {
   `;
 
     db.run(createStatement);
-  }
-
-  delete() {
-    const deleteStatement = db.query(`
-      DELETE FROM collections_meta AS c WHERE c.name = $name;
-      DELETE FROM fields_meta AS f WHERE f.collection = $id;
-      
-      DROP TABLE ${this.name};
-    `);
-
-    deleteStatement.run({ $name: this.name, $id: this.id });
-
-    Collections.delete(this.name);
   }
 
   insertMetaData() {
@@ -136,8 +122,6 @@ export default class Collection {
           $system: this.system,
         });
 
-        Collections.set(this.name, this);
-
         for (const [key, value] of Object.entries(this.ruleData)) {
           const query = db.query(
             'INSERT INTO auth_rules (id, collection, rule, permission) VALUES ($id, $collection, $rule, $permission)'
@@ -150,13 +134,13 @@ export default class Collection {
             $permission: value,
           });
         }
+
+        for (const field of this.fields) {
+          field.insertMetaData(this.id);
+        }
       } catch (e) {
         console.log(e);
       }
-    }
-
-    for (const field of this.fields) {
-      field.insertMetaData(this.id);
     }
   }
 }

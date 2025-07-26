@@ -1,6 +1,7 @@
-import { getIcon, Icon } from '@iconify/react/dist/iconify.js';
+import { Icon } from '@iconify/react/dist/iconify.js';
 import { useState } from 'react';
-import { fieldIconMap, getFieldIcon, type IField } from '../../utils/utils';
+import { getFieldIcon, type IField } from '../../utils/utils';
+import { useCollection } from '../../providers/CollectionContext';
 
 interface CollectionCreateFieldProps {
   field: IField;
@@ -41,6 +42,20 @@ const CollectionCreateField = ({
       </div>
     );
   };
+
+  const { collections } = useCollection();
+
+  const onOptionsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const texts = value.split(',');
+
+    field.options = [];
+
+    for (let i = 0; i < texts.length; i++) {
+      field.options.push({ value: i, text: texts[i] });
+    }
+  };
+
   return (
     <div
       className={`rounded-lg ${
@@ -68,7 +83,30 @@ const CollectionCreateField = ({
               onChange={handleChange && ((e) => handleChange(e, index))}
             />
           </div>
-
+          {field.type === 'Select' && (
+            <div>
+              <label>choices</label>
+              <input type="text" onChange={onOptionsChange} />
+            </div>
+          )}
+          {field.type === 'Reference' && (
+            <div>
+              <select
+                onChange={handleChange && ((e) => handleChange(e, index))}
+                value={field.references}
+                name="references"
+              >
+                <option value="" disabled>
+                  --- Select ---
+                </option>
+                {collections.map((collection) => (
+                  <option key={collection.id} value={collection.name}>
+                    {collection.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div>
             <input
               id={`settings-${index}`}

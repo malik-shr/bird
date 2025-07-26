@@ -7,6 +7,11 @@ export interface IField {
   primary_key: boolean;
   secure: boolean;
   hidden: boolean;
+  references?: string;
+  options?: {
+    value: number;
+    text: string;
+  }[];
 }
 
 export const fieldIconMap: Record<string, string> = {
@@ -14,6 +19,9 @@ export const fieldIconMap: Record<string, string> = {
   Integer: 'ri:hashtag',
   Float: 'ri:calculator-line',
   Boolean: 'ri:toggle-line',
+  Date: 'ri:calendar-line',
+  Reference: 'ri:mind-map',
+  Select: 'ri:list-check',
 };
 
 export const collectionIconMap: Record<string, string> = {

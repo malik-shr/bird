@@ -13,6 +13,7 @@ export class FieldRow {
   id: string;
   name: string;
   type: FieldType;
+  references: string;
 
   secure: boolean;
   system: boolean;
@@ -41,4 +42,9 @@ export class AuthRuleRow {
   createRule: number;
   updateRule: number;
   deleteRule: number;
+}
+
+export class OptionRow {
+  value: number;
+  text: string;
 }

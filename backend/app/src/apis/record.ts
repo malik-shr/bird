@@ -1,16 +1,13 @@
 import Elysia, { HTTPHeaders, StatusMap } from 'elysia';
 import { listRecords } from './handlers/record/listRecords';
-import {
-  createRecord,
-  RecordUpsertBody,
-  updateRecord,
-} from './handlers/record/upsertRecord';
+import { RecordUpdateBody, updateRecord } from './handlers/record/updateRecord';
 import { getRecord } from './handlers/record/getRecord';
 import { deleteRecord } from './handlers/record/deleteRecord';
 import { db } from '../core/db';
 import { AuthRuleRow, UserRow } from '../db/models';
 import { authMiddleware } from '../middleware/auhtMiddleware';
 import { ElysiaCookie } from 'elysia/dist/cookies';
+import { createRecord, RecordCreateBody } from './handlers/record/createRecord';
 
 export const recordApi = new Elysia({
   prefix: '/api/collections/:collection_name/records',
@@ -63,7 +60,7 @@ export const recordApi = new Elysia({
         async ({ body: { values }, params: { collection_name } }) =>
           await createRecord(values, collection_name),
         {
-          body: RecordUpsertBody,
+          body: RecordCreateBody,
         }
       )
   )
@@ -91,7 +88,7 @@ export const recordApi = new Elysia({
         '/:id',
         ({ body: { values }, params: { collection_name, id } }) =>
           updateRecord(values, collection_name, id),
-        { body: RecordUpsertBody }
+        { body: RecordUpdateBody }
       )
   )
 

@@ -41,6 +41,7 @@ const CollectionSidebar = () => {
 
   const handleChange = async (e: any, index: number) => {
     const { name, value, type, checked } = e.target;
+    console.log(fields);
     setFields((prevFields) => {
       const newFields = [...prevFields];
       newFields[index] = {

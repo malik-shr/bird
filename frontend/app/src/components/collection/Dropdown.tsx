@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { Icon } from '@iconify/react';
 import { fieldIconMap, type IField } from '../../utils/utils';
 
-const types = ['String', 'Integer', 'Float', 'Boolean'];
+const types = [
+  'String',
+  'Integer',
+  'Float',
+  'Boolean',
+  'Date',
+  'Select',
+  'Reference',
+];
 
 interface DropdownProps {
   fields: IField[];

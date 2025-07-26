@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { bird } from '../../lib/lib';
 import Input from '../Input';
-import { fieldIconMap, getFieldIcon, type IField } from '../../utils/utils';
+import { getFieldIcon, type IField } from '../../utils/utils';
 import { useRecord } from '../../providers/RecordContext';
-import { getIcon, Icon } from '@iconify/react/dist/iconify.js';
 import Sidebar from '../Sidebar';
 
 interface RecordSidebarProps {
@@ -33,34 +32,45 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
         acc[column.name] = selectedRecord[column.name];
         return acc;
       }
-      if (column.name !== 'id') {
-        acc[column.name] = ''; // or null, or a default value
+      if (column.type === 'Select') {
+        acc[column.name] = 0;
       }
       if (column.type === 'Boolean') {
         acc[column.name] = false;
       }
+      if (column.name !== 'id') {
+        acc[column.name] = ''; // or null, or a default value
+      }
+
       return acc;
     }, {});
 
     setFormData(initialFormData);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: any) => {
     const { name, type, checked, value } = event.target;
+
+    let val = value;
+
+    if (type === 'checkbox') {
+      val = checked;
+    } else if (type === 'select-one') {
+      val = parseInt(value);
+    }
 
     setFormData((prev: any) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: val,
     }));
   };
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     try {
-      if (selectedRecord.id && selectedRecord) {
+      if (selectedRecord.id) {
         await bird
           .collection(collectionName)
-          //@ts-ignore
           .update(selectedRecord.id, formData);
       } else {
         await bird.collection(collectionName).create(formData);
@@ -89,6 +99,9 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
     if (field.type === 'Integer' || field.type == 'Float') {
       return 'number';
     }
+    if (field.type === 'Date') {
+      return 'date';
+    }
     return 'text';
   };
 
@@ -96,7 +109,8 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
     if (
       field.type == 'Integer' ||
       field.type === 'String' ||
-      field.type === 'Float'
+      field.type === 'Float' ||
+      field.type === 'Date'
     ) {
       return (
         <Input
@@ -124,6 +138,25 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
             onChange={handleChange}
           />
           <label htmlFor={field.name}>{field.name}</label>
+        </div>
+      );
+    } else if (field.type === 'Select' && field.options) {
+      return (
+        <div className="flex gap-2">
+          <select
+            name={field.name}
+            value={String(formData[field.name])}
+            onChange={handleChange}
+          >
+            <option value="" disabled>
+              --- Select ---
+            </option>
+            {field.options.map((option) => (
+              <option key={option.value} value={String(option.value)}>
+                {option.text}
+              </option>
+            ))}
+          </select>
         </div>
       );
     }
