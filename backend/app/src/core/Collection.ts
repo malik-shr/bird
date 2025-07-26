@@ -1,20 +1,9 @@
 import { Static } from 'elysia';
-import { LengthRow } from '../db/models';
 import { db } from './db';
 import Field from './Field';
 import { Collections } from './store';
 import { RuleData } from '../apis/handlers/collection/createCollection';
-
-const idField = new Field({
-  name: 'id',
-  type: 'String',
-  secure: false,
-  system: true,
-  hidden: false,
-  required: true,
-  primary_key: true,
-  unique: true,
-});
+import { LengthRow } from '../db/models';
 
 type CollectionProps = {
   id?: string;
@@ -37,6 +26,17 @@ export default class Collection {
   require_auth: boolean;
   ruleData: Static<typeof RuleData>;
 
+  idField = new Field({
+    name: 'id',
+    type: 'String',
+    secure: false,
+    system: true,
+    hidden: false,
+    required: true,
+    primary_key: true,
+    unique: true,
+  });
+
   constructor({
     id = '',
     name,
@@ -50,9 +50,8 @@ export default class Collection {
     this.name = name;
     this.type = type;
     this.description = description;
-    this.fields = fields;
 
-    this.fields = [idField, ...this.fields];
+    this.fields = [this.idField, ...fields];
 
     this.system = system;
     this.require_auth = require_auth;
@@ -139,10 +138,6 @@ export default class Collection {
 
         Collections.set(this.name, this);
 
-        for (const field of this.fields) {
-          field.insertMetaData(this.id);
-        }
-
         for (const [key, value] of Object.entries(this.ruleData)) {
           const query = db.query(
             'INSERT INTO auth_rules (id, collection, rule, permission) VALUES ($id, $collection, $rule, $permission)'
@@ -158,6 +153,10 @@ export default class Collection {
       } catch (e) {
         console.log(e);
       }
+    }
+
+    for (const field of this.fields) {
+      field.insertMetaData(this.id);
     }
   }
 }

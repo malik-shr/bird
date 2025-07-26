@@ -5,7 +5,6 @@ import { type IField } from '../../utils/utils';
 import Input from '../Input';
 import { useCollection } from '../../providers/CollectionContext';
 import CollectionCreateField from './CollectionCreateField';
-import { Icon } from '@iconify/react/dist/iconify.js';
 import Sidebar from '../Sidebar';
 import AuthRules from './AuthRules';
 
@@ -42,7 +41,6 @@ const CollectionSidebar = () => {
 
   const handleChange = async (e: any, index: number) => {
     const { name, value, type, checked } = e.target;
-
     setFields((prevFields) => {
       const newFields = [...prevFields];
       newFields[index] = {
@@ -64,11 +62,6 @@ const CollectionSidebar = () => {
   const handleSubmit = async (e: any) => {
     try {
       e.preventDefault();
-      const tableData = {
-        table_name: tableName,
-        fields: fields,
-        type: 'base', //TODO
-      };
 
       const newFields = [];
 
@@ -79,9 +72,9 @@ const CollectionSidebar = () => {
       }
 
       const newCollection = await bird.collections.create(
-        tableData.table_name,
+        tableName,
         newFields,
-        tableData.type,
+        'base',
         ruleData
       );
 
@@ -114,8 +107,8 @@ const CollectionSidebar = () => {
         setFields([
           {
             name: 'id',
-            primary_key: true,
             type: 'String',
+            primary_key: true,
             required: true,
             secure: false,
             hidden: false,
@@ -191,7 +184,7 @@ const CollectionSidebar = () => {
               <div className="flex flex-col mb-5 w-full">
                 {fields.map((field, i) => (
                   <CollectionCreateField
-                    key={field.name}
+                    key={i}
                     field={field}
                     index={i}
                     handleChange={handleChange}

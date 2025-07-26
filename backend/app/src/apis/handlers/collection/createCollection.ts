@@ -12,8 +12,10 @@ const fieldTypesSchema = t.Object({
 const FieldDefinition = t.Object({
   name: t.String(),
   type: t.KeyOf(fieldTypesSchema),
-  nullable: t.Boolean(),
   primary_key: t.Boolean(),
+  required: t.Boolean(),
+  secure: t.Boolean(),
+  hidden: t.Boolean(),
 });
 
 export const RuleData = t.Object({
@@ -44,19 +46,29 @@ export async function createCollection(
         name: field.name,
         type: field.type,
         primary_key: field.primary_key,
-        required: !field.nullable,
+        required: field.required,
+        secure: field.secure,
+        hidden: field.hidden,
       })
     );
   }
 
-  const collection = new Collection({
+  const newCollection = new Collection({
     name: table_name,
     type: type,
     fields: collectionFields,
     ruleData: ruleData,
   });
-  collection.createTable();
-  collection.insertMetaData();
+  newCollection.createTable();
+  newCollection.insertMetaData();
 
-  return { message: 'Record successfully created' };
+  return {
+    collection: {
+      id: newCollection.id,
+      name: newCollection.name,
+      type: newCollection.type,
+      require_auth: newCollection.require_auth,
+      system: newCollection.system,
+    },
+  };
 }

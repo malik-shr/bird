@@ -86,14 +86,7 @@ export class Bird extends Elysia {
           unique: fieldMeta.unique,
         });
         Fields.set(fieldMeta.name, field);
-        if (
-          fieldMeta.name !== 'id' &&
-          fieldMeta.name !== 'username' &&
-          fieldMeta.name !== 'password' &&
-          fieldMeta.name !== 'email' &&
-          fieldMeta.name !== 'disabled' &&
-          fieldMeta.name !== 'role'
-        ) {
+        if (fieldMeta.name !== 'id') {
           collectionFields.push(field);
         }
       }

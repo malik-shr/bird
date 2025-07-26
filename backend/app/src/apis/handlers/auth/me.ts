@@ -1,12 +1,7 @@
-import { JWTPayloadSpec } from '@elysiajs/jwt';
-import { getUser } from '../../../utils/utils';
+import { UserRow } from '../../../db/models';
 
-type me = false | (Record<string, string | number> & JWTPayloadSpec) | null;
-
-export async function me(user: me) {
+export async function me(user: UserRow | null) {
   if (!user) return new Error('Not Authorized');
 
-  const activeUser = getUser(user.username);
-
-  return { activeUser };
+  return { user: user };
 }

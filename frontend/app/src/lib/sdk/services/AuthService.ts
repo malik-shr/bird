@@ -42,7 +42,7 @@ export class AuthService {
         },
       });
 
-      return data.activeUser;
+      return data.user;
     } catch (e) {
       console.error('Verification failed', e);
       localStorage.removeItem('token');

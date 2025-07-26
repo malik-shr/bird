@@ -3,7 +3,7 @@ import Bird, { SendMethod } from '../Bird';
 type ColumnDefinition = {
   name: string;
   type: string;
-  nullable?: boolean;
+  required: boolean;
   primary_key: boolean;
 };
 
