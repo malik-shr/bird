@@ -14,6 +14,7 @@ export type SelectType = {
   required: boolean;
   handleChange?: (e: any) => void;
   options: Options[];
+  icon: string;
 };
 
 const Select = ({
@@ -25,6 +26,7 @@ const Select = ({
   required,
   handleChange,
   options,
+  icon,
 }: SelectType) => {
   return (
     <div
@@ -33,7 +35,7 @@ const Select = ({
       }`}
     >
       <label htmlFor={id} className="flex items-center gap-1">
-        <Icon icon="ri:list-check" />
+        <Icon icon={icon} />
         <span>{label} </span>
         <span className="text-red-600">{required ? '*' : ''}</span>
       </label>
@@ -44,11 +46,15 @@ const Select = ({
         onChange={handleChange}
         className="outline-none w-full"
       >
-        {options.map((option) => (
-          <option value={option.value} className="w-full" key={option.value}>
-            {option.text}
-          </option>
-        ))}
+        <option value="" disabled>
+          --- Select ---
+        </option>
+        {options &&
+          options.map((option) => (
+            <option value={option.value} className="w-full" key={option.value}>
+              {option.text}
+            </option>
+          ))}
       </select>
     </div>
   );

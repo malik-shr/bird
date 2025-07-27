@@ -11,52 +11,52 @@ type FieldProps = {
   id?: string;
   name: string;
   type: FieldType;
-  references?: null | string;
+  relationCollection?: null | string;
   options?: null | Option[];
-  secure?: boolean;
-  system?: boolean;
-  hidden?: boolean;
-  required?: boolean;
-  primary_key?: boolean;
-  unique?: boolean;
+  isSecure?: boolean;
+  isSystem?: boolean;
+  isHidden?: boolean;
+  isRequired?: boolean;
+  isPrimaryKey?: boolean;
+  isUnique?: boolean;
 };
 
 export default class Field {
   id: string;
   name: string;
   type: FieldType;
-  references: null | string;
+  relationCollection: null | string;
   options?: null | Option[];
-  secure: boolean;
-  system: boolean;
-  hidden: boolean;
-  required: boolean;
-  primary_key: boolean;
-  unique: boolean;
+  isSecure: boolean;
+  isSystem: boolean;
+  isHidden: boolean;
+  isRequired: boolean;
+  isPrimaryKey: boolean;
+  isUnique: boolean;
 
   constructor({
     id = '',
     name,
     type,
-    references = null,
+    relationCollection = null,
     options = null,
-    secure = false,
-    system = false,
-    hidden = false,
-    required = false,
-    primary_key = false,
-    unique = false,
+    isSecure = false,
+    isSystem = false,
+    isHidden = false,
+    isRequired = false,
+    isPrimaryKey = false,
+    isUnique = false,
   }: FieldProps) {
     this.name = name;
     this.type = type;
-    this.references = references;
+    this.relationCollection = relationCollection;
     this.options = options;
-    this.secure = secure;
-    this.system = system;
-    this.hidden = hidden;
-    this.required = required;
-    this.primary_key = primary_key;
-    this.unique = unique;
+    this.isSecure = isSecure;
+    this.isSystem = isSystem;
+    this.isHidden = isHidden;
+    this.isRequired = isRequired;
+    this.isPrimaryKey = isPrimaryKey;
+    this.isUnique = isUnique;
 
     this.id = id;
 
@@ -73,8 +73,8 @@ export default class Field {
         )
         .as(LengthRow);
       const result = query.get({
-        $name: this.name,
-        $collection: collection_id,
+        name: this.name,
+        collection: collection_id,
       });
 
       if (result) {
@@ -92,25 +92,25 @@ export default class Field {
       const insertFieldMeta = db.query(
         `
             INSERT INTO fields_meta 
-                ("id", "name", "type", "collection", "secure", "required", "references", "system", "hidden", "primary_key", "unique") 
+                ("id", "name", "type", "collection", "is_secure", "is_required", "relation_collection", "is_system", "is_hidden", "is_primary_key", "is_unique") 
                 VALUES 
-                ($id, $name, $type, $collection, $secure, $required, $references, $system, $hidden, $primary_key, $unique )
+                ($id, $name, $type, $collection, $is_secure, $is_required, $relation_collection, $is_system, $is_hidden, $is_primary_key, $is_unique )
         `
       );
 
       try {
         insertFieldMeta.run({
-          $id: this.id,
-          $name: this.name,
-          $type: this.type,
-          $collection: collection_id,
-          $secure: this.secure,
-          $required: this.required,
-          $references: this.references,
-          $system: this.system,
-          $hidden: this.hidden,
-          $primary_key: this.primary_key,
-          $unique: this.unique,
+          id: this.id,
+          name: this.name,
+          type: this.type,
+          collection: collection_id,
+          is_secure: this.isSecure,
+          is_required: this.isRequired,
+          relation_collection: this.relationCollection,
+          is_system: this.isSystem,
+          is_hidden: this.isHidden,
+          is_primary_key: this.isPrimaryKey,
+          is_unique: this.isUnique,
         });
 
         if (this.type === 'Select' && this.options) {
@@ -125,11 +125,11 @@ export default class Field {
             );
 
             optionsQuery.run({
-              $id: crypto.randomUUID(),
-              $collection: collection_id,
-              $field: this.id,
-              $text: option.text,
-              $value: option.value,
+              id: crypto.randomUUID(),
+              collection: collection_id,
+              field: this.id,
+              text: option.text,
+              value: option.value,
             });
           }
         }
@@ -140,8 +140,8 @@ export default class Field {
   }
 
   sql() {
-    const notNull = this.required ? ' NOT NULL' : '';
-    const unique = this.unique ? ' UNIQUE' : '';
+    const notNull = this.isRequired ? ' NOT NULL' : '';
+    const unique = this.isUnique ? ' UNIQUE' : '';
 
     const col = `"${this.name}" ${FieldTypes[this.type]}${notNull}${unique}`;
 

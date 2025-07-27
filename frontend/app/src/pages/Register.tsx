@@ -17,6 +17,7 @@ const Register = () => {
       email: email,
       username: username,
       password: password,
+      confirmPassword: confirmPassword,
       disabled: false,
       role: 5,
     });
@@ -64,6 +65,7 @@ const Register = () => {
             value={confirmPassword}
             type="password"
             id="confirmPassword"
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
         </div>
         <input

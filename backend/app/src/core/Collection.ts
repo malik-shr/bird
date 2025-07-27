@@ -10,8 +10,8 @@ type CollectionProps = {
   type: string;
   description?: string;
   fields: Field[];
-  system?: boolean;
-  require_auth?: boolean;
+  isSystem?: boolean;
+  requiresAuth?: boolean;
   ruleData: Static<typeof RuleData>;
 };
 
@@ -21,19 +21,19 @@ export default class Collection {
   type: string;
   description: string;
   fields: Field[];
-  system: boolean;
-  require_auth: boolean;
+  isSystem: boolean;
+  requiresAuth: boolean;
   ruleData: Static<typeof RuleData>;
 
   idField = new Field({
     name: 'id',
     type: 'String',
-    secure: false,
-    system: true,
-    hidden: false,
-    required: true,
-    primary_key: true,
-    unique: true,
+    isSecure: false,
+    isSystem: true,
+    isHidden: false,
+    isRequired: true,
+    isPrimaryKey: true,
+    isUnique: true,
   });
 
   constructor({
@@ -42,8 +42,8 @@ export default class Collection {
     type,
     description = '',
     fields,
-    system = false,
-    require_auth = false,
+    isSystem = false,
+    requiresAuth = false,
     ruleData,
   }: CollectionProps) {
     this.name = name;
@@ -52,8 +52,8 @@ export default class Collection {
 
     this.fields = [this.idField, ...fields];
 
-    this.system = system;
-    this.require_auth = require_auth;
+    this.isSystem = isSystem;
+    this.requiresAuth = requiresAuth;
 
     this.ruleData = ruleData;
 
@@ -67,11 +67,11 @@ export default class Collection {
   exists() {
     const query = db
       .query(
-        `SELECT COUNT(*) AS length FROM collections_meta WHERE name = $name`
+        `SELECT COUNT(*) AS length FROM collections_meta WHERE name = :name`
       )
       .as(LengthRow);
 
-    const result = query.get({ $name: this.name });
+    const result = query.get({ name: this.name });
 
     if (result) {
       return result.length !== 0;
@@ -86,7 +86,7 @@ export default class Collection {
 
     for (const field of this.fields) {
       fieldsString += `${field.sql()},\n`;
-      if (field.primary_key) {
+      if (field.isPrimaryKey) {
         primary_keys.push(`${field.name}`);
       }
     }
@@ -106,20 +106,20 @@ export default class Collection {
       const query = db.query(
         `
           INSERT INTO collections_meta 
-              (id, name, type, description, require_auth, system) 
+              (id, name, type, description, requires_auth, is_system) 
               VALUES 
-              ($id, $name, $type, $description, $require_auth, $system)
+              ($id, $name, $type, $description, $requires_auth, $is_system)
         `
       );
 
       try {
         query.run({
-          $id: this.id,
-          $name: this.name,
-          $type: this.type,
-          $description: this.description,
-          $require_auth: this.require_auth,
-          $system: this.system,
+          id: this.id,
+          name: this.name,
+          type: this.type,
+          description: this.description,
+          requires_auth: this.requiresAuth,
+          is_system: this.isSystem,
         });
 
         for (const [key, value] of Object.entries(this.ruleData)) {
@@ -128,10 +128,10 @@ export default class Collection {
           );
 
           query.run({
-            $id: crypto.randomUUID(),
-            $collection: this.id,
-            $rule: key,
-            $permission: value,
+            id: crypto.randomUUID(),
+            collection: this.id,
+            rule: key,
+            permission: value,
           });
         }
 

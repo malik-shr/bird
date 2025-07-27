@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Select from '../Select';
+import { fieldIconMap } from '../../utils/utils';
 
 type RuleData = {
   viewRule: number;
@@ -35,6 +36,7 @@ const AuthRules = ({ ruleData, handleRuleChange }: AuthRulesProps) => {
         handleChange={handleRuleChange}
         disabled={false}
         options={options}
+        icon={fieldIconMap['Select']}
       ></Select>
       <Select
         id="createRule"
@@ -45,6 +47,7 @@ const AuthRules = ({ ruleData, handleRuleChange }: AuthRulesProps) => {
         handleChange={handleRuleChange}
         disabled={false}
         options={options}
+        icon={fieldIconMap['Select']}
       ></Select>
       <Select
         id="updateRule"
@@ -55,6 +58,7 @@ const AuthRules = ({ ruleData, handleRuleChange }: AuthRulesProps) => {
         handleChange={handleRuleChange}
         disabled={false}
         options={options}
+        icon={fieldIconMap['Select']}
       ></Select>
       <Select
         id="deleteRule"
@@ -65,6 +69,7 @@ const AuthRules = ({ ruleData, handleRuleChange }: AuthRulesProps) => {
         handleChange={handleRuleChange}
         disabled={false}
         options={options}
+        icon={fieldIconMap['Select']}
       ></Select>
     </div>
   );

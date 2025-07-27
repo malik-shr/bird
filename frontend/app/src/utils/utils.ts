@@ -3,11 +3,14 @@ import type { Collection } from '../types/types';
 export interface IField {
   name: string;
   type: string;
-  required: boolean;
-  primary_key: boolean;
-  secure: boolean;
-  hidden: boolean;
-  references?: string;
+  relation_collection?: null | string;
+
+  is_primary_key: boolean;
+  is_required: boolean;
+  is_secure: boolean;
+  is_hidden: boolean;
+  is_unique: boolean;
+  is_system: boolean;
   options?: {
     value: number;
     text: string;
@@ -20,7 +23,7 @@ export const fieldIconMap: Record<string, string> = {
   Float: 'ri:calculator-line',
   Boolean: 'ri:toggle-line',
   Date: 'ri:calendar-line',
-  Reference: 'ri:mind-map',
+  Relation: 'ri:mind-map',
   Select: 'ri:list-check',
 };
 
@@ -32,7 +35,7 @@ export const collectionIconMap: Record<string, string> = {
 };
 
 export const getFieldIcon = (field: IField) => {
-  if (field.primary_key) {
+  if (field.is_primary_key) {
     return 'ri:key-2-line';
   }
 

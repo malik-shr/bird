@@ -18,7 +18,7 @@ const TableBar = ({}: TableBarProps) => {
     <div className="flex flex-col gap-2 p-5 border-1 border-gray-300 rounded-2xl shadow-sm">
       <h3 className="text-xl font-bold mb-5">Collections</h3>
       {collections
-        .filter((collection) => !collection.system)
+        .filter((collection) => !collection.is_system)
         .map((collection) => (
           <TableBarItem key={collection.id} collection={collection} />
         ))}
@@ -42,7 +42,7 @@ const TableBar = ({}: TableBarProps) => {
         </label>
         <div className="collapse-content flex flex-col justify-start p-0">
           {collections
-            .filter((collection) => collection.system)
+            .filter((collection) => collection.is_system)
             .map((collection) => (
               <TableBarItem key={collection.id} collection={collection} />
             ))}

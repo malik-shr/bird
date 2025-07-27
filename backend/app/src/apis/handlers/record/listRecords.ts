@@ -1,16 +1,16 @@
 import { db } from '../../../core/db';
-import { FieldRow, OptionRow } from '../../../db/models';
+import { AliasFieldRow, FieldRow, OptionRow } from '../../../db/models';
 
 export async function listRecords(collection_name: string) {
   try {
     const fieldsQuery = db
       .query(
-        `SELECT * FROM fields_meta WHERE collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name) AND hidden = 0`
+        `SELECT * FROM fields_meta WHERE collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name) AND is_hidden = 0`
       )
       .as(FieldRow);
 
     const fieldResponse = fieldsQuery.all({
-      $collection_name: collection_name,
+      collection_name: collection_name,
     });
 
     const selectFields = [];
@@ -31,18 +31,46 @@ export async function listRecords(collection_name: string) {
         .as(OptionRow);
 
       const optionsResponse = optionsQuery.all({
-        $collection_name: collection_name,
-        $field_id: field.id,
+        collection_name: collection_name,
+        field_id: field.id,
       });
 
-      if (field.references) {
+      if (field.relation_collection) {
         const joinAlias = `ref_${joinCounter++}`;
-        const referencedCollection = field.references;
+        const relatedCollection = field.relation_collection;
 
-        joins.push(
-          `LEFT JOIN \`${referencedCollection}\` AS ${joinAlias} ON \`${collection_name}\`.\`${field.name}\` = ${joinAlias}.\`id\``
-        );
-        selectFields.push(`${joinAlias}.\`name\` AS \`${field.name}\``);
+        const aliasFieldQuery = db
+          .query(
+            `
+            SELECT 
+              name
+            FROM 
+              fields_meta 
+            WHERE 
+              collection = (SELECT MAX(id) FROM collections_meta WHERE name = $related_collection)
+            ORDER BY 
+              is_unique DESC,
+              CASE name 
+                WHEN 'id' THEN 999  
+                ELSE 1              
+              END,
+              name ASC;
+          `
+          )
+          .as(AliasFieldRow);
+
+        const aliasFieldResponse = aliasFieldQuery.get({
+          related_collection: relatedCollection,
+        });
+
+        if (aliasFieldResponse) {
+          joins.push(
+            `LEFT JOIN \`${relatedCollection}\` AS ${joinAlias} ON \`${collection_name}\`.\`${field.name}\` = ${joinAlias}.\`id\``
+          );
+          selectFields.push(
+            `${joinAlias}.${aliasFieldResponse.name} AS \`${field.name}\``
+          );
+        }
       } else if (optionsResponse.length > 0) {
         const optionsAlias = `opt_${joinCounter++}`;
         joins.push(
@@ -58,6 +86,7 @@ export async function listRecords(collection_name: string) {
     if (joins.length > 0) {
       query += ` ${joins.join(' ')}`;
     }
+
     const records = db.query(query).all();
 
     return { records: records };

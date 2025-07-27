@@ -89,12 +89,12 @@ const CollectionCreateField = ({
               <input type="text" onChange={onOptionsChange} />
             </div>
           )}
-          {field.type === 'Reference' && (
+          {field.type === 'Relation' && (
             <div>
               <select
                 onChange={handleChange && ((e) => handleChange(e, index))}
-                value={field.references}
-                name="references"
+                value={field.relation_collection || ''}
+                name="relation"
               >
                 <option value="" disabled>
                   --- Select ---
@@ -135,12 +135,12 @@ const CollectionCreateField = ({
           }`}
         >
           <div className="flex gap-10">
-            {renderCheckbox(field, 'required', index, 'Required')}
-            {renderCheckbox(field, 'primary_key', index, 'Primary Key')}
-            {renderCheckbox(field, 'secure', index, 'Secure')}
+            {renderCheckbox(field, 'is_required', index, 'Required')}
+            {renderCheckbox(field, 'is_primary_key', index, 'Primary Key')}
+            {renderCheckbox(field, 'is_secure', index, 'Secure')}
           </div>
           <div className="flex gap-10">
-            {renderCheckbox(field, 'hidden', index, 'Hidden')}
+            {renderCheckbox(field, 'is_hidden', index, 'Hidden')}
           </div>
         </div>
       )}

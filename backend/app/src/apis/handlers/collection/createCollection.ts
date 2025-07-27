@@ -9,7 +9,7 @@ const fieldTypesSchema = t.Object({
   Boolean: t.Literal('BOOLEAN'),
   Date: t.Literal('DATE'),
   Select: t.Literal('TEXT'),
-  Reference: t.Literal('TEXT'),
+  Relation: t.Literal('TEXT'),
 });
 
 const options = t.Object({
@@ -20,12 +20,12 @@ const options = t.Object({
 const FieldDefinition = t.Object({
   name: t.String(),
   type: t.KeyOf(fieldTypesSchema),
-  primary_key: t.Boolean(),
-  required: t.Boolean(),
-  references: t.Optional(t.String()),
+  relationCollection: t.Optional(t.String()),
+  isPrimaryKey: t.Boolean(),
+  isRequired: t.Boolean(),
+  isSecure: t.Boolean(),
+  isHidden: t.Boolean(),
   options: t.Optional(t.Array(options)),
-  secure: t.Boolean(),
-  hidden: t.Boolean(),
 });
 
 export const RuleData = t.Object({
@@ -56,12 +56,12 @@ export async function createCollection(
         new Field({
           name: field.name,
           type: field.type,
-          primary_key: field.primary_key,
-          required: field.required,
-          references: field.references,
+          isPrimaryKey: field.isPrimaryKey,
+          isRequired: field.isRequired,
+          relationCollection: field.relationCollection,
           options: field.options,
-          secure: field.secure,
-          hidden: field.hidden,
+          isSecure: field.isSecure,
+          isHidden: field.isHidden,
         })
       );
     }
@@ -80,8 +80,8 @@ export async function createCollection(
         id: newCollection.id,
         name: newCollection.name,
         type: newCollection.type,
-        require_auth: newCollection.require_auth,
-        system: newCollection.system,
+        requires_auth: newCollection.requiresAuth,
+        system: newCollection.isSystem,
       },
     };
   } catch (e) {

@@ -5,7 +5,7 @@ export const FieldTypes = {
   Boolean: 'BOOLEAN',
   Date: 'DATE',
   Select: 'TEXT',
-  Reference: 'TEXT',
+  Relation: 'TEXT',
 };
 
 export type FieldType = keyof typeof FieldTypes;

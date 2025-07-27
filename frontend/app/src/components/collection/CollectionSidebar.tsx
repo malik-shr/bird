@@ -7,6 +7,7 @@ import { useCollection } from '../../providers/CollectionContext';
 import CollectionCreateField from './CollectionCreateField';
 import Sidebar from '../Sidebar';
 import AuthRules from './AuthRules';
+import type { ColumnRequest } from '../../lib/sdk/services/CollectionService';
 
 const CollectionSidebar = () => {
   const [fields, setFields] = useState<IField[]>([]);
@@ -41,7 +42,6 @@ const CollectionSidebar = () => {
 
   const handleChange = async (e: any, index: number) => {
     const { name, value, type, checked } = e.target;
-    console.log(fields);
     setFields((prevFields) => {
       const newFields = [...prevFields];
       newFields[index] = {
@@ -64,11 +64,22 @@ const CollectionSidebar = () => {
     try {
       e.preventDefault();
 
-      const newFields = [];
+      const newFields: ColumnRequest[] = [];
 
       for (const field of fields) {
         if (field.name !== 'id') {
-          newFields.push(field);
+          newFields.push({
+            name: field.name,
+            type: field.type,
+            relationCollection: field.relation_collection,
+            isPrimaryKey: field.is_primary_key,
+            isHidden: field.is_hidden,
+            isUnique: field.is_unique,
+            isRequired: field.is_required,
+            isSecure: field.is_secure,
+            isSystem: field.is_system,
+            options: field.options,
+          });
         }
       }
 
@@ -109,10 +120,12 @@ const CollectionSidebar = () => {
           {
             name: 'id',
             type: 'String',
-            primary_key: true,
-            required: true,
-            secure: false,
-            hidden: false,
+            is_primary_key: true,
+            is_required: true,
+            is_secure: false,
+            is_hidden: false,
+            is_system: false,
+            is_unique: true,
           },
         ]);
       }

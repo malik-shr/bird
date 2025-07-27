@@ -7,7 +7,7 @@ export function getUser(username: string | number) {
       'SELECT id, username, email, password, disabled, role FROM users WHERE username = $username'
     )
     .as(UserRow);
-  const user = query.get({ $username: username });
+  const user = query.get({ username: username });
 
   return user;
 }

@@ -5,7 +5,7 @@ export async function deleteRecord(collection_name: string, id: string) {
     const query = db.query(`DELETE FROM ${collection_name} WHERE id = $id`);
 
     query.run({
-      $id: id,
+      id: id,
     });
   } catch (e) {
     console.log(e);

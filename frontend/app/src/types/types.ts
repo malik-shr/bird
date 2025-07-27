@@ -2,8 +2,8 @@ export type Collection = {
   id: string;
   name: string;
   type: string;
-  require_auth: boolean;
-  system: boolean;
+  requires_auth: boolean;
+  is_system: boolean;
 };
 
 export type User = {

@@ -31,7 +31,7 @@ export const recordApi = new Elysia({
       )
       .as(AuthRuleRow);
 
-    const rules = query.get({ $collection_name: collection_name });
+    const rules = query.get({ collection_name: collection_name });
 
     return { rules };
   })

@@ -1,13 +1,43 @@
 import Bird, { SendMethod } from '../Bird';
 
-type ColumnDefinition = {
+export type ColumnDefinition = {
+  id: string;
   name: string;
   type: string;
-  required: boolean;
-  primary_key: boolean;
+  relationCollection?: null | string;
+
+  isPrimaryKey: boolean;
+  isHidden: boolean;
+  isUnique: boolean;
+  isRequired: boolean;
+  isSecure: boolean;
+  isSystem: boolean;
+
+  options?: {
+    value: number;
+    text: string;
+  }[];
 };
 
-type RuleData = {
+export type ColumnRequest = {
+  name: string;
+  type: string;
+  relationCollection?: null | string;
+
+  isPrimaryKey: boolean;
+  isHidden: boolean;
+  isUnique: boolean;
+  isRequired: boolean;
+  isSecure: boolean;
+  isSystem: boolean;
+
+  options?: {
+    value: number;
+    text: string;
+  }[];
+};
+
+export type RuleData = {
   viewRule: number;
   createRule: number;
   updateRule: number;
@@ -40,7 +70,7 @@ export default class CollectionService {
 
   async create(
     table_name: string,
-    columns: ColumnDefinition[],
+    columns: ColumnRequest[],
     type: string,
     ruleData: RuleData
   ) {

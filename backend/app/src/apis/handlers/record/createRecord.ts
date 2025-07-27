@@ -10,30 +10,32 @@ export async function createRecord(
   collection_name: string
 ) {
   try {
-    values['id'] = crypto.randomUUID();
+    // Clone and strip out password_confirm
+    const { confirmPassword, ...filteredValues } = values;
 
-    if (values['password_confirm']) {
-      if (values['password'] !== values['password_confirm']) {
+    filteredValues['id'] = crypto.randomUUID();
+
+    if (confirmPassword) {
+      if (filteredValues['password'] !== confirmPassword) {
         throw new Error('Password and password confirmation do not match');
       }
-      delete values['password_confirm'];
     }
 
-    if (values['password']) {
-      values['password'] = await Bun.password.hash(
-        values['password'],
+    if (filteredValues['password']) {
+      filteredValues['password'] = await Bun.password.hash(
+        filteredValues['password'],
         'bcrypt'
       );
     }
 
-    const keys = Object.keys(values);
+    const keys = Object.keys(filteredValues);
     const placeholders = keys.map(() => '?').join(', ');
 
     const insertSQL = `INSERT INTO ${collection_name} (${keys.join(
       ', '
     )}) VALUES (${placeholders})`;
 
-    db.run(insertSQL, Object.values(values));
+    db.run(insertSQL, Object.values(filteredValues));
 
     return { message: 'Successfully created Record' };
   } catch (e) {

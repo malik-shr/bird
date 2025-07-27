@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { bird } from '../../lib/lib';
 import Input from '../Input';
-import { getFieldIcon, type IField } from '../../utils/utils';
+import { fieldIconMap, getFieldIcon, type IField } from '../../utils/utils';
 import { useRecord } from '../../providers/RecordContext';
 import Sidebar from '../Sidebar';
+import Select from '../Select';
 
 interface RecordSidebarProps {
   collectionName: string;
@@ -12,6 +13,9 @@ interface RecordSidebarProps {
 const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
   const [columns, setColumns] = useState<IField[]>([]);
   const [formData, setFormData] = useState<any>({});
+  const [relationRecords, setRelationRecords] = useState<Map<string, any>>(
+    new Map()
+  );
 
   const {
     selectedRecord,
@@ -22,30 +26,13 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
     toggleCreate,
   } = useRecord();
 
-  const getColumns = async () => {
-    const data = await bird.collections.columns(collectionName);
-    setColumns(data);
+  const handleSelectChange = (event: any) => {
+    const { name, value } = event.target;
 
-    // Initialize formData, skipping the "id" column
-    const initialFormData = data.reduce((acc: any, column: any) => {
-      if (!isNew && selectedRecord) {
-        acc[column.name] = selectedRecord[column.name];
-        return acc;
-      }
-      if (column.type === 'Select') {
-        acc[column.name] = 0;
-      }
-      if (column.type === 'Boolean') {
-        acc[column.name] = false;
-      }
-      if (column.name !== 'id') {
-        acc[column.name] = ''; // or null, or a default value
-      }
-
-      return acc;
-    }, {});
-
-    setFormData(initialFormData);
+    setFormData((prev: any) => ({
+      ...prev,
+      [name]: parseInt(value),
+    }));
   };
 
   const handleChange = (event: any) => {
@@ -55,8 +42,6 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
 
     if (type === 'checkbox') {
       val = checked;
-    } else if (type === 'select-one') {
-      val = parseInt(value);
     }
 
     setFormData((prev: any) => ({
@@ -86,14 +71,63 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
     toggle();
   };
 
+  const getData = async () => {
+    const columnsResponse = await bird.collections.columns(collectionName);
+    setColumns(columnsResponse);
+
+    // Initialize formData, skipping the "id" column
+    const initialFormData = columnsResponse.reduce((acc: any, column: any) => {
+      if (!isNew && selectedRecord) {
+        acc[column.name] = selectedRecord[column.name];
+        return acc;
+      }
+      if (column.type === 'Select') {
+        acc[column.name] = 0;
+      }
+      if (column.type === 'Boolean') {
+        acc[column.name] = false;
+      }
+      if (column.name !== 'id') {
+        acc[column.name] = ''; // or null, or a default value
+      }
+
+      return acc;
+    }, {});
+
+    setFormData(initialFormData);
+
+    const relations = new Map();
+    console.log(columnsResponse);
+    for (const field of columnsResponse) {
+      if (field.relationCollection) {
+        const relationsRecordsResponse = await bird
+          .collection(field.relationCollection)
+          .getList();
+
+        const relationRecordArr = [];
+
+        for (const relationRecord of relationsRecordsResponse) {
+          relationRecordArr.push({
+            value: relationRecord.id,
+            text: relationRecord.name,
+          });
+        }
+
+        relations.set(field.name, relationRecordArr);
+      }
+    }
+
+    setRelationRecords(relations);
+  };
+
   useEffect(() => {
     if (collectionName) {
-      getColumns();
+      getData();
     }
   }, [collectionName, selectedRecord]);
 
   const getInputType = (field: IField) => {
-    if (field.secure) {
+    if (field.is_secure) {
       return 'password';
     }
     if (field.type === 'Integer' || field.type == 'Float') {
@@ -123,7 +157,7 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
           placeholder={field.name === 'id' ? 'Autogeneration' : ''}
           disabled={field.name === 'id'}
           icon={getFieldIcon(field)}
-          required={field.required}
+          required={field.is_required}
         />
       );
     } else if (field.type === 'Boolean') {
@@ -143,20 +177,33 @@ const RecordSidebar = ({ collectionName }: RecordSidebarProps) => {
     } else if (field.type === 'Select' && field.options) {
       return (
         <div className="flex gap-2">
-          <select
+          <Select
+            value={formData[field.name]}
+            id={`select-${field.name}`}
             name={field.name}
-            value={String(formData[field.name])}
-            onChange={handleChange}
-          >
-            <option value="" disabled>
-              --- Select ---
-            </option>
-            {field.options.map((option) => (
-              <option key={option.value} value={String(option.value)}>
-                {option.text}
-              </option>
-            ))}
-          </select>
+            required={field.is_required}
+            handleChange={handleSelectChange}
+            options={field.options}
+            label={field.name}
+            icon={fieldIconMap[field.type]}
+          />
+        </div>
+      );
+    } else if (field.type === 'Relation') {
+      return (
+        <div className="flex gap-2">
+          {relationRecords && relationRecords.size > 0 && (
+            <Select
+              value={formData[field.name]}
+              id={`relation-${field.name}`}
+              name={field.name}
+              required={field.is_required}
+              handleChange={handleChange}
+              options={relationRecords.get(field.name)}
+              label={field.name}
+              icon={fieldIconMap[field.type]}
+            />
+          )}
         </div>
       );
     }

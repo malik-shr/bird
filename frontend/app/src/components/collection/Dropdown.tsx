@@ -9,7 +9,7 @@ const types = [
   'Boolean',
   'Date',
   'Select',
-  'Reference',
+  'Relation',
 ];
 
 interface DropdownProps {
@@ -32,10 +32,10 @@ const Dropdown = ({ fields, setFields }: DropdownProps) => {
       {
         name: 'field',
         type: type,
-        required: false,
-        primary_key: false,
-        secure: false,
-        hidden: false,
+        is_required: false,
+        is_primary_key: false,
+        is_secure: false,
+        is_hidden: false,
       },
     ]);
 

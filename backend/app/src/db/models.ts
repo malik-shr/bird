@@ -13,14 +13,14 @@ export class FieldRow {
   id: string;
   name: string;
   type: FieldType;
-  references: string;
+  relation_collection: string;
 
-  secure: boolean;
-  system: boolean;
-  hidden: boolean;
-  required: boolean;
-  primary_key: boolean;
-  unique: boolean;
+  is_secure: boolean;
+  is_system: boolean;
+  is_hidden: boolean;
+  is_required: boolean;
+  is_primary_key: boolean;
+  is_unique: boolean;
 }
 
 export class CollectionRow {
@@ -29,8 +29,8 @@ export class CollectionRow {
   type: string;
   description: string;
 
-  require_auth: boolean;
-  system: boolean;
+  requires_auth: boolean;
+  is_system: boolean;
 }
 
 export class LengthRow {
@@ -47,4 +47,8 @@ export class AuthRuleRow {
 export class OptionRow {
   value: number;
   text: string;
+}
+
+export class AliasFieldRow {
+  name: string;
 }
