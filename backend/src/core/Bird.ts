@@ -40,6 +40,7 @@ export class Bird extends Elysia {
     const api = new Elysia({ prefix: '/api' });
 
     api.use(recordApi).use(collectionApi).use(authApi);
+    this.use(api);
   }
 
   start() {
@@ -54,12 +55,12 @@ export class Bird extends Elysia {
     console.log(` ${title}  ${ready} ${pc.white(time)} ms`);
     console.log('\n');
     console.log(
-      ` ${pc.green('➜')}  ${pc.white(pc.bold('Local:'))}   ${pc.cyan(
+      ` ${pc.green('➜')}  ${pc.white(pc.bold('API:'))}   ${pc.cyan(
         'http://localhost:3000/api'
       )}`
     );
     console.log(
-      ` ${pc.green('➜')}  ${pc.white(pc.bold('Frontend:'))}   ${pc.cyan(
+      ` ${pc.green('➜')}  ${pc.white(pc.bold('UI: '))}   ${pc.cyan(
         'http://localhost:3000'
       )}`
     );

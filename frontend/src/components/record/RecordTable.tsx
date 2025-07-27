@@ -63,24 +63,28 @@ const RecordTable = ({}: RecordTableProps) => {
 
   return (
     <div className="w-full p-5 border-1 border-gray-300 rounded-2xl shadow-sm">
-      <div className="flex items-center gap-2 mb-10">
-        <h2 className="text-2xl font-bold">{activeCollection.name}</h2>
-        <button onClick={toggleEdit}>
-          <div className="rounded-full hover:bg-gray-300 p-2">
-            <Icon icon="ri:settings-3-line" className="text-2xl" />
-          </div>
-        </button>
+      <div className="flex items-center gap-2 mb-10 justify-between">
+        <div className="flex gap-2 items-center">
+          <h2 className="text-2xl font-bold">{activeCollection.name}</h2>
+          <button onClick={toggleEdit}>
+            <div className="rounded-full hover:bg-gray-300 p-1">
+              <Icon icon="ri:settings-3-line" className="text-2xl" />
+            </div>
+          </button>
+        </div>
+
+        <div className="drawer-content flex justify-end m-5">
+          <label
+            htmlFor="record-drawer"
+            aria-label="close sidebar"
+            className="drawer-button btn btn-secondary flex items-center gap-2"
+          >
+            <Icon icon="ri:add-line" />
+            Create Record
+          </label>
+        </div>
       </div>
-      <div className="drawer-content flex justify-end m-5">
-        <label
-          htmlFor="record-drawer"
-          aria-label="close sidebar"
-          className="drawer-button btn btn-secondary flex items-center gap-2"
-        >
-          <Icon icon="ri:add-line" />
-          Create Record
-        </label>
-      </div>
+
       <RecordSidebar collectionName={activeCollection.name} />
 
       <div>
@@ -92,7 +96,6 @@ const RecordTable = ({}: RecordTableProps) => {
         </table>
         <div className="overflow-auto">
           <table className="table">
-            {/* head */}
             <thead>
               <tr>
                 <th>

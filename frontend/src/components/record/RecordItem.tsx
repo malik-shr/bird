@@ -30,6 +30,7 @@ const RecordItem = ({
             type="checkbox"
             className="checkbox"
             onChange={handleCheck}
+            onClick={(e) => e.stopPropagation()}
             name={record!.id}
             checked={checkedItems.includes(record!.id)}
           />
