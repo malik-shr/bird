@@ -1,8 +1,0 @@
-{
-  "name": "Existing Docker Compose (Extend)",
-
-  "dockerComposeFile": ["../docker-compose.yml"],
-  "service": "backend",
-
-  "workspaceFolder": "/backend/app"
-}
