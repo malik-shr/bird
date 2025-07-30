@@ -13,9 +13,9 @@ export async function deleteCollection(collection_name: string) {
       'DELETE FROM collections_meta WHERE name = $collection_name'
     );
 
-    deleteFields.run({ collection_name: collection_name });
-    deleteOptions.run({ collection_name: collection_name });
-    deleteCollectionMeta.run({ collection_name: collection_name });
+    deleteFields.run({ $collection_name: collection_name });
+    deleteOptions.run({ $collection_name: collection_name });
+    deleteCollectionMeta.run({ $collection_name: collection_name });
     db.exec(`DROP TABLE ${collection_name}`);
 
     return {

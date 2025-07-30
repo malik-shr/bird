@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { db } from '../../../core/db';
+import { bb, db } from '../../../core/db';
 
 export const RecordCreateBody = t.Object({
   values: t.Record(t.String(), t.Any()),
@@ -28,14 +28,7 @@ export async function createRecord(
       );
     }
 
-    const keys = Object.keys(filteredValues);
-    const placeholders = keys.map(() => '?').join(', ');
-
-    const insertSQL = `INSERT INTO ${collection_name} (${keys.join(
-      ', '
-    )}) VALUES (${placeholders})`;
-
-    db.run(insertSQL, Object.values(filteredValues));
+    bb.insertInto(collection_name).values(filteredValues).run();
 
     return { message: 'Successfully created Record' };
   } catch (e) {

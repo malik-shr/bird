@@ -11,7 +11,7 @@ export async function viewCollection(collection_name: string) {
       .as(FieldRow);
 
     const fieldResponse = fieldsQuery.all({
-      collection_name: collection_name,
+      $collection_name: collection_name,
     });
 
     const fields: Field[] = [];
@@ -31,8 +31,8 @@ export async function viewCollection(collection_name: string) {
         .as(OptionRow);
 
       const optionsResponse = optionsQuery.all({
-        collection_name: collection_name,
-        field_id: field.id,
+        $collection_name: collection_name,
+        $field_id: field.id,
       });
       fields.push(
         new Field({

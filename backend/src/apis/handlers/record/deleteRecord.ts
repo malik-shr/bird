@@ -1,12 +1,8 @@
-import { db } from '../../../core/db';
+import { bb, db } from '../../../core/db';
 
 export async function deleteRecord(collection_name: string, id: string) {
   try {
-    const query = db.query(`DELETE FROM ${collection_name} WHERE id = $id`);
-
-    query.run({
-      id: id,
-    });
+    bb.deleteFrom(collection_name).where(['id', '=', id]).run();
   } catch (e) {
     console.log(e);
   }

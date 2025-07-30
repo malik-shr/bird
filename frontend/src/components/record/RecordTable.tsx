@@ -7,11 +7,12 @@ import { Icon } from '@iconify/react/dist/iconify.js';
 import RecordItem from './RecordItem';
 import BulkDeletePanel from './BulkDeletePanel';
 import { bird } from '../../lib/lib';
+import type { ColumnRequest } from '../../lib/sdk/services/CollectionService';
 
 interface RecordTableProps {}
 
 const RecordTable = ({}: RecordTableProps) => {
-  const [columns, setColumns] = useState<IField[]>([]);
+  const [columns, setColumns] = useState<ColumnRequest[]>([]);
 
   const [isCheckAll, setIsCheckAll] = useState(false);
   const [checkedItems, setCheckedItems] = useState<string[]>([]);
@@ -111,7 +112,7 @@ const RecordTable = ({}: RecordTableProps) => {
                   </label>
                 </th>
                 {columns
-                  .filter((col) => !col.is_hidden)
+                  .filter((col) => !col.isHidden)
                   .map((column) => (
                     <th key={column.name}>
                       <div className="flex gap-2 items-center">

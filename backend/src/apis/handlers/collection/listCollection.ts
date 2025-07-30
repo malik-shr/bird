@@ -1,11 +1,11 @@
-import { db } from '../../../core/db';
+import { bb, db } from '../../../core/db';
 
 export async function listCollection() {
   try {
-    const query = db.query(
-      'SELECT id, name, type, requires_auth, is_system FROM collections_meta ORDER BY is_system'
-    );
-    const collections = query.all();
+    const collections = bb
+      .select('id', 'name', 'type', 'requires_auth', 'is_system')
+      .from('collections_meta')
+      .all();
 
     return { collections: collections };
   } catch (e) {

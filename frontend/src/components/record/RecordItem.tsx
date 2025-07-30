@@ -1,9 +1,9 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
 import { useRecord } from '../../providers/RecordContext';
-import type { IField } from '../../utils/utils';
+import type { ColumnRequest } from '../../lib/sdk/services/CollectionService';
 
 interface RecordItemType {
-  columns: IField[];
+  columns: ColumnRequest[];
   record: any;
   handleCheck: (e: any) => void;
   checkedItems: string[];
@@ -37,8 +37,8 @@ const RecordItem = ({
         </label>
       </th>
       {columns
-        .filter((col) => !col.is_hidden)
-        .map((column: IField) => (
+        .filter((col) => !col.isHidden)
+        .map((column: ColumnRequest) => (
           <td key={column.name} className="px-4 py-3 text-sm">
             {record[column.name] !== null &&
             record[column.name] !== undefined ? (

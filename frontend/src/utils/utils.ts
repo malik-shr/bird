@@ -1,3 +1,5 @@
+import type { ColumnRequest } from '../lib/sdk/services/CollectionService';
+
 export interface IField {
   name: string;
   type: string;
@@ -32,8 +34,8 @@ export const collectionIconMap: Record<string, string> = {
   system: 'ri:folder-settings-line',
 };
 
-export const getFieldIcon = (field: IField) => {
-  if (field.is_primary_key) {
+export const getFieldIcon = (field: ColumnRequest) => {
+  if (field.isPrimaryKey) {
     return 'ri:key-2-line';
   }
 

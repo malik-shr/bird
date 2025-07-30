@@ -1,10 +1,7 @@
-import { db } from '../../../core/db';
+import { bb, db } from '../../../core/db';
 
 export async function getRecord(collection_name: string, id: string) {
-  const query = db.query(`SELECT * FROM ${collection_name} WHERE id=$id`);
-  const record = query.get({
-    id: id,
-  });
+  const record = bb.select().from(collection_name).where(['id', '=', id]).get();
 
   return { record: record };
 }

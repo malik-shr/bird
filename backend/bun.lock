@@ -8,7 +8,8 @@
         "@elysiajs/jwt": "^1.3.2",
         "@elysiajs/static": "^1.3.0",
         "@elysiajs/swagger": "^1.3.1",
-        "dotenv": "^17.2.0",
+        "bird-sql": "github:malik-shr/bird-sql",
+        "dotenv": "^17.2.1",
         "elysia": "^1.3.6",
         "kysely": "^0.28.3",
         "picocolors": "^1.1.1",
@@ -44,6 +45,8 @@
     "@types/react": ["@types/react@19.1.8", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-AwAfQ2Wa5bCx9WP8nZL2uMZWod7J7/JSplxbTmBQ5ms6QpqNYm672H0Vu9ZVKVngQ+ii4R/byguVEUZQyeg44g=="],
 
     "@unhead/schema": ["@unhead/schema@1.11.20", "", { "dependencies": { "hookable": "^5.5.3", "zhead": "^2.2.4" } }, "sha512-0zWykKAaJdm+/Y7yi/Yds20PrUK7XabLe9c3IRcjnwYmSWY6z0Cr19VIs3ozCj8P+GhR+/TI2mwtGlueCEYouA=="],
+
+    "bird-sql": ["bird-sql@github:malik-shr/bird-sql#8417536", {}, "malik-shr-bird-sql-8417536"],
 
     "bun-types": ["bun-types@1.2.19", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-uAOTaZSPuYsWIXRpj7o56Let0g/wjihKCkeRqUBhlLVM/Bt+Fj9xTo+LhC1OV1XDaGkz4hNC80et5xgy+9KTHQ=="],
 

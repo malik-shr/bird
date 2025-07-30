@@ -1,6 +1,6 @@
 import { FieldType, FieldTypes } from '../apis/schemas/types';
 import { LengthRow } from '../db/models';
-import { db } from './db';
+import { bb, db } from './db';
 
 type Option = {
   value: number;
@@ -89,29 +89,22 @@ export default class Field {
 
   insertMetaData(collection_id: string) {
     if (!this.exists(collection_id)) {
-      const insertFieldMeta = db.query(
-        `
-            INSERT INTO fields_meta 
-                ("id", "name", "type", "collection", "is_secure", "is_required", "relation_collection", "is_system", "is_hidden", "is_primary_key", "is_unique") 
-                VALUES 
-                ($id, $name, $type, $collection, $is_secure, $is_required, $relation_collection, $is_system, $is_hidden, $is_primary_key, $is_unique )
-        `
-      );
-
       try {
-        insertFieldMeta.run({
-          id: this.id,
-          name: this.name,
-          type: this.type,
-          collection: collection_id,
-          is_secure: this.isSecure,
-          is_required: this.isRequired,
-          relation_collection: this.relationCollection,
-          is_system: this.isSystem,
-          is_hidden: this.isHidden,
-          is_primary_key: this.isPrimaryKey,
-          is_unique: this.isUnique,
-        });
+        bb.insertInto('fields_meta')
+          .values({
+            id: this.id,
+            name: this.name,
+            type: this.type,
+            collection: collection_id,
+            is_secure: this.isSecure,
+            is_required: this.isRequired,
+            relation_collection: this.relationCollection,
+            is_system: this.isSystem,
+            is_hidden: this.isHidden,
+            is_primary_key: this.isPrimaryKey,
+            is_unique: this.isUnique,
+          })
+          .run();
 
         if (this.type === 'Select' && this.options) {
           for (const option of this.options) {

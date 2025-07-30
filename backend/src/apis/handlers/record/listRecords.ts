@@ -1,4 +1,4 @@
-import { db } from '../../../core/db';
+import { bb, db } from '../../../core/db';
 import { AliasFieldRow, FieldRow, OptionRow } from '../../../db/models';
 
 export async function listRecords(collection_name: string) {
@@ -10,7 +10,7 @@ export async function listRecords(collection_name: string) {
       .as(FieldRow);
 
     const fieldResponse = fieldsQuery.all({
-      collection_name: collection_name,
+      $collection_name: collection_name,
     });
 
     const selectFields = [];
@@ -31,8 +31,8 @@ export async function listRecords(collection_name: string) {
         .as(OptionRow);
 
       const optionsResponse = optionsQuery.all({
-        collection_name: collection_name,
-        field_id: field.id,
+        $collection_name: collection_name,
+        $field_id: field.id,
       });
 
       if (field.relation_collection) {
@@ -60,7 +60,7 @@ export async function listRecords(collection_name: string) {
           .as(AliasFieldRow);
 
         const aliasFieldResponse = aliasFieldQuery.get({
-          related_collection: relatedCollection,
+          $related_collection: relatedCollection,
         });
 
         if (aliasFieldResponse) {
@@ -86,7 +86,6 @@ export async function listRecords(collection_name: string) {
     if (joins.length > 0) {
       query += ` ${joins.join(' ')}`;
     }
-
     const records = db.query(query).all();
 
     return { records: records };

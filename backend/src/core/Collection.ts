@@ -1,5 +1,5 @@
 import { Static } from 'elysia';
-import { db } from './db';
+import { bb, db } from './db';
 import Field from './Field';
 import { RuleData } from '../apis/handlers/collection/createCollection';
 import { LengthRow } from '../db/models';
@@ -65,13 +65,13 @@ export default class Collection {
   }
 
   exists() {
-    const query = db
-      .query(
-        `SELECT COUNT(*) AS length FROM collections_meta WHERE name = :name`
+    const result = bb
+      .raw(
+        `SELECT COUNT(*) AS length FROM collections_meta WHERE name = $name`,
+        { $name: this.name }
       )
-      .as(LengthRow);
-
-    const result = query.get({ name: this.name });
+      .as(LengthRow)
+      .get();
 
     if (result) {
       return result.length !== 0;
@@ -103,36 +103,27 @@ export default class Collection {
 
   insertMetaData() {
     if (!this.exists()) {
-      const query = db.query(
-        `
-          INSERT INTO collections_meta 
-              (id, name, type, description, requires_auth, is_system) 
-              VALUES 
-              ($id, $name, $type, $description, $requires_auth, $is_system)
-        `
-      );
-
       try {
-        query.run({
-          id: this.id,
-          name: this.name,
-          type: this.type,
-          description: this.description,
-          requires_auth: this.requiresAuth,
-          is_system: this.isSystem,
-        });
+        bb.insertInto('collections_meta')
+          .values({
+            id: this.id,
+            name: this.name,
+            type: this.type,
+            description: this.description,
+            requires_auth: this.requiresAuth,
+            is_system: this.isSystem,
+          })
+          .run();
 
         for (const [key, value] of Object.entries(this.ruleData)) {
-          const query = db.query(
-            'INSERT INTO auth_rules (id, collection, rule, permission) VALUES ($id, $collection, $rule, $permission)'
-          );
-
-          query.run({
-            id: crypto.randomUUID(),
-            collection: this.id,
-            rule: key,
-            permission: value,
-          });
+          bb.insertInto('auth_rules')
+            .values({
+              id: crypto.randomUUID(),
+              collection: this.id,
+              rule: key,
+              permission: value,
+            })
+            .run();
         }
 
         for (const field of this.fields) {
