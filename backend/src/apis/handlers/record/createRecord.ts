@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { bb, db } from '../../../core/db';
+import { bb } from '../../../core/db';
 
 export const RecordCreateBody = t.Object({
   values: t.Record(t.String(), t.Any()),

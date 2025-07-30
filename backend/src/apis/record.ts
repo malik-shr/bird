@@ -3,7 +3,7 @@ import { listRecords } from './handlers/record/listRecords';
 import { RecordUpdateBody, updateRecord } from './handlers/record/updateRecord';
 import { getRecord } from './handlers/record/getRecord';
 import { deleteRecord } from './handlers/record/deleteRecord';
-import { db } from '../core/db';
+import { bb } from '../core/db';
 import { AuthRuleRow, UserRow } from '../db/models';
 import { authMiddleware } from '../middleware/auhtMiddleware';
 import { ElysiaCookie } from 'elysia/dist/cookies';
@@ -14,8 +14,8 @@ export const recordApi = new Elysia({
 })
   .use(authMiddleware)
   .derive(async ({ params: { collection_name }, user }) => {
-    const query = db
-      .query(
+    const rules = bb
+      .raw(
         `
     SELECT
       MAX(CASE WHEN rule = 'viewRule' THEN rules.permission END) AS viewRule,
@@ -27,11 +27,11 @@ export const recordApi = new Elysia({
       JOIN collections_meta AS c
         ON rules.collection = c.id
     WHERE c.name = $collection_name;
-    `
+    `,
+        { collection_name: collection_name }
       )
-      .as(AuthRuleRow);
-
-    const rules = query.get({ collection_name: collection_name });
+      .as(AuthRuleRow)
+      .get();
 
     return { rules };
   })

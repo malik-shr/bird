@@ -1,46 +1,46 @@
-import { bb, db } from '../../../core/db';
+import { bb } from '../../../core/db';
 import { AliasFieldRow, FieldRow, OptionRow } from '../../../db/models';
 
 export async function listRecords(collection_name: string) {
   try {
-    const fieldsQuery = db
-      .query(
-        `SELECT * FROM fields_meta WHERE collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name) AND is_hidden = 0`
+    const fieldResponse = bb
+      .raw(
+        `SELECT * FROM fields_meta WHERE collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name) AND is_hidden = 0`,
+        { $collection_name: collection_name }
       )
-      .as(FieldRow);
-
-    const fieldResponse = fieldsQuery.all({
-      $collection_name: collection_name,
-    });
+      .as(FieldRow)
+      .all();
 
     const selectFields = [];
     const joins = [];
     let joinCounter = 0;
 
     for (const field of fieldResponse) {
-      const optionsQuery = db
-        .query(
+      const optionsResponse = bb
+        .raw(
           `
         SELECT value, text
         FROM select_options
         WHERE 
           collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name) 
           AND field = $field_id
-      `
+      `,
+          {
+            $collection_name: collection_name,
+            $field_id: field.id,
+          }
         )
-        .as(OptionRow);
+        .as(OptionRow)
+        .all();
 
-      const optionsResponse = optionsQuery.all({
-        $collection_name: collection_name,
-        $field_id: field.id,
-      });
+      console.log(optionsResponse);
 
       if (field.relation_collection) {
         const joinAlias = `ref_${joinCounter++}`;
         const relatedCollection = field.relation_collection;
 
-        const aliasFieldQuery = db
-          .query(
+        const aliasFieldResponse = bb
+          .raw(
             `
             SELECT 
               name
@@ -55,13 +55,11 @@ export async function listRecords(collection_name: string) {
                 ELSE 1              
               END,
               name ASC;
-          `
+          `,
+            { $related_collection: relatedCollection }
           )
-          .as(AliasFieldRow);
-
-        const aliasFieldResponse = aliasFieldQuery.get({
-          $related_collection: relatedCollection,
-        });
+          .as(AliasFieldRow)
+          .get();
 
         if (aliasFieldResponse) {
           joins.push(
@@ -86,7 +84,7 @@ export async function listRecords(collection_name: string) {
     if (joins.length > 0) {
       query += ` ${joins.join(' ')}`;
     }
-    const records = db.query(query).all();
+    const records = bb.raw(query).all();
 
     return { records: records };
   } catch (e) {

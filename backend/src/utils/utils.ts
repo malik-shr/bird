@@ -1,4 +1,4 @@
-import { bb, db } from '../core/db';
+import { bb } from '../core/db';
 import { UserRow } from '../db/models';
 
 export function getUser(username: string) {

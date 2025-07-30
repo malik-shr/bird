@@ -1,5 +1,5 @@
 import { Static } from 'elysia';
-import { bb, db } from './db';
+import { bb } from './db';
 import Field from './Field';
 import { RuleData } from '../apis/handlers/collection/createCollection';
 import { LengthRow } from '../db/models';
@@ -91,14 +91,15 @@ export default class Collection {
       }
     }
 
-    const createStatement = `
+    // Create Table
+    bb.raw(
+      `
       CREATE TABLE IF NOT EXISTS ${this.name}(
           ${fieldsString}
           PRIMARY KEY(${primary_keys.join(', ')})
       )
-  `;
-
-    db.run(createStatement);
+  `
+    ).run();
   }
 
   insertMetaData() {

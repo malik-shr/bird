@@ -1,24 +1,24 @@
-import { db } from '../../../core/db';
+import { bb } from '../../../core/db';
 import Field from '../../../core/Field';
 import { FieldRow, OptionRow } from '../../../db/models';
 
 export async function viewCollection(collection_name: string) {
   try {
-    const fieldsQuery = db
-      .query(
-        'SELECT * FROM fields_meta WHERE collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name)'
+    const fieldResponse = bb
+      .raw(
+        'SELECT * FROM fields_meta WHERE collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name)',
+        {
+          $collection_name: collection_name,
+        }
       )
-      .as(FieldRow);
-
-    const fieldResponse = fieldsQuery.all({
-      $collection_name: collection_name,
-    });
+      .as(FieldRow)
+      .all();
 
     const fields: Field[] = [];
 
     for (const field of fieldResponse) {
-      const optionsQuery = db
-        .query(
+      const optionsResponse = bb
+        .raw(
           `
           SELECT value, text 
           FROM 
@@ -26,14 +26,15 @@ export async function viewCollection(collection_name: string) {
           WHERE 
             collection = (SELECT MAX(id) FROM collections_meta WHERE name = $collection_name) 
             AND field = $field_id
-          `
+          `,
+          {
+            $collection_name: collection_name,
+            $field_id: field.id,
+          }
         )
-        .as(OptionRow);
+        .as(OptionRow)
+        .all();
 
-      const optionsResponse = optionsQuery.all({
-        $collection_name: collection_name,
-        $field_id: field.id,
-      });
       fields.push(
         new Field({
           id: field.id,

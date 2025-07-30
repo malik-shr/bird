@@ -1,6 +1,6 @@
 import { FieldType, FieldTypes } from '../apis/schemas/types';
 import { LengthRow } from '../db/models';
-import { bb, db } from './db';
+import { bb } from './db';
 
 type Option = {
   value: number;
@@ -67,15 +67,16 @@ export default class Field {
 
   exists(collection_id: string) {
     try {
-      const query = db
-        .query(
-          `SELECT COUNT(*) AS length FROM fields_meta AS f WHERE f.name = $name AND f.collection = $collection`
+      const result = bb
+        .raw(
+          `SELECT COUNT(*) AS length FROM fields_meta AS f WHERE f.name = $name AND f.collection = $collection`,
+          {
+            name: this.name,
+            collection: collection_id,
+          }
         )
-        .as(LengthRow);
-      const result = query.get({
-        name: this.name,
-        collection: collection_id,
-      });
+        .as(LengthRow)
+        .get();
 
       if (result) {
         return result.length !== 0;
@@ -108,22 +109,15 @@ export default class Field {
 
         if (this.type === 'Select' && this.options) {
           for (const option of this.options) {
-            const optionsQuery = db.query(
-              `
-              INSERT INTO select_options
-              (id, collection, field, text, value)
-              VALUES
-              ($id, $collection, $field, $text, $value)
-              `
-            );
-
-            optionsQuery.run({
-              id: crypto.randomUUID(),
-              collection: collection_id,
-              field: this.id,
-              text: option.text,
-              value: option.value,
-            });
+            bb.insertInto('select_options')
+              .values({
+                id: crypto.randomUUID(),
+                collection: collection_id,
+                field: this.id,
+                text: option.text,
+                value: option.value,
+              })
+              .run();
           }
         }
       } catch (e) {
