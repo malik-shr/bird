@@ -1,0 +1,26 @@
+import { writable } from 'svelte/store';
+import Bird from './sdk';
+
+export const bird = new Bird('');
+
+export const user = writable<Bird.User | null>(null);
+export const collections = writable<Bird.Collection[]>([]);
+
+export async function fetchUser() {
+  try {
+    const request = await bird.auth.verify();
+
+    user.set(request);
+  } catch (e) {
+    user.set(null);
+  }
+}
+
+export async function fetchCollections() {
+  try {
+    const request = await bird.collections.list();
+    collections.set(request);
+  } catch (e) {
+    console.log(e);
+  }
+}
