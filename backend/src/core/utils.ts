@@ -1,15 +1,6 @@
-import { db } from '../db/db';
-import { FieldsTable } from '../db/db.types';
-
-export async function getUser(username: string) {
-  const user = await db
-    .selectFrom('users')
-    .selectAll()
-    .where('username', '=', username)
-    .executeTakeFirstOrThrow();
-
-  return user;
-}
+import { FieldsTable } from '../shared/db.types';
+import { DataTypeExpression } from 'kysely/dist/cjs/parser/data-type-parser';
+import { db } from './db/db';
 
 /** Get alls fields and validate in memory if fields of this collection exist, to prevent sql injection */
 export async function validateUserInput(
@@ -57,3 +48,15 @@ function validateField(
 
   return fieldExists.length > 0;
 }
+
+export const FieldTypes: { [key: string]: DataTypeExpression } = {
+  String: 'text',
+  Integer: 'integer',
+  Float: 'float4',
+  Boolean: 'boolean',
+  Date: 'date',
+  Select: 'text',
+  Relation: 'text',
+};
+
+export type FieldType = keyof typeof FieldTypes;

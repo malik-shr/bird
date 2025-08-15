@@ -1,5 +1,5 @@
-import { FieldType, FieldTypes } from '../core/apis/schemas/types';
-import { db } from '../db/db';
+import { FieldType, FieldTypes } from '../core/utils';
+import { db } from '@core/db/db';
 
 type Option = {
   value: number;
@@ -67,7 +67,7 @@ export default class Field {
   async exists(collection_id: string) {
     try {
       const result = await db
-        .selectFrom('fields_keta as f')
+        .selectFrom('fields_meta as f')
         .select(({ fn }) => fn.countAll().as('length'))
         .where('f.name', '=', this.name)
         .where('f.collection', '=', collection_id)

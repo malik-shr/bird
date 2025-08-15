@@ -1,4 +1,4 @@
-import { db } from '../../../../db/db';
+import { db } from '@core/db/db';
 
 export async function getRecord(collection_name: string, id: string) {
   const record = await db

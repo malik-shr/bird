@@ -3,13 +3,14 @@ import { listRecords } from './handlers/record/listRecords';
 import { RecordUpdateBody, updateRecord } from './handlers/record/updateRecord';
 import { getRecord } from './handlers/record/getRecord';
 import { deleteRecord } from './handlers/record/deleteRecord';
-import { db } from '../../db/db';
 import { ElysiaCookie } from 'elysia/dist/cookies';
 import { createRecord, RecordCreateBody } from './handlers/record/createRecord';
 import { isValidCollection, validateUserInput } from '../utils';
-import { authMiddleware } from './middleware/authMiddleware';
+
 import { sql } from 'kysely';
-import { UserTable } from '../../db/db.types';
+import { db } from '../db/db';
+import { authMiddleware } from '@plugins/auth';
+import { UserTable } from '@plugins/auth/db.types';
 
 interface AuthRuleRow {
   viewRule: number;
@@ -21,7 +22,7 @@ interface AuthRuleRow {
 export const recordApi = new Elysia({
   prefix: '/collections/:collection_name/records',
 })
-  .use(authMiddleware)
+  .use(authMiddleware(db))
   .derive(async ({ params: { collection_name }, set }) => {
     /** Validate collection_name otherways set request status forbidden*/
 

@@ -1,5 +1,4 @@
-import { sql } from 'kysely';
-import { db } from '../../../../db/db';
+import { db } from '@core/db/db';
 
 export async function listRecords(collection_name: string) {
   try {

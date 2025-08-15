@@ -1,5 +1,10 @@
 {
   "compilerOptions": {
+    "paths": {
+      "@core/*": ["./src/core/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@plugins/*": ["./src/plugins/*"]
+    },
     /* Visit https://aka.ms/tsconfig to read more about this file */
 
     /* Projects */

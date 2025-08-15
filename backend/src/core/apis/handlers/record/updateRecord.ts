@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { db } from '../../../../db/db';
+import { db } from '@core/db/db';
 
 export const RecordUpdateBody = t.Object({
   values: t.Record(t.String(), t.Any()),

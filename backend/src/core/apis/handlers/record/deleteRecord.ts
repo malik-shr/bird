@@ -1,4 +1,4 @@
-import { db } from '../../../../db/db';
+import { db } from '@core/db/db';
 
 export async function deleteRecord(collection_name: string, id: string) {
   try {

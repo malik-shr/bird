@@ -1,4 +1,4 @@
-import { db } from '../../../../db/db';
+import { db } from '@core/db/db';
 
 export async function listCollection() {
   try {

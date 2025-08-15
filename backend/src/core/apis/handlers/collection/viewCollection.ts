@@ -1,5 +1,5 @@
-import { db } from '../../../../db/db';
-import Field from '../../../../shared/Field';
+import { db } from '@core/db/db';
+import Field from '@shared/Field';
 
 export async function viewCollection(collection_name: string) {
   try {

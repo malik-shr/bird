@@ -1,6 +1,8 @@
 import { t } from 'elysia';
 import { JWTPayloadSpec } from '@elysiajs/jwt';
-import { getUser } from '../../../utils';
+import { getUser } from '../utils';
+import { Kysely } from 'kysely';
+import { DB } from '@shared/db.types';
 
 export const loginBody = t.Object({
   username: t.String(),
@@ -17,10 +19,11 @@ interface JWTAuth {
 export async function login(
   username: string,
   password: string,
-  jwt_auth: JWTAuth
+  jwt_auth: JWTAuth,
+  db: Kysely<DB>
 ) {
   try {
-    const foundUser = await getUser(username);
+    const foundUser = await getUser(username, db);
     if (!foundUser) throw new Error('User does not exist');
 
     const isPasswordCorrect = await verifyPassword(

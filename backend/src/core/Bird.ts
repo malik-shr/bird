@@ -2,25 +2,36 @@ import Elysia from 'elysia';
 import { cors } from '@elysiajs/cors';
 import { recordApi } from './apis/record';
 import { collectionApi } from './apis/collection';
-import { authApi } from './apis/auth';
-import { predefined_collections } from '../db/tables';
 import pc from 'picocolors';
 import { staticPlugin } from '@elysiajs/static';
+import { predefined_collections } from './db/tables';
+import { PluginContext } from '@shared/PluginContext';
+import { db } from './db/db';
+import Plugin from '@shared/Plugin';
+import AuthApi from '@plugins/auth/api';
 
 export class Bird extends Elysia {
   startTime: number;
+  ctx: PluginContext;
+  plugins: Plugin[] = [];
 
   constructor() {
     super();
 
     this.startTime = performance.now();
     this.use(cors());
-    // this.use(
-    //   staticPlugin({
-    //     assets: '../frontend/dist',
-    //     prefix: '/',
-    //   })
-    // );
+    this.use(
+      staticPlugin({
+        assets: '../frontend/build',
+        prefix: '/',
+      })
+    );
+
+    this.ctx = {
+      db: db,
+    };
+
+    this.plugins.push(new AuthApi(this.ctx));
 
     this.setupDatabase();
     this.registerRoutes();
@@ -34,12 +45,24 @@ export class Bird extends Elysia {
     for (const collection of predefined_collections) {
       collection.insertMetaData();
     }
+
+    for (const plugin of this.plugins) {
+      for (const collection of plugin.collections) {
+        collection.createTable();
+        collection.insertMetaData();
+      }
+    }
   }
 
   private registerRoutes() {
     const api = new Elysia({ prefix: '/api' });
 
-    api.use(recordApi).use(collectionApi).use(authApi);
+    api.use(recordApi).use(collectionApi);
+
+    for (const plugin of this.plugins) {
+      api.use(plugin.app);
+    }
+
     this.use(api);
   }
 
@@ -59,10 +82,10 @@ export class Bird extends Elysia {
         'http://localhost:3000/api'
       )}`
     );
-    // console.log(
-    //   ` ${pc.green('➜')}  ${pc.white(pc.bold('UI: '))}   ${pc.cyan(
-    //     'http://localhost:3000'
-    //   )}`
-    // );
+    console.log(
+      ` ${pc.green('➜')}  ${pc.white(pc.bold('UI: '))}   ${pc.cyan(
+        'http://localhost:3000'
+      )}`
+    );
   }
 }

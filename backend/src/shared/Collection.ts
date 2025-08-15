@@ -1,8 +1,8 @@
 import { Static } from 'elysia';
-import { db } from '../db/db';
-import { RuleData } from '../core/apis/handlers/collection/createCollection';
+import { db } from '@core/db/db';
+import { RuleData } from '@core/apis/handlers/collection/createCollection';
 import Field from './Field';
-import { FieldTypes } from '../core/apis/schemas/types';
+import { FieldTypes } from '@core/utils';
 
 type CollectionProps = {
   id?: string;

@@ -1,13 +1,4 @@
-interface UserTable {
-  id: string;
-  username: string;
-  email: string;
-  password: string;
-  disabled: boolean;
-  role: number;
-}
-
-interface CollectionsTable {
+export interface CollectionsTable {
   id: string;
   name: string;
   type: string;
@@ -16,7 +7,7 @@ interface CollectionsTable {
   is_system: boolean;
 }
 
-interface FieldsTable {
+export interface FieldsTable {
   id: string;
   name: string;
   type: string;
@@ -30,27 +21,29 @@ interface FieldsTable {
   relation_collection: string | null;
 }
 
-interface AuthRulesTable {
+export interface AuthRulesTable {
   id: string;
   collection: string;
   rule: string;
   permission: number;
 }
 
-interface SelectOptionsTable {
+export interface SelectOptionsTable {
   id: string;
   collection: string;
   field: string;
   text: string;
-  value: string;
+  value: number;
 }
 
-export interface DB {
-  users: UserTable;
-  collections_meta: CollectionsTable;
-  fields_meta: FieldsTable;
-  authRules: AuthRulesTable;
-  selectOptions: SelectOptionsTable;
-
-  [tableName: string]: any;
+declare global {
+  interface DB {
+    collections_meta: CollectionsTable;
+    fields_meta: FieldsTable;
+    auth_rules: AuthRulesTable;
+    select_options: SelectOptionsTable;
+    [key: string]: any;
+  }
 }
+
+export {};
