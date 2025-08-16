@@ -30,6 +30,6 @@ export async function createRecord(
 
     return { message: 'Successfully created Record' };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

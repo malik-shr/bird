@@ -5,6 +5,7 @@ import { authMiddleware } from './middleware/authMiddleware';
 import { login, loginBody } from './handlers/login';
 import { me } from './handlers/me';
 import { users } from './tables';
+import { register, registerBody } from './handlers/register';
 
 export default class AuthApi extends Plugin {
   constructor(ctx: PluginContext) {
@@ -21,6 +22,18 @@ export default class AuthApi extends Plugin {
         async ({ body: { username, password }, jwt_auth }) =>
           await login(username, password, jwt_auth, this.ctx.db),
         { body: loginBody }
+      )
+      .post(
+        '/register',
+        async ({ body: { username, email, password, confirmPassword } }) =>
+          await register(
+            username,
+            email,
+            password,
+            confirmPassword,
+            this.ctx.db
+          ),
+        { body: registerBody }
       )
       .guard(
         {

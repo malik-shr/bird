@@ -20,7 +20,7 @@ export default class CollectionService {
 
       return data.collections;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -46,7 +46,7 @@ export default class CollectionService {
 
       return data.collection;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -61,7 +61,7 @@ export default class CollectionService {
 
       return data.fields;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -76,7 +76,7 @@ export default class CollectionService {
 
       return data.message;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 }

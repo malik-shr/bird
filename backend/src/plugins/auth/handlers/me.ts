@@ -1,4 +1,4 @@
-import { UserTable } from '@shared/db.types';
+import { UserTable } from '../db.types';
 
 export async function me(user: UserTable | null) {
   if (!user) return new Error('Not Authorized');

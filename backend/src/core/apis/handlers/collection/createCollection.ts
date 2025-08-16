@@ -23,7 +23,6 @@ const FieldDefinition = t.Object({
   relationCollection: t.Optional(t.String()),
   isPrimaryKey: t.Boolean(),
   isRequired: t.Boolean(),
-  isSecure: t.Boolean(),
   isHidden: t.Boolean(),
   options: t.Optional(t.Array(options)),
 });
@@ -52,18 +51,7 @@ export async function createCollection(
     const collectionFields: Field[] = [];
 
     for (const field of fields) {
-      collectionFields.push(
-        new Field({
-          name: field.name,
-          type: field.type,
-          isPrimaryKey: field.isPrimaryKey,
-          isRequired: field.isRequired,
-          relationCollection: field.relationCollection,
-          options: field.options,
-          isSecure: field.isSecure,
-          isHidden: field.isHidden,
-        })
-      );
+      collectionFields.push(new Field({ ...field }));
     }
 
     const newCollection = new Collection({
@@ -72,19 +60,18 @@ export async function createCollection(
       fields: collectionFields,
       ruleData: ruleData,
     });
-    newCollection.createTable();
-    newCollection.insertMetaData();
+    await newCollection.createTable();
+    await newCollection.insertMetaData();
 
     return {
       collection: {
         id: newCollection.id,
         name: newCollection.name,
         type: newCollection.type,
-        requires_auth: newCollection.requiresAuth,
         system: newCollection.isSystem,
       },
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

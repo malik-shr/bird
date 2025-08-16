@@ -10,6 +10,25 @@ export class AuthService {
     this.baseUrl = `${this.bird.url}/api/auth`;
   }
 
+  async register(
+    username: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) {
+    try {
+      await this.bird.send(`${this.baseUrl}/register`, {
+        method: SendMethod.POST,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: { username, email, password, confirmPassword },
+      });
+    } catch (e) {
+      console.error('Register:', e);
+    }
+  }
+
   async login(username: string, password: string) {
     try {
       const data = await this.bird.send(`${this.baseUrl}/login`, {
@@ -21,8 +40,8 @@ export class AuthService {
       });
 
       localStorage.setItem('token', String(data.access_token));
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (e) {
+      console.error('Login error:', e);
     }
   }
 

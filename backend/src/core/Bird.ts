@@ -37,19 +37,19 @@ export class Bird extends Elysia {
     this.registerRoutes();
   }
 
-  private setupDatabase() {
+  private async setupDatabase() {
     for (const collection of predefined_collections) {
-      collection.createTable();
+      await collection.createTable();
     }
 
     for (const collection of predefined_collections) {
-      collection.insertMetaData();
+      await collection.insertMetaData();
     }
 
     for (const plugin of this.plugins) {
       for (const collection of plugin.collections) {
-        collection.createTable();
-        collection.insertMetaData();
+        await collection.createTable();
+        await collection.insertMetaData();
       }
     }
   }

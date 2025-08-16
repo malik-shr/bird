@@ -12,8 +12,6 @@ type FieldProps = {
   type: FieldType;
   relationCollection?: null | string;
   options?: null | Option[];
-  isSecure?: boolean;
-  isSystem?: boolean;
   isHidden?: boolean;
   isRequired?: boolean;
   isPrimaryKey?: boolean;
@@ -26,8 +24,6 @@ export default class Field {
   type: FieldType;
   relationCollection: null | string;
   options?: null | Option[];
-  isSecure: boolean;
-  isSystem: boolean;
   isHidden: boolean;
   isRequired: boolean;
   isPrimaryKey: boolean;
@@ -39,8 +35,6 @@ export default class Field {
     type,
     relationCollection = null,
     options = null,
-    isSecure = false,
-    isSystem = false,
     isHidden = false,
     isRequired = false,
     isPrimaryKey = false,
@@ -50,8 +44,6 @@ export default class Field {
     this.type = type;
     this.relationCollection = relationCollection;
     this.options = options;
-    this.isSecure = isSecure;
-    this.isSystem = isSystem;
     this.isHidden = isHidden;
     this.isRequired = isRequired;
     this.isPrimaryKey = isPrimaryKey;
@@ -79,12 +71,12 @@ export default class Field {
 
       return false;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
   async insertMetaData(collection_id: string) {
-    if (!this.exists(collection_id)) {
+    if (!(await this.exists(collection_id))) {
       try {
         await db
           .insertInto('fields_meta')
@@ -93,10 +85,8 @@ export default class Field {
             name: this.name,
             type: this.type as string,
             collection: collection_id,
-            is_secure: this.isSecure,
             is_required: this.isRequired,
             relation_collection: this.relationCollection,
-            is_system: this.isSystem,
             is_hidden: this.isHidden,
             is_primary_key: this.isPrimaryKey,
             is_unique: this.isUnique,
@@ -118,7 +108,7 @@ export default class Field {
           }
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
   }

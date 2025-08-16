@@ -3,7 +3,6 @@ export interface CollectionsTable {
   name: string;
   type: string;
   description: string;
-  require_auth: boolean;
   is_system: boolean;
 }
 
@@ -12,8 +11,6 @@ export interface FieldsTable {
   name: string;
   type: string;
   collection: string;
-  is_secure: boolean;
-  is_system: boolean;
   is_hidden: boolean;
   is_required: boolean;
   is_primary_key: boolean;

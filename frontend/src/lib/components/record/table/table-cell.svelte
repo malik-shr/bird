@@ -1,7 +1,5 @@
 <script lang="ts">
   let { field, value } = $props();
-
-  console.log(value);
 </script>
 
 {#if field.type === 'Boolean'}

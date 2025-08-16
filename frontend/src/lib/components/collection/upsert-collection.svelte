@@ -37,8 +37,6 @@
         isPrimaryKey: false,
         isHidden: false,
         isRequired: false,
-        isSecure: false,
-        isSystem: false,
         isUnique: false,
         options: [],
       },

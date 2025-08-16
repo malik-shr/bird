@@ -15,7 +15,6 @@ export const users = new Collection({
     new Field({
       name: 'password',
       type: 'String',
-      isSecure: true,
       isHidden: true,
       isRequired: true,
     }),

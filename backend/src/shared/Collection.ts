@@ -11,7 +11,6 @@ type CollectionProps = {
   description?: string;
   fields: Field[];
   isSystem?: boolean;
-  requiresAuth?: boolean;
   ruleData: Static<typeof RuleData>;
 };
 
@@ -22,14 +21,11 @@ export default class Collection {
   description: string;
   fields: Field[];
   isSystem: boolean;
-  requiresAuth: boolean;
   ruleData: Static<typeof RuleData>;
 
   idField = new Field({
     name: 'id',
     type: 'String',
-    isSecure: false,
-    isSystem: true,
     isHidden: false,
     isRequired: true,
     isPrimaryKey: true,
@@ -43,7 +39,6 @@ export default class Collection {
     description = '',
     fields,
     isSystem = false,
-    requiresAuth = false,
     ruleData,
   }: CollectionProps) {
     this.name = name;
@@ -53,7 +48,6 @@ export default class Collection {
     this.fields = [this.idField, ...fields];
 
     this.isSystem = isSystem;
-    this.requiresAuth = requiresAuth;
 
     this.ruleData = ruleData;
 
@@ -79,25 +73,29 @@ export default class Collection {
   }
 
   async createTable() {
-    let builder = db.schema.createTable(this.name).ifNotExists();
+    try {
+      let builder = db.schema.createTable(this.name).ifNotExists();
 
-    for (const field of this.fields) {
-      builder = builder.addColumn(
-        field.name,
-        FieldTypes[field.type],
-        (colBuilder) => {
-          if (field.isRequired) colBuilder.notNull();
-          if (field.isPrimaryKey) colBuilder.primaryKey();
-          return colBuilder;
-        }
-      );
+      for (const field of this.fields) {
+        builder = builder.addColumn(
+          field.name,
+          FieldTypes[field.type],
+          (colBuilder) => {
+            if (field.isRequired) colBuilder.notNull();
+            if (field.isPrimaryKey) colBuilder.primaryKey();
+            return colBuilder;
+          }
+        );
+      }
+
+      await builder.execute();
+    } catch (e) {
+      console.error(e);
     }
-
-    await builder.execute();
   }
 
   async insertMetaData() {
-    if (!this.exists()) {
+    if (!(await this.exists())) {
       try {
         await db
           .insertInto('collections_meta')
@@ -106,7 +104,6 @@ export default class Collection {
             name: this.name,
             type: this.type,
             description: this.description,
-            require_auth: this.requiresAuth,
             is_system: this.isSystem,
           })
           .execute();
@@ -123,10 +120,10 @@ export default class Collection {
         }
 
         for (const field of this.fields) {
-          field.insertMetaData(this.id);
+          await field.insertMetaData(this.id);
         }
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     }
   }

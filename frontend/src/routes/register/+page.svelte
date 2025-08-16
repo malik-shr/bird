@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import Button from '$lib/components/ui/button/button.svelte';
   import * as Form from '$lib/components/ui/form/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
@@ -11,8 +12,13 @@
     const formData = new FormData(form);
     const formObject = Object.fromEntries(formData.entries());
 
-    const user = { ...formObject, role: 0, disabled: false };
-    await bird.collection('users').create(user);
+    await bird.auth.register(
+      formObject['username'],
+      formObject['email'],
+      formObject['password'],
+      formObject['confirmPassword']
+    );
+    goto('/#/login');
   }
 </script>
 

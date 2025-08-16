@@ -22,7 +22,7 @@ export default class RecordService {
 
       return data.record;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -43,7 +43,7 @@ export default class RecordService {
 
       return data.records;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -61,7 +61,7 @@ export default class RecordService {
 
       return data.message;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -79,7 +79,7 @@ export default class RecordService {
 
       return data.message;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 
@@ -94,7 +94,7 @@ export default class RecordService {
 
       return data.message;
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   }
 }

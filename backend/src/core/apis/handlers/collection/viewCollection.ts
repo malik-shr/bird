@@ -34,8 +34,6 @@ export async function viewCollection(collection_name: string) {
           isHidden: field.is_hidden,
           isUnique: field.is_unique,
           isRequired: field.is_required,
-          isSecure: field.is_secure,
-          isSystem: field.is_system,
           options: optionsResponse,
         })
       );
@@ -43,6 +41,6 @@ export async function viewCollection(collection_name: string) {
 
     return { fields: fields };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

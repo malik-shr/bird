@@ -41,8 +41,6 @@ const fieldsMeta = new Collection({
       isRequired: true,
       relationCollection: 'collections_meta',
     }),
-    new Field({ name: 'is_secure', type: 'Boolean', isRequired: true }),
-    new Field({ name: 'is_system', type: 'Boolean', isRequired: true }),
     new Field({ name: 'is_hidden', type: 'Boolean', isRequired: true }),
     new Field({
       name: 'is_required',

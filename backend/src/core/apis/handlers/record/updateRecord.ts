@@ -19,6 +19,6 @@ export async function updateRecord(
 
     return { message: 'Succesfully updated Record' };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

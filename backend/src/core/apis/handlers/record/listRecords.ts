@@ -2,10 +2,65 @@ import { db } from '@core/db/db';
 
 export async function listRecords(collection_name: string) {
   try {
-    let records = await db.selectFrom(collection_name).selectAll().execute();
+    const selectFields: string[] = [];
+    let joinCounter = 0;
+
+    const collection_id = db
+      .selectFrom('collections_meta as c')
+      .select(({ fn }) => fn.max('id').as('max_id'))
+      .where('name', '=', collection_name);
+
+    let query = db.selectFrom(collection_name);
+
+    const fields = await db
+      .selectFrom('fields_meta')
+      .selectAll()
+      .where('is_hidden', '=', false)
+      .where('collection', '=', collection_id)
+      .execute();
+
+    for (const field of fields) {
+      const options = await db
+        .selectFrom('select_options')
+        .select('text')
+        .where('collection', '=', collection_id)
+        .where('field', '=', field.id)
+        .execute();
+
+      if (field.relation_collection !== null) {
+        query = query.leftJoin(
+          `${field.relation_collection} as ref_${joinCounter}`,
+          `${collection_name}.${field.name}`,
+          `ref_${joinCounter}.id`
+        );
+
+        selectFields.push(`ref_${joinCounter}.name as ${field.name}`);
+        ++joinCounter;
+      } else if (field.type === 'Select') {
+        query = query.leftJoin(`select_options as ref_${joinCounter}`, (join) =>
+          join
+            .on(`ref_${joinCounter}.collection`, '=', collection_id)
+            .on(`ref_${joinCounter}.field`, '=', field.id) // match field_id properly
+            .onRef(
+              `ref_${joinCounter}.value`,
+              '=',
+              `${collection_name}.${field.name}` // must be a valid column ref
+            )
+        );
+
+        selectFields.push(`ref_${joinCounter}.text as ${field.name}`);
+        ++joinCounter;
+      } else {
+        selectFields.push(`${collection_name}.${field.name}`);
+      }
+    }
+
+    query = query.select(selectFields);
+    // console.log(query.compile().sql);
+    const records = await query.execute();
 
     return { records: records };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

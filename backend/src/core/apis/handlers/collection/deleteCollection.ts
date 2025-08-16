@@ -34,6 +34,6 @@ export async function deleteCollection(collection_name: string) {
       data: collection_name,
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

@@ -88,8 +88,11 @@ export namespace Bird {
   export type Collection = {
     id: string;
     name: string;
+    type: string;
+    description: string;
     is_system: boolean;
   };
+
   export type User = {
     id: string;
     username: string;
@@ -106,8 +109,6 @@ export namespace Bird {
     isHidden: boolean;
     isUnique: boolean;
     isRequired: boolean;
-    isSecure: boolean;
-    isSystem: boolean;
 
     options?: {
       value: number;

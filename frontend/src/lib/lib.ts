@@ -21,6 +21,6 @@ export async function fetchCollections() {
     const request = await bird.collections.list();
     collections.set(request);
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }

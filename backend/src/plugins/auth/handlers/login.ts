@@ -2,7 +2,6 @@ import { t } from 'elysia';
 import { JWTPayloadSpec } from '@elysiajs/jwt';
 import { getUser } from '../utils';
 import { Kysely } from 'kysely';
-import { DB } from '@shared/db.types';
 
 export const loginBody = t.Object({
   username: t.String(),
@@ -37,7 +36,7 @@ export async function login(
 
     return { access_token: token };
   } catch (e) {
-    console.log(e);
+    console.error(e);
   }
 }
 
