@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
 export const RecordUpdateBody = t.Object({
   values: t.Record(t.String(), t.Any()),
@@ -8,7 +8,8 @@ export const RecordUpdateBody = t.Object({
 export async function updateRecord(
   values: Record<string, any>,
   collection_name: string,
-  id: string
+  id: string,
+  db: Kysely<DB>
 ) {
   try {
     await db

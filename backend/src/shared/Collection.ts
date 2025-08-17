@@ -1,27 +1,22 @@
 import { Static } from 'elysia';
-import { db } from '@core/db/db';
-import { RuleData } from '@core/apis/handlers/collection/createCollection';
-import Field from './Field';
-import { FieldTypes } from '@core/utils';
-
-type CollectionProps = {
-  id?: string;
-  name: string;
-  type: string;
-  description?: string;
-  fields: Field[];
-  isSystem?: boolean;
-  ruleData: Static<typeof RuleData>;
-};
+import Field, { FieldProps } from './Field';
+import { FieldTypes } from '../apis/record/utils';
+import { Kysely } from 'kysely';
+import { RuleData } from '../apis/collection/handlers/createCollection';
 
 export default class Collection {
-  id: string;
-  name: string;
-  type: string;
-  description: string;
-  fields: Field[];
-  isSystem: boolean;
-  ruleData: Static<typeof RuleData>;
+  id;
+  name;
+  type;
+  description = '';
+  isSystem = false;
+  fields;
+  ruleData = {
+    viewRule: 0,
+    createRule: 0,
+    updateRule: 0,
+    deleteRule: 0,
+  };
 
   idField = new Field({
     name: 'id',
@@ -32,33 +27,16 @@ export default class Collection {
     isUnique: true,
   });
 
-  constructor({
-    id = '',
-    name,
-    type,
-    description = '',
-    fields,
-    isSystem = false,
-    ruleData,
-  }: CollectionProps) {
+  constructor(name: string, type: string) {
     this.name = name;
     this.type = type;
-    this.description = description;
 
-    this.fields = [this.idField, ...fields];
+    this.fields = [this.idField];
 
-    this.isSystem = isSystem;
-
-    this.ruleData = ruleData;
-
-    this.id = id;
-
-    if (id === '') {
-      this.id = crypto.randomUUID();
-    }
+    this.id = crypto.randomUUID();
   }
 
-  async exists() {
+  async exists(db: Kysely<DB>) {
     const result = await db
       .selectFrom('collections_meta')
       .select(({ fn }) => fn.countAll().as('length'))
@@ -72,7 +50,7 @@ export default class Collection {
     return false;
   }
 
-  async createTable() {
+  async createTable(db: Kysely<DB>) {
     try {
       let builder = db.schema.createTable(this.name).ifNotExists();
 
@@ -87,15 +65,14 @@ export default class Collection {
           }
         );
       }
-
       await builder.execute();
     } catch (e) {
       console.error(e);
     }
   }
 
-  async insertMetaData() {
-    if (!(await this.exists())) {
+  async insertMetaData(db: Kysely<DB>) {
+    if (!(await this.exists(db))) {
       try {
         await db
           .insertInto('collections_meta')
@@ -120,11 +97,31 @@ export default class Collection {
         }
 
         for (const field of this.fields) {
-          await field.insertMetaData(this.id);
+          await field.insertMetaData(this.id, db);
         }
       } catch (e) {
         console.error(e);
       }
     }
+  }
+
+  addField(props: FieldProps) {
+    const field = new Field(props);
+    this.fields.push(field);
+    return this;
+  }
+
+  addDescription(description: string) {
+    this.description = description;
+  }
+
+  setSystem(isSystem: boolean) {
+    this.isSystem = isSystem;
+    return this;
+  }
+
+  setRuleData(ruleData: Static<typeof RuleData>) {
+    this.ruleData = ruleData;
+    return this;
   }
 }

@@ -1,6 +1,10 @@
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
-export async function deleteRecord(collection_name: string, id: string) {
+export async function deleteRecord(
+  collection_name: string,
+  id: string,
+  db: Kysely<DB>
+) {
   try {
     await db.deleteFrom(collection_name).where('id', '=', id).execute();
   } catch (e) {

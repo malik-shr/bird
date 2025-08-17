@@ -1,19 +1,20 @@
 import Elysia from 'elysia';
 import { cors } from '@elysiajs/cors';
-import { recordApi } from './apis/record';
-import { collectionApi } from './apis/collection';
 import pc from 'picocolors';
 import { staticPlugin } from '@elysiajs/static';
-import { predefined_collections } from './db/tables';
 import { PluginContext } from '@shared/PluginContext';
-import { db } from './db/db';
 import Plugin from '@shared/Plugin';
-import AuthApi from '@plugins/auth/api';
+import AuthApi from '../apis/auth/auth';
+import RecordApi from '../apis/record/record';
+import CollectionApi from '../apis/collection/collection';
+import { Kysely } from 'kysely';
+import { BunSqliteDialect } from 'kysely-bun-worker/normal';
 
 export class Bird extends Elysia {
   startTime: number;
   ctx: PluginContext;
   plugins: Plugin[] = [];
+  db: Kysely<DB>;
 
   constructor() {
     super();
@@ -27,37 +28,40 @@ export class Bird extends Elysia {
       })
     );
 
+    this.db = new Kysely<DB>({
+      dialect: new BunSqliteDialect({ url: 'data.db' }),
+    });
+
     this.ctx = {
-      db: db,
+      db: this.db,
     };
 
-    this.plugins.push(new AuthApi(this.ctx));
+    this.plugins.push(
+      new CollectionApi(this.ctx),
+      new RecordApi(this.ctx),
+      new AuthApi(this.ctx)
+    );
 
     this.setupDatabase();
     this.registerRoutes();
   }
 
   private async setupDatabase() {
-    for (const collection of predefined_collections) {
-      await collection.createTable();
-    }
-
-    for (const collection of predefined_collections) {
-      await collection.insertMetaData();
-    }
-
     for (const plugin of this.plugins) {
-      for (const collection of plugin.collections) {
-        await collection.createTable();
-        await collection.insertMetaData();
+      if (plugin.collections) {
+        for (const collection of plugin.collections) {
+          await collection.createTable(this.db);
+        }
+
+        for (const collection of plugin.collections) {
+          await collection.insertMetaData(this.db);
+        }
       }
     }
   }
 
   private registerRoutes() {
     const api = new Elysia({ prefix: '/api' });
-
-    api.use(recordApi).use(collectionApi);
 
     for (const plugin of this.plugins) {
       api.use(plugin.app);

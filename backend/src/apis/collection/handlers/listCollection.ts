@@ -1,6 +1,6 @@
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
-export async function listCollection() {
+export async function listCollection(db: Kysely<DB>) {
   try {
     const collections = await db
       .selectFrom('collections_meta')

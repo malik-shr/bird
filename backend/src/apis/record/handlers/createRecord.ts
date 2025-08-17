@@ -1,5 +1,5 @@
 import { t } from 'elysia';
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
 export const RecordCreateBody = t.Object({
   values: t.Record(t.String(), t.Any()),
@@ -7,7 +7,8 @@ export const RecordCreateBody = t.Object({
 
 export async function createRecord(
   values: Record<string, any>,
-  collection_name: string
+  collection_name: string,
+  db: Kysely<DB>
 ) {
   try {
     const collection = await db

@@ -1,7 +1,7 @@
-import { db } from '@core/db/db';
 import Field from '@shared/Field';
+import { Kysely } from 'kysely';
 
-export async function viewCollection(collection_name: string) {
+export async function viewCollection(collection_name: string, db: Kysely<DB>) {
   try {
     const collection_id = db
       .selectFrom('collections_meta')

@@ -1,14 +1,9 @@
-import Elysia from 'elysia';
 import { PluginContext } from './PluginContext';
 import Collection from './Collection';
+import Elysia from 'elysia';
 
-export default class Plugin {
+export default interface Plugin {
   ctx: PluginContext;
-  collections: Collection[] = [];
-  app;
-
-  constructor(ctx: PluginContext, prefix: string) {
-    this.app = new Elysia({ prefix });
-    this.ctx = ctx;
-  }
+  collections?: Collection[];
+  app: Elysia<any>; // Children must set this
 }

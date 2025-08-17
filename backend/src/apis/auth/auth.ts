@@ -6,13 +6,19 @@ import { login, loginBody } from './handlers/login';
 import { me } from './handlers/me';
 import { users } from './tables';
 import { register, registerBody } from './handlers/register';
-import { sse } from 'elysia';
+import Elysia, { sse } from 'elysia';
+import Collection from '@shared/Collection';
 
-export default class AuthApi extends Plugin {
+export default class AuthApi implements Plugin {
+  app;
+  ctx: PluginContext;
+  collections: Collection[];
+
   constructor(ctx: PluginContext) {
-    super(ctx, 'auth');
+    this.ctx = ctx;
 
     this.collections = [users];
+    this.app = new Elysia({ prefix: '/auth' });
 
     this.app
       .use(swagger())

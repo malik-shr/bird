@@ -1,6 +1,9 @@
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
-export async function deleteCollection(collection_name: string) {
+export async function deleteCollection(
+  collection_name: string,
+  db: Kysely<DB>
+) {
   try {
     //TODO make delete a transaction
 

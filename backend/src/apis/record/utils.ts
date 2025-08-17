@@ -1,15 +1,16 @@
-import { FieldsTable } from '../shared/db.types';
+import { Kysely } from 'kysely';
+import { FieldsTable } from '../../shared/db.types';
 import { DataTypeExpression } from 'kysely/dist/cjs/parser/data-type-parser';
-import { db } from './db/db';
 
 /** Get alls fields and validate in memory if fields of this collection exist, to prevent sql injection */
 export async function validateUserInput(
   fieldNames: string[],
-  collectionName: string
+  collectionName: string,
+  db: Kysely<DB>
 ) {
   const fields = await db.selectFrom('fields_meta').selectAll().execute();
 
-  const collection = await isValidCollection(collectionName);
+  const collection = await isValidCollection(collectionName, db);
 
   if (!collection) {
     return false;
@@ -26,7 +27,7 @@ export async function validateUserInput(
 /** Get all collections from collection_meta and check if it includes the user provided collection in memory
  * to prevent sql injection
  */
-export async function isValidCollection(name: string) {
+export async function isValidCollection(name: string, db: Kysely<DB>) {
   const collections = await db
     .selectFrom('collections_meta')
     .selectAll()

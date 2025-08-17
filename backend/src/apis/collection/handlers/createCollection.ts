@@ -1,6 +1,7 @@
 import { Static, t } from 'elysia';
-import Field from '../../../../shared/Field';
-import Collection from '../../../../shared/Collection';
+import Field from '@shared/Field';
+import Collection from '@shared/Collection';
+import { Kysely } from 'kysely';
 
 const fieldTypesSchema = t.Object({
   String: t.Literal('TEXT'),
@@ -45,7 +46,8 @@ export async function createCollection(
   table_name: string,
   fields: Static<typeof FieldDefinition>[],
   type: string,
-  ruleData: Static<typeof RuleData>
+  ruleData: Static<typeof RuleData>,
+  db: Kysely<DB>
 ) {
   try {
     const collectionFields: Field[] = [];
@@ -54,14 +56,16 @@ export async function createCollection(
       collectionFields.push(new Field({ ...field }));
     }
 
-    const newCollection = new Collection({
-      name: table_name,
-      type: type,
-      fields: collectionFields,
-      ruleData: ruleData,
-    });
-    await newCollection.createTable();
-    await newCollection.insertMetaData();
+    const newCollection = new Collection(table_name, type).setRuleData(
+      ruleData
+    );
+
+    for (const field of collectionFields) {
+      newCollection.addField(field);
+    }
+
+    await newCollection.createTable(db);
+    await newCollection.insertMetaData(db);
 
     return {
       collection: {

@@ -72,10 +72,6 @@ export class AuthService {
   async subscribe(onMessage: (event: any) => void) {
     const token = localStorage.getItem('token');
 
-    if (!token) {
-      throw new Error('No token found');
-    }
-
     await fetchEventSource(`${this.baseUrl}/realtime`, {
       headers: {
         Authorization: `Bearer ${token}`,

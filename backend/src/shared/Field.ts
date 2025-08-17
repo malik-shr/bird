@@ -1,12 +1,12 @@
-import { FieldType, FieldTypes } from '../core/utils';
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
+import { FieldType } from '../apis/record/utils';
 
 type Option = {
   value: number;
   text: string;
 };
 
-type FieldProps = {
+export type FieldProps = {
   id?: string;
   name: string;
   type: FieldType;
@@ -56,7 +56,7 @@ export default class Field {
     }
   }
 
-  async exists(collection_id: string) {
+  async exists(collection_id: string, db: Kysely<DB>) {
     try {
       const result = await db
         .selectFrom('fields_meta as f')
@@ -75,8 +75,8 @@ export default class Field {
     }
   }
 
-  async insertMetaData(collection_id: string) {
-    if (!(await this.exists(collection_id))) {
+  async insertMetaData(collection_id: string, db: Kysely<DB>) {
+    if (!(await this.exists(collection_id, db))) {
       try {
         await db
           .insertInto('fields_meta')
@@ -111,14 +111,5 @@ export default class Field {
         console.error(e);
       }
     }
-  }
-
-  sql() {
-    const notNull = this.isRequired ? ' NOT NULL' : '';
-    const unique = this.isUnique ? ' UNIQUE' : '';
-
-    const col = `"${this.name}" ${FieldTypes[this.type]}${notNull}${unique}`;
-
-    return col.trim();
   }
 }

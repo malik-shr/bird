@@ -1,6 +1,10 @@
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
-export async function getRecord(collection_name: string, id: string) {
+export async function getRecord(
+  collection_name: string,
+  id: string,
+  db: Kysely<DB>
+) {
   const record = await db
     .selectFrom(collection_name)
     .selectAll()

@@ -1,6 +1,6 @@
-import { db } from '@core/db/db';
+import { Kysely } from 'kysely';
 
-export async function listRecords(collection_name: string) {
+export async function listRecords(collection_name: string, db: Kysely<DB>) {
   try {
     const selectFields: string[] = [];
     let joinCounter = 0;
