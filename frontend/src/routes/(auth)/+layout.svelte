@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import AppSidebar from '$lib/components/sidebar/app-sidebar.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import { fetchCollections, fetchUser, user } from '$lib/lib';
+  import { fetchCollections, user } from '$lib/lib';
   import { onMount } from 'svelte';
 
   let { children } = $props();
@@ -11,7 +11,6 @@
 
   onMount(async () => {
     try {
-      await fetchUser();
       await fetchCollections();
       loading = false;
     } catch (e) {

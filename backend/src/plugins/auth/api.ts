@@ -6,6 +6,7 @@ import { login, loginBody } from './handlers/login';
 import { me } from './handlers/me';
 import { users } from './tables';
 import { register, registerBody } from './handlers/register';
+import { sse } from 'elysia';
 
 export default class AuthApi extends Plugin {
   constructor(ctx: PluginContext) {
@@ -43,6 +44,25 @@ export default class AuthApi extends Plugin {
         },
         (app) => app.get('/me', ({ user }) => me(user))
       )
+      .get('/realtime', async function* ({ user }) {
+        while (true) {
+          try {
+            const data = await me(user);
+
+            yield sse({
+              event: 'auth_update',
+              data: data,
+            });
+          } catch (err) {
+            yield sse({
+              event: 'auth-error',
+              data: { user: null },
+            });
+          }
+
+          await Bun.sleep(5000);
+        }
+      })
       .get('/private', ({ user }) => {
         return { private: true };
       });

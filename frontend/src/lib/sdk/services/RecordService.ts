@@ -1,3 +1,4 @@
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { Bird, SendMethod } from '../Bird';
 
 export default class RecordService {
@@ -96,5 +97,20 @@ export default class RecordService {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  async subscribe(onMessage: (event: MessageEvent) => void) {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      throw new Error('No token found');
+    }
+
+    await fetchEventSource(`${this.baseUrl}/realtime`, {
+      onmessage(msg) {
+        const parsed = JSON.parse(msg.data);
+        onMessage(parsed);
+      },
+    });
   }
 }

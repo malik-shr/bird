@@ -1,4 +1,4 @@
-import Elysia, { HTTPHeaders, StatusMap } from 'elysia';
+import Elysia, { HTTPHeaders, sse, StatusMap } from 'elysia';
 import { listRecords } from './handlers/record/listRecords';
 import { RecordUpdateBody, updateRecord } from './handlers/record/updateRecord';
 import { getRecord } from './handlers/record/getRecord';
@@ -63,6 +63,28 @@ export const recordApi = new Elysia({
       app.get('/', ({ params: { collection_name } }) =>
         listRecords(collection_name)
       )
+  )
+
+  .guard(
+    {
+      beforeHandle({ user, rules, set, params: { collection_name } }) {
+        if (!isValidCollection(collection_name)) {
+          return (set.status = 'Forbidden');
+        }
+
+        beforeRecord(user, rules, 'viewRule', set);
+      },
+    },
+    (app) =>
+      app.get('/realtime', async function* ({ params: { collection_name } }) {
+        while (true) {
+          const data = await listRecords(collection_name);
+
+          yield sse({ event: 'update_collection', data: data });
+
+          await Bun.sleep(5000);
+        }
+      })
   )
 
   .guard(

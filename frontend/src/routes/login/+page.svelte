@@ -3,11 +3,10 @@
   import Button from '$lib/components/ui/button/button.svelte';
   import { Input } from '$lib/components/ui/input/index.js';
   import Label from '$lib/components/ui/label/label.svelte';
-  import { bird, fetchUser, user } from '$lib/lib';
+  import { bird, user } from '$lib/lib';
   import { onMount } from 'svelte';
 
   onMount(async () => {
-    await fetchUser();
     if ($user !== null) {
       goto('/#/collections');
     }

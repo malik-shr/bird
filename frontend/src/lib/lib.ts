@@ -6,15 +6,9 @@ export const bird = new Bird('');
 export const user = writable<Bird.User | null>(null);
 export const collections = writable<Bird.Collection[]>([]);
 
-export async function fetchUser() {
-  try {
-    const request = await bird.auth.verify();
-
-    user.set(request);
-  } catch (e) {
-    user.set(null);
-  }
-}
+bird.auth.subscribe((e) => {
+  user.set(e.user);
+});
 
 export async function fetchCollections() {
   try {

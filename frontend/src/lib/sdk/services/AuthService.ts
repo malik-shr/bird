@@ -1,3 +1,4 @@
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { Bird } from '../Bird';
 import { SendMethod } from '../Bird';
 
@@ -66,6 +67,24 @@ export class AuthService {
       localStorage.removeItem('token');
       throw e;
     }
+  }
+
+  async subscribe(onMessage: (event: any) => void) {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      throw new Error('No token found');
+    }
+
+    await fetchEventSource(`${this.baseUrl}/realtime`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      onmessage(msg) {
+        const parsed = JSON.parse(msg.data);
+        onMessage(parsed);
+      },
+    });
   }
 
   async logout() {
