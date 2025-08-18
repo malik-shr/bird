@@ -4,6 +4,7 @@ export interface CollectionsTable {
   type: string;
   description: string;
   is_system: boolean;
+  relation_alias: string;
 }
 
 export interface FieldsTable {

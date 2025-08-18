@@ -8,6 +8,7 @@ import { users } from './tables';
 import { register, registerBody } from './handlers/register';
 import Elysia, { sse } from 'elysia';
 import Collection from '@shared/Collection';
+import { realtTimeHandler } from './handlers/realtimeHandler';
 
 export default class AuthApi implements Plugin {
   app;
@@ -50,25 +51,7 @@ export default class AuthApi implements Plugin {
         },
         (app) => app.get('/me', ({ user }) => me(user))
       )
-      .get('/realtime', async function* ({ user }) {
-        while (true) {
-          try {
-            const data = await me(user);
-
-            yield sse({
-              event: 'auth_update',
-              data: data,
-            });
-          } catch (err) {
-            yield sse({
-              event: 'auth-error',
-              data: { user: null },
-            });
-          }
-
-          await Bun.sleep(5000);
-        }
-      })
+      .get('/realtime', async ({ user }) => realtTimeHandler(user))
       .get('/private', ({ user }) => {
         return { private: true };
       });

@@ -19,22 +19,24 @@
   let tableColumns: ColumnDef<Bird.Record>[] = $state([]);
   let loading: boolean = $state(true);
 
-  let currentCollection = $derived(page.params.collection);
+  let collection_name: string = $state(page.params.collection!);
 
   $effect(() => {
-    if (currentCollection) {
+    if (page.params.collection) {
       loading = true;
-      load();
+      load(page.params.collection);
     }
   });
 
-  async function fetchRecords() {
-    records = await bird.collection(page.params.collection!).getList();
+  async function fetchRecords(collection_name: string) {
+    records = await bird.collection(collection_name).getList();
   }
 
-  async function load() {
-    fetchRecords();
-    columns = await bird.collections.columns(page.params.collection!);
+  async function load(collection: string) {
+    collection_name = page.params.collection!;
+
+    records = await bird.collection(collection).getList();
+    columns = await bird.collections.columns(collection);
 
     const dataColumns: ColumnDef<Bird.Record>[] = columns
       .filter((field) => !field.isHidden)
@@ -82,9 +84,8 @@
         header: ({ table }) => renderComponent(ToggleColumns, { table: table }),
 
         cell: ({ row }) => {
-          // You can pass whatever you need from `row.original` to the component
           return renderComponent(UpsertRecord, {
-            collection: page.params.collection!,
+            collection: collection_name,
             columns: columns,
             record_id: String(row.original.id),
             fetchRecords,
@@ -105,11 +106,7 @@
         <UpsertCollection selectedCollectionName={page.params.collection} />
       </div>
 
-      <CreateRecord
-        {fetchRecords}
-        {columns}
-        collection={page.params.collection!}
-      />
+      <CreateRecord {fetchRecords} {columns} collection={collection_name} />
     </div>
 
     <DataTable data={records} columns={tableColumns} />

@@ -15,4 +15,5 @@ export const users = new Collection('users', 'auth')
     isRequired: true,
   })
   .addField({ name: 'disabled', type: 'Boolean' })
-  .addField({ name: 'role', type: 'Integer', isRequired: true });
+  .addField({ name: 'role', type: 'Integer', isRequired: true })
+  .setRelationAlias('username');

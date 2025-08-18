@@ -4,7 +4,6 @@ export async function listRecords(collection_name: string, db: Kysely<DB>) {
   try {
     const selectFields: string[] = [];
     let joinCounter = 0;
-
     const collection_id = db
       .selectFrom('collections_meta as c')
       .select(({ fn }) => fn.max('id').as('max_id'))
@@ -20,13 +19,6 @@ export async function listRecords(collection_name: string, db: Kysely<DB>) {
       .execute();
 
     for (const field of fields) {
-      const options = await db
-        .selectFrom('select_options')
-        .select('text')
-        .where('collection', '=', collection_id)
-        .where('field', '=', field.id)
-        .execute();
-
       if (field.relation_collection !== null) {
         query = query.leftJoin(
           `${field.relation_collection} as ref_${joinCounter}`,
@@ -34,7 +26,15 @@ export async function listRecords(collection_name: string, db: Kysely<DB>) {
           `ref_${joinCounter}.id`
         );
 
-        selectFields.push(`ref_${joinCounter}.name as ${field.name}`);
+        const relationCollectionMeta = await db
+          .selectFrom('collections_meta')
+          .selectAll()
+          .where('name', '=', field.relation_collection)
+          .executeTakeFirstOrThrow();
+
+        selectFields.push(
+          `ref_${joinCounter}.${relationCollectionMeta.relation_alias} as ${field.name}`
+        );
         ++joinCounter;
       } else if (field.type === 'Select') {
         query = query.leftJoin(`select_options as ref_${joinCounter}`, (join) =>
@@ -56,7 +56,6 @@ export async function listRecords(collection_name: string, db: Kysely<DB>) {
     }
 
     query = query.select(selectFields);
-    // console.log(query.compile().sql);
     const records = await query.execute();
 
     return { records: records };

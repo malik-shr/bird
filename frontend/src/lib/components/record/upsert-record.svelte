@@ -24,7 +24,7 @@
     columns: Bird.Field[];
     collection: string;
     record_id?: string | null;
-    fetchRecords: () => Promise<void>;
+    fetchRecords: (collection_name: string) => Promise<void>;
   } = $props();
 
   let record: Bird.Record = $state({});
@@ -91,7 +91,7 @@
 
     open = false;
 
-    await fetchRecords();
+    await fetchRecords(collection);
   }
 
   function getOptionText(field: Bird.Field, option_value: number) {

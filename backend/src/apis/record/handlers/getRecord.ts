@@ -5,11 +5,15 @@ export async function getRecord(
   id: string,
   db: Kysely<DB>
 ) {
-  const record = await db
-    .selectFrom(collection_name)
-    .selectAll()
-    .where('id', '=', id)
-    .executeTakeFirstOrThrow();
+  try {
+    const record = await db
+      .selectFrom(collection_name)
+      .selectAll()
+      .where('id', '=', id)
+      .executeTakeFirstOrThrow();
 
-  return { record: record };
+    return { record: record };
+  } catch (e) {
+    console.error(e);
+  }
 }

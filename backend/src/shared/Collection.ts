@@ -10,6 +10,7 @@ export default class Collection {
   type;
   description = '';
   isSystem = false;
+  relationAlias = 'id';
   fields;
   ruleData = {
     viewRule: 0,
@@ -82,6 +83,7 @@ export default class Collection {
             type: this.type,
             description: this.description,
             is_system: this.isSystem,
+            relation_alias: this.relationAlias,
           })
           .execute();
 
@@ -122,6 +124,11 @@ export default class Collection {
 
   setRuleData(ruleData: Static<typeof RuleData>) {
     this.ruleData = ruleData;
+    return this;
+  }
+
+  setRelationAlias(relationAlias: string) {
+    this.relationAlias = relationAlias;
     return this;
   }
 }

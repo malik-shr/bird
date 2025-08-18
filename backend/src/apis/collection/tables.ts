@@ -5,7 +5,9 @@ export const collectionsMeta = new Collection('collections_meta', 'system')
   .addField({ name: 'type', type: 'String', isRequired: true })
   .addField({ name: 'description', type: 'String' })
   .addField({ name: 'is_system', type: 'Boolean', isRequired: true })
-  .setSystem(true);
+  .addField({ name: 'relation_alias', type: 'String', isRequired: true })
+  .setSystem(true)
+  .setRelationAlias('name');
 
 export const fieldsMeta = new Collection('fields_meta', 'system')
   .addField({
@@ -40,7 +42,8 @@ export const fieldsMeta = new Collection('fields_meta', 'system')
     name: 'relation_collection',
     type: 'String',
   })
-  .setSystem(true);
+  .setSystem(true)
+  .setRelationAlias('name');
 
 export const authRules = new Collection('auth_rules', 'system')
   .addField({
@@ -51,7 +54,8 @@ export const authRules = new Collection('auth_rules', 'system')
   })
   .addField({ name: 'rule', type: 'String', isRequired: true })
   .addField({ name: 'permission', type: 'Integer', isRequired: true })
-  .setSystem(true);
+  .setSystem(true)
+  .setRelationAlias('rule');
 
 export const select_options = new Collection('select_options', 'system')
   .addField({
@@ -68,4 +72,5 @@ export const select_options = new Collection('select_options', 'system')
   })
   .addField({ name: 'text', type: 'String', isRequired: true })
   .addField({ name: 'value', type: 'Integer', isRequired: true })
-  .setSystem(true);
+  .setSystem(true)
+  .setRelationAlias('text');

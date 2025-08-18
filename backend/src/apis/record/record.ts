@@ -1,13 +1,11 @@
-import Elysia, { HTTPHeaders, StatusMap } from 'elysia';
+import Elysia from 'elysia';
 import { listRecords } from './handlers/listRecords';
 import { RecordUpdateBody, updateRecord } from './handlers/updateRecord';
 import { getRecord } from './handlers/getRecord';
 import { deleteRecord } from './handlers/deleteRecord';
-import { ElysiaCookie } from 'elysia/dist/cookies';
 import { createRecord, RecordCreateBody } from './handlers/createRecord';
 
 import { sql } from 'kysely';
-import { UserTable } from '../auth/db.types';
 import { authMiddleware } from '../auth/middleware/authMiddleware';
 import { isValidCollection, validateUserInput } from './utils';
 import { realtimeHandler } from './handlers/realtimeHandler';
@@ -33,6 +31,9 @@ export default class RecordApi implements Plugin {
       .use(authMiddleware(this.ctx.db))
       .derive(async ({ params: { collection_name }, set }) => {
         /** Validate collection_name otherways set request status forbidden*/
+        if (!isValidCollection(collection_name, this.ctx.db)) {
+          return { rules: null };
+        }
 
         const rules = await this.ctx.db
           .selectFrom('auth_rules as rules')
@@ -59,58 +60,41 @@ export default class RecordApi implements Plugin {
 
       .guard(
         {
-          beforeHandle: ({ user, rules, set, params: { collection_name } }) => {
-            if (!isValidCollection(collection_name, this.ctx.db)) {
-              return (set.status = 'Forbidden');
-            }
-
-            beforeRecord(user, rules, 'viewRule', set);
+          beforeHandle: (ctx) => {
+            this.beforeRecord(ctx, 'viewRule');
           },
         },
         (app) =>
-          app.get('/', ({ params: { collection_name } }) =>
-            listRecords(collection_name, this.ctx.db)
+          app.get('/', (ctx) =>
+            listRecords(ctx.params.collection_name, this.ctx.db)
           )
       )
 
       .guard(
         {
-          beforeHandle: ({ user, rules, set, params: { collection_name } }) => {
-            if (!isValidCollection(collection_name, this.ctx.db)) {
-              return (set.status = 'Forbidden');
-            }
-
-            beforeRecord(user, rules, 'viewRule', set);
+          beforeHandle: (ctx) => {
+            this.beforeRecord(ctx, 'viewRule');
           },
         },
         (app) =>
-          app.get('/realtime', async ({ params: { collection_name } }) =>
-            realtimeHandler(collection_name, this.ctx.db)
+          app.get('/realtime', async (ctx) =>
+            realtimeHandler(ctx.params.collection_name, this.ctx.db)
           )
       )
 
       .guard(
         {
-          beforeHandle: ({
-            user,
-            rules,
-            set,
-            body: { values },
-            params: { collection_name },
-          }: any) => {
-            if (!isValidCollection(collection_name, this.ctx.db)) {
-              return (set.status = 'Forbidden');
-            }
+          beforeHandle: (ctx: any) => {
             if (
               !validateUserInput(
-                Object.keys(values),
-                collection_name,
+                Object.keys(ctx.body.values),
+                ctx.params.collection_name,
                 this.ctx.db
               )
             ) {
-              return (set.status = 'Forbidden');
+              return (ctx.set.status = 'Forbidden');
             }
-            beforeRecord(user, rules, 'createRule', set);
+            this.beforeRecord(ctx, 'createRule');
           },
         },
         (app) =>
@@ -126,12 +110,7 @@ export default class RecordApi implements Plugin {
 
       .guard(
         {
-          beforeHandle: ({ user, rules, set, params: { collection_name } }) => {
-            if (!isValidCollection(collection_name, this.ctx.db)) {
-              return (set.status = 'Forbidden');
-            }
-            beforeRecord(user, rules, 'viewRule', set);
-          },
+          beforeHandle: (ctx) => this.beforeRecord(ctx, 'viewRule'),
         },
         (app) =>
           app.get('/:id', ({ params: { collection_name, id } }) =>
@@ -141,55 +120,40 @@ export default class RecordApi implements Plugin {
 
       .guard(
         {
-          beforeHandle: ({ user, rules, set, params: { collection_name } }) => {
-            if (!isValidCollection(collection_name, this.ctx.db)) {
-              return (set.status = 'Forbidden');
-            }
-            beforeRecord(user, rules, 'updateRule', set);
-          },
+          beforeHandle: (ctx) => this.beforeRecord(ctx, 'updateRule'),
         },
         (app) =>
           app.patch(
             '/:id',
-            ({ body: { values }, params: { collection_name, id } }) =>
-              updateRecord(values, collection_name, id, this.ctx.db),
+            (ctx) =>
+              updateRecord(
+                ctx.body.values,
+                ctx.params.collection_name,
+                ctx.params.id,
+                this.ctx.db
+              ),
             { body: RecordUpdateBody }
           )
       )
 
       .guard(
         {
-          beforeHandle: ({ user, rules, set, params: { collection_name } }) => {
-            if (!isValidCollection(collection_name, this.ctx.db)) {
-              return (set.status = 'Forbidden');
-            }
-            beforeRecord(user, rules, 'deleteRule', set);
-          },
+          beforeHandle: (ctx) => this.beforeRecord(ctx, 'deleteRule'),
         },
         (app) =>
-          app.delete('/:id', ({ params: { collection_name, id } }) =>
-            deleteRecord(collection_name, id, this.ctx.db)
+          app.delete('/:id', (ctx) =>
+            deleteRecord(ctx.params.collection_name, ctx.params.id, this.ctx.db)
           )
       );
   }
-}
 
-function beforeRecord(
-  user: UserTable | null,
-  authRules: AuthRuleRow | null,
-  key: keyof AuthRuleRow,
-  set: {
-    headers: HTTPHeaders;
-    status?: number | keyof StatusMap;
-    redirect?: string;
-    cookie?: Record<string, ElysiaCookie>;
-  }
-) {
-  const userRole = user ? user.role : 0;
+  beforeRecord(ctx: any, key: keyof AuthRuleRow) {
+    const userRole = ctx.user ? ctx.user.role : 0;
 
-  if (authRules) {
-    if (authRules[key] > userRole) {
-      return (set.status = 'Unauthorized');
+    if (ctx.authRules) {
+      if (ctx.authRules[key] > userRole) {
+        return (ctx.set.status = 'Unauthorized');
+      }
     }
   }
 }
