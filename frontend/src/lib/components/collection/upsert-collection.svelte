@@ -48,6 +48,8 @@
     fetchCollections();
     goto(`/#/collections/${collection_name}`);
     open = false;
+
+    console.log(fields);
   }
 
   async function load() {

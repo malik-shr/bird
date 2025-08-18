@@ -48,16 +48,11 @@ export default class RecordService {
     }
   }
 
-  async create(values = {}) {
+  async create(values = new FormData()) {
     try {
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: {
-          values: values,
-        },
+        body: values,
       });
 
       return data.message;
@@ -66,16 +61,11 @@ export default class RecordService {
     }
   }
 
-  async update(id: string, values = {}) {
+  async update(id: string, values = new FormData()) {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${id}`, {
         method: SendMethod.PATCH,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: {
-          values: values,
-        },
+        body: values,
       });
 
       return data.message;
@@ -88,9 +78,6 @@ export default class RecordService {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${id}`, {
         method: SendMethod.DELETE,
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
       return data.message;

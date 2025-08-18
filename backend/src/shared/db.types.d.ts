@@ -34,12 +34,22 @@ export interface SelectOptionsTable {
   value: number;
 }
 
+export interface UserTable {
+  id: string;
+  username: string;
+  email: string;
+  password: string;
+  disabled: boolean;
+  role: number;
+}
+
 declare global {
   interface DB {
     collections_meta: CollectionsTable;
     fields_meta: FieldsTable;
     auth_rules: AuthRulesTable;
     select_options: SelectOptionsTable;
+    users: UserTable;
     [key: string]: any;
   }
 }

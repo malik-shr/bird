@@ -3,8 +3,8 @@ import { Bird } from '../Bird';
 import { SendMethod } from '../Bird';
 
 export class AuthService {
-  bird: Bird;
-  baseUrl: string;
+  private bird: Bird;
+  private baseUrl: string;
 
   constructor(bird: Bird) {
     this.bird = bird;

@@ -1,6 +1,6 @@
 import { sse } from 'elysia';
-import { UserTable } from '../db.types';
 import { me } from './me';
+import { UserTable } from '@shared/db.types';
 
 export async function* realtTimeHandler(user: UserTable | null) {
   while (true) {

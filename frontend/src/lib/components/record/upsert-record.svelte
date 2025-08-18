@@ -50,7 +50,7 @@
           return Object.assign(a, { [column.name]: 'Autogeneration' });
         }
 
-        if (column.type === 'String') {
+        if (column.type === 'String' || column.type === 'File') {
           return Object.assign(a, { [column.name]: '' });
         } else if (column.type === 'Boolean') {
           return Object.assign(a, { [column.name]: false });
@@ -73,6 +73,8 @@
       return 'number';
     } else if (column.type === 'Date') {
       return 'date';
+    } else if (column.type === 'File') {
+      return 'file';
     }
 
     return 'text';
@@ -83,15 +85,29 @@
     let { id, ...rest } = formData;
     formData = rest;
 
+    const fd = new FormData();
+    for (const key in formData) {
+      const val = formData[key];
+      if (val instanceof File) {
+        fd.append(key, val); // keep as file
+      } else if (val != null) {
+        fd.append(key, String(val)); // convert everything else to string
+      }
+    }
+
     if (record.id) {
-      await bird.collection(collection).update(record.id, formData);
+      await bird.collection(collection).update(record.id, fd);
     } else {
-      await bird.collection(collection).create(formData);
+      await bird.collection(collection).create(fd);
     }
 
     open = false;
 
     await fetchRecords(collection);
+  }
+
+  function handleFileChange(e: any, field: string) {
+    formData[field] = e.target.files[0];
   }
 
   function getOptionText(field: Bird.Field, option_value: number) {
@@ -140,6 +156,15 @@
                 class="col-span-3"
                 type={getInputType(column)}
                 disabled={column.name === 'id'}
+              />
+            {:else if column.type === 'File'}
+              <Label for={column.name} class="text-right">{column.name}</Label>
+              <Input
+                id={column.name}
+                name={column.name}
+                class="col-span-3"
+                type="file"
+                onchange={(e) => handleFileChange(e, column.name)}
               />
             {:else if column.type === 'Boolean'}
               <Label for={column.name}>{column.name}</Label>

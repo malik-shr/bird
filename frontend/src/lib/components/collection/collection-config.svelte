@@ -29,6 +29,17 @@
     fields[i].relationCollection = relation;
     fields = [...fields];
   }
+
+  const types = [
+    'String',
+    'Integer',
+    'Float',
+    'Boolean',
+    'Date',
+    'Select',
+    'Relation',
+    'File',
+  ];
 </script>
 
 <Card.Root class="h-[45em]">
@@ -90,27 +101,11 @@
         </DropdownMenu.Trigger>
         <DropdownMenu.Content class="w-56" align="start">
           <DropdownMenu.Group>
-            <DropdownMenu.Item onclick={() => addField('String')}
-              >String</DropdownMenu.Item
-            >
-            <DropdownMenu.Item onclick={() => addField('Integer')}
-              >Integer</DropdownMenu.Item
-            >
-            <DropdownMenu.Item onclick={() => addField('Float')}
-              >Float</DropdownMenu.Item
-            >
-            <DropdownMenu.Item onclick={() => addField('Boolean')}
-              >Boolean</DropdownMenu.Item
-            >
-            <DropdownMenu.Item onclick={() => addField('Date')}
-              >Date</DropdownMenu.Item
-            >
-            <DropdownMenu.Item onclick={() => addField('Select')}
-              >Select</DropdownMenu.Item
-            >
-            <DropdownMenu.Item onclick={() => addField('Relation')}
-              >Relation</DropdownMenu.Item
-            >
+            {#each types as type}
+              <DropdownMenu.Item onclick={() => addField(type)}
+                >{type}</DropdownMenu.Item
+              >
+            {/each}
           </DropdownMenu.Group>
         </DropdownMenu.Content>
       </DropdownMenu.Root>

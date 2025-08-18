@@ -11,6 +11,7 @@ const fieldTypesSchema = t.Object({
   Date: t.Literal('DATE'),
   Select: t.Literal('TEXT'),
   Relation: t.Literal('TEXT'),
+  File: t.Literal('TEXT'),
 });
 
 const options = t.Object({
@@ -50,17 +51,14 @@ export async function createCollection(
   db: Kysely<DB>
 ) {
   try {
-    const collectionFields: Field[] = [];
-
-    for (const field of fields) {
-      collectionFields.push(new Field({ ...field }));
-    }
-
     const newCollection = new Collection(table_name, type).setRuleData(
       ruleData
     );
 
-    for (const field of collectionFields) {
+    console.log('/n/n');
+    console.log(fields);
+
+    for (const field of fields) {
       newCollection.addField(field);
     }
 

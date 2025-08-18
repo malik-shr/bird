@@ -58,6 +58,7 @@ export const FieldTypes: { [key: string]: DataTypeExpression } = {
   Date: 'date',
   Select: 'text',
   Relation: 'text',
+  File: 'text',
 };
 
 export type FieldType = keyof typeof FieldTypes;

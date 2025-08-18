@@ -85,23 +85,14 @@ export default class RecordApi implements Plugin {
       .guard(
         {
           beforeHandle: (ctx: any) => {
-            if (
-              !validateUserInput(
-                Object.keys(ctx.body.values),
-                ctx.params.collection_name,
-                this.ctx.db
-              )
-            ) {
-              return (ctx.set.status = 'Forbidden');
-            }
             this.beforeRecord(ctx, 'createRule');
           },
         },
         (app) =>
           app.post(
             '/',
-            async ({ body: { values }, params: { collection_name } }) =>
-              await createRecord(values, collection_name, this.ctx.db),
+            async ({ body, params: { collection_name } }) =>
+              await createRecord(body, collection_name, this.ctx.db),
             {
               body: RecordCreateBody,
             }
@@ -127,7 +118,7 @@ export default class RecordApi implements Plugin {
             '/:id',
             (ctx) =>
               updateRecord(
-                ctx.body.values,
+                ctx.body,
                 ctx.params.collection_name,
                 ctx.params.id,
                 this.ctx.db

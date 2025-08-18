@@ -9,6 +9,7 @@ import RecordApi from '../apis/record/record';
 import CollectionApi from '../apis/collection/collection';
 import { Kysely } from 'kysely';
 import { BunSqliteDialect } from 'kysely-bun-worker/normal';
+import FileApi from '../apis/file/file';
 
 export class Bird extends Elysia {
   startTime: number;
@@ -29,7 +30,7 @@ export class Bird extends Elysia {
     );
 
     this.db = new Kysely<DB>({
-      dialect: new BunSqliteDialect({ url: 'data.db' }),
+      dialect: new BunSqliteDialect({ url: 'bird_data/data.db' }),
     });
 
     this.ctx = {
@@ -39,7 +40,8 @@ export class Bird extends Elysia {
     this.plugins.push(
       new CollectionApi(this.ctx),
       new RecordApi(this.ctx),
-      new AuthApi(this.ctx)
+      new AuthApi(this.ctx),
+      new FileApi(this.ctx)
     );
 
     this.setupDatabase();

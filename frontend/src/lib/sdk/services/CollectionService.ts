@@ -1,8 +1,8 @@
 import { Bird, SendMethod } from '../Bird';
 
 export default class CollectionService {
-  bird: Bird;
-  baseUrl: string;
+  private bird: Bird;
+  private baseUrl: string;
 
   constructor(bird: Bird) {
     this.bird = bird;

@@ -56,6 +56,9 @@ export default class Collection {
       let builder = db.schema.createTable(this.name).ifNotExists();
 
       for (const field of this.fields) {
+        if (field.type === 'File') {
+          console.log(FieldTypes[field.type]);
+        }
         builder = builder.addColumn(
           field.name,
           FieldTypes[field.type],

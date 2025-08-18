@@ -12,6 +12,7 @@ import ListCheck from '@lucide/svelte/icons/list-check';
 import Key from '@lucide/svelte/icons/key';
 import Lock from '@lucide/svelte/icons/lock';
 import Mail from '@lucide/svelte/icons/mail';
+import File from '@lucide/svelte/icons/file';
 import type Bird from './sdk';
 
 export function cn(...inputs: ClassValue[]) {
@@ -47,6 +48,7 @@ export const IconMap = {
   Date: Calendar,
   Relation: MoveHorizontal,
   Select: ListCheck,
+  File: File,
 };
 
 export function getIcon(field: Bird.Field) {

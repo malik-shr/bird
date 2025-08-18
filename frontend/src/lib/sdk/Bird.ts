@@ -1,5 +1,6 @@
 import { AuthService } from './services/AuthService';
 import CollectionService from './services/CollectionService';
+import FileService from './services/FileService';
 import RecordService from './services/RecordService';
 
 export const SendMethod = {
@@ -19,6 +20,7 @@ export class Bird {
   url: string;
   collections: CollectionService;
   auth: AuthService;
+  file: FileService;
 
   private recordServices: { [key: string]: RecordService } = {};
 
@@ -26,6 +28,7 @@ export class Bird {
     this.url = url;
     this.collections = new CollectionService(this);
     this.auth = new AuthService(this);
+    this.file = new FileService(this);
   }
 
   collection(collectionName: string) {

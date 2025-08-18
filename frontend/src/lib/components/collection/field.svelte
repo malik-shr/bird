@@ -31,7 +31,7 @@
     <TypeIcon size={15} /></Label
   >
 
-  {#if field.type === 'String' || field.type === 'Integer' || field.type === 'Float' || field.type === 'Date' || field.type === 'Boolean'}
+  {#if field.type === 'String' || field.type === 'Integer' || field.type === 'Float' || field.type === 'Date' || field.type === 'Boolean' || field.type === 'File'}
     <div class="flex items-center gap-2 w-full">
       <Input
         type="text"
