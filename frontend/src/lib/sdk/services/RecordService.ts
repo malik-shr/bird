@@ -1,5 +1,6 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { Bird, SendMethod } from '../Bird';
+import { Send } from '@lucide/svelte';
 
 export default class RecordService {
   private bird: Bird;

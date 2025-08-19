@@ -1,6 +1,7 @@
 import Plugin from '@shared/Plugin';
 import { PluginContext } from '@shared/PluginContext';
 import Elysia from 'elysia';
+import { download } from './handlers/download';
 
 export default class FileApi implements Plugin {
   ctx: PluginContext;
@@ -11,13 +12,8 @@ export default class FileApi implements Plugin {
 
     this.app.get(
       '/:collection_name/:record_id/:file_name',
-      async ({ params: { collection_name, record_id, file_name } }) => {
-        const path = `bird_data/storage/${collection_name}/${record_id}/${file_name}`;
-
-        const file = Bun.file(path);
-
-        return new Response(file);
-      }
+      async ({ params: { collection_name, record_id, file_name } }) =>
+        download(collection_name, record_id, file_name)
     );
   }
 }

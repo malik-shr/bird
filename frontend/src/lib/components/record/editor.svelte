@@ -9,7 +9,7 @@
   let { value = $bindable() } = $props();
 
   onMount(() => {
-    editor = newEditor();
+    editor = newEditor(value);
 
     editor.codemirror.on('change', () => {
       value = editor.value();

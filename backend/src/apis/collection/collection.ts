@@ -15,6 +15,7 @@ import {
   select_options,
 } from './tables';
 import Collection from '@shared/Collection';
+import { exportCollection } from './handlers/exportCollection';
 
 export default class CollectionApi implements Plugin {
   app;
@@ -45,12 +46,18 @@ export default class CollectionApi implements Plugin {
         }
       )
 
-      .get('/:collection_name', ({ params: { collection_name } }) =>
+      .get('/:collection_name', async ({ params: { collection_name } }) =>
         viewCollection(collection_name, this.ctx.db)
       )
 
-      .delete('/:collection_name', ({ params: { collection_name } }) =>
+      .delete('/:collection_name', async ({ params: { collection_name } }) =>
         deleteCollection(collection_name, this.ctx.db)
+      )
+
+      .get(
+        '/:collection_name/export',
+        async ({ params: { collection_name } }) =>
+          exportCollection(collection_name, this.ctx.db)
       );
   }
 }

@@ -13,6 +13,9 @@
   import ToggleColumns from '$lib/components/record/table/toggle-columns.svelte';
   import type Bird from '$lib/sdk';
   import TableCell from '$lib/components/record/table/table-cell.svelte';
+  import Button, {
+    buttonVariants,
+  } from '$lib/components/ui/button/button.svelte';
 
   let records: Bird.Record[] = $state([]);
   let columns: Bird.Field[] = $state([]);
@@ -96,6 +99,10 @@
 
     loading = false;
   }
+
+  async function exportCollection() {
+    await bird.collections.export(collection_name);
+  }
 </script>
 
 {#if !loading}
@@ -106,7 +113,10 @@
         <UpsertCollection selectedCollectionName={page.params.collection} />
       </div>
 
-      <CreateRecord {fetchRecords} {columns} collection={collection_name} />
+      <div class="flex gap-5 items-center">
+        <Button variant="outline" onclick={exportCollection}>Export</Button>
+        <CreateRecord {fetchRecords} {columns} collection={collection_name} />
+      </div>
     </div>
 
     <DataTable data={records} columns={tableColumns} />

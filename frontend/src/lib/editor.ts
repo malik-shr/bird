@@ -1,8 +1,9 @@
 import EasyMDE from 'easymde';
 
-export function newEditor() {
+export function newEditor(initialValue: string) {
   return new EasyMDE({
     element: document.getElementById('markdown-editor')!,
+    initialValue: initialValue,
     toolbar: [
       'bold',
       'italic',
@@ -12,6 +13,7 @@ export function newEditor() {
       'code',
       '|',
       'table',
+      'preview',
       {
         name: 'others',
         className: 'fa fa-blind',

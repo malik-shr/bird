@@ -1,33 +1,33 @@
 <script lang="ts">
   import * as Sheet from '$lib/components/ui/sheet/index.js';
 
-  import { Input } from '$lib/components/ui/input/index.js';
-  import { Label } from '$lib/components/ui/label/index.js';
-
   import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-  import * as Dialog from '$lib/components/ui/dialog/index.js';
-  import { bird } from '$lib/lib';
 
-  import * as Select from '$lib/components/ui/select/index.js';
-  import { Switch } from '$lib/components/ui/switch/index.js';
+  import { bird } from '$lib/lib';
   import { page } from '$app/state';
   import Pen from '@lucide/svelte/icons/pen';
   import RelationField from './relation-field.svelte';
   import type Bird from '$lib/sdk';
-  import Editor from './editor.svelte';
-  import { assignRecordFormData, getInputType, getOptionText } from './utils';
+  import { assignRecordFormData } from './utils';
+  import BaseInput from './inputs/base-input.svelte';
+  import FileInput from './inputs/file-input.svelte';
+  import MarkdownInput from './inputs/markdown-input.svelte';
+  import BooleanInput from './inputs/boolean-input.svelte';
+  import SelectInput from './inputs/select-input.svelte';
+
+  interface Props {
+    columns: Bird.Field[];
+    collection: string;
+    record_id?: string | null;
+    fetchRecords: (collection_name: string) => Promise<void>;
+  }
 
   let {
     columns: fields,
     collection,
     record_id = null,
     fetchRecords,
-  }: {
-    columns: Bird.Field[];
-    collection: string;
-    record_id?: string | null;
-    fetchRecords: (collection_name: string) => Promise<void>;
-  } = $props();
+  }: Props = $props();
 
   let record: Bird.Record = $state({});
   let formData: Bird.Record = $state({});
@@ -78,10 +78,6 @@
 
     await fetchRecords(collection);
   }
-
-  function handleFileChange(e: any, field: string) {
-    formData[field] = e.target.files[0];
-  }
 </script>
 
 {#if loading}
@@ -109,74 +105,15 @@
         {#each fields as column}
           <div class="grid grid-cols-4 items-center gap-4">
             {#if column.type === 'String' || column.type === 'Float' || column.type === 'Integer' || column.type === 'Date'}
-              <Label for={column.name} class="text-right">{column.name}</Label>
-              <Input
-                id={column.name}
-                name={column.name}
-                bind:value={formData[column.name]}
-                class="col-span-3"
-                type={getInputType(column)}
-                disabled={column.name === 'id'}
-              />
+              <BaseInput bind:value={formData[column.name]} {column} />
             {:else if column.type === 'File'}
-              <Label for={column.name} class="text-right">{column.name}</Label>
-              <Input
-                id={column.name}
-                name={column.name}
-                class="col-span-3"
-                type="file"
-                onchange={(e) => handleFileChange(e, column.name)}
-              />
+              <FileInput bind:value={formData[column.name]} {column} />
             {:else if column.type === 'Markdown'}
-              <Label for={column.name} class="text-right">{column.name}</Label>
-              <Dialog.Root>
-                <Dialog.Trigger class={buttonVariants({ variant: 'outline' })}
-                  >Open Editor</Dialog.Trigger
-                >
-                <Dialog.Content>
-                  <Dialog.Header>
-                    <Dialog.Title>{column.name}</Dialog.Title>
-                  </Dialog.Header>
-                  <Editor bind:value={formData[column.name]} />
-                  <Dialog.Footer>
-                    <Dialog.Close
-                      ><Button type="submit">Save changes</Button></Dialog.Close
-                    >
-                  </Dialog.Footer>
-                </Dialog.Content>
-              </Dialog.Root>
+              <MarkdownInput bind:value={formData[column.name]} {column} />
             {:else if column.type === 'Boolean'}
-              <Label for={column.name}>{column.name}</Label>
-              <Switch
-                id={column.name}
-                name={column.name}
-                bind:checked={formData[column.name]}
-              />
+              <BooleanInput bind:value={formData[column.name]} {column} />
             {:else if column.type === 'Select'}
-              <Label for={column.name}>{column.name}</Label>
-              <Select.Root
-                type="single"
-                name={column.name}
-                bind:value={formData[column.name]}
-              >
-                <Select.Trigger
-                  >{getOptionText(
-                    column,
-                    parseInt(formData[column.name])
-                  )}</Select.Trigger
-                >
-                <Select.Content>
-                  <Select.Group>
-                    <Select.Label>Options</Select.Label>
-                    {#each column.options! as option}
-                      <Select.Item
-                        value={String(option.value)}
-                        label={option.text}>{option.text}</Select.Item
-                      >
-                    {/each}
-                  </Select.Group>
-                </Select.Content>
-              </Select.Root>
+              <SelectInput bind:value={formData[column.name]} {column} />
             {:else if column.type === 'Relation'}
               <RelationField value={formData[column.name]} field={column} />
             {/if}
