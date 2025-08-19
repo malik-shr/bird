@@ -5,7 +5,7 @@
   import { Label } from '$lib/components/ui/label/index.js';
 
   import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
-
+  import * as Dialog from '$lib/components/ui/dialog/index.js';
   import { bird } from '$lib/lib';
 
   import * as Select from '$lib/components/ui/select/index.js';
@@ -14,9 +14,11 @@
   import Pen from '@lucide/svelte/icons/pen';
   import RelationField from './relation-field.svelte';
   import type Bird from '$lib/sdk';
+  import Editor from './editor.svelte';
+  import { assignRecordFormData, getInputType, getOptionText } from './utils';
 
   let {
-    columns,
+    columns: fields,
     collection,
     record_id = null,
     fetchRecords,
@@ -45,39 +47,10 @@
       record = await bird.collection(collection).getOne(record_id);
       formData = Object.assign({}, record);
     } else {
-      formData = columns.reduce((a, column) => {
-        if (column.name === 'id') {
-          return Object.assign(a, { [column.name]: 'Autogeneration' });
-        }
-
-        if (column.type === 'String' || column.type === 'File') {
-          return Object.assign(a, { [column.name]: '' });
-        } else if (column.type === 'Boolean') {
-          return Object.assign(a, { [column.name]: false });
-        } else if (column.type === 'Select') {
-          return Object.assign(a, { [column.name]: 'Select Option' });
-        } else if (column.type === 'Relation') {
-          return Object.assign(a, { [column.name]: 'Select Relation' });
-        }
-
-        return Object.assign(a, { [column.name]: 0 });
-      }, {});
+      formData = assignRecordFormData(fields);
     }
 
     loading = false;
-  }
-
-  function getInputType(column: Bird.Field) {
-    if (column.name === 'password') return 'password';
-    if (column.type === 'Integer' || column.type === 'Float') {
-      return 'number';
-    } else if (column.type === 'Date') {
-      return 'date';
-    } else if (column.type === 'File') {
-      return 'file';
-    }
-
-    return 'text';
   }
 
   async function createRecordAction() {
@@ -109,18 +82,6 @@
   function handleFileChange(e: any, field: string) {
     formData[field] = e.target.files[0];
   }
-
-  function getOptionText(field: Bird.Field, option_value: number) {
-    const option = field.options?.filter(
-      (option) => option.value === option_value
-    )[0];
-
-    if (option) {
-      return option.text;
-    }
-
-    return 'Select Option';
-  }
 </script>
 
 {#if loading}
@@ -145,7 +106,7 @@
       </Sheet.Header>
 
       <div class="grid gap-4 py-4 mx-4">
-        {#each columns as column}
+        {#each fields as column}
           <div class="grid grid-cols-4 items-center gap-4">
             {#if column.type === 'String' || column.type === 'Float' || column.type === 'Integer' || column.type === 'Date'}
               <Label for={column.name} class="text-right">{column.name}</Label>
@@ -166,6 +127,24 @@
                 type="file"
                 onchange={(e) => handleFileChange(e, column.name)}
               />
+            {:else if column.type === 'Markdown'}
+              <Label for={column.name} class="text-right">{column.name}</Label>
+              <Dialog.Root>
+                <Dialog.Trigger class={buttonVariants({ variant: 'outline' })}
+                  >Open Editor</Dialog.Trigger
+                >
+                <Dialog.Content>
+                  <Dialog.Header>
+                    <Dialog.Title>{column.name}</Dialog.Title>
+                  </Dialog.Header>
+                  <Editor bind:value={formData[column.name]} />
+                  <Dialog.Footer>
+                    <Dialog.Close
+                      ><Button type="submit">Save changes</Button></Dialog.Close
+                    >
+                  </Dialog.Footer>
+                </Dialog.Content>
+              </Dialog.Root>
             {:else if column.type === 'Boolean'}
               <Label for={column.name}>{column.name}</Label>
               <Switch

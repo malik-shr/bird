@@ -34,6 +34,7 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
-		"@microsoft/fetch-event-source": "^2.0.1"
+		"@microsoft/fetch-event-source": "^2.0.1",
+		"easymde": "^2.20.0"
 	}
 }

@@ -12,6 +12,7 @@ const fieldTypesSchema = t.Object({
   Select: t.Literal('TEXT'),
   Relation: t.Literal('TEXT'),
   File: t.Literal('TEXT'),
+  Markdown: t.Literal('TEXT'),
 });
 
 const options = t.Object({
@@ -54,9 +55,6 @@ export async function createCollection(
     const newCollection = new Collection(table_name, type).setRuleData(
       ruleData
     );
-
-    console.log('/n/n');
-    console.log(fields);
 
     for (const field of fields) {
       newCollection.addField(field);

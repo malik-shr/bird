@@ -39,6 +39,7 @@
     'Select',
     'Relation',
     'File',
+    'Markdown',
   ];
 </script>
 

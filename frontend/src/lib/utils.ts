@@ -1,19 +1,20 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-
-import Type from '@lucide/svelte/icons/type';
-import Hash from '@lucide/svelte/icons/hash';
-import Calculator from '@lucide/svelte/icons/calculator';
-import ToggleRight from '@lucide/svelte/icons/toggle-right';
-import Calendar from '@lucide/svelte/icons/calendar';
-import MoveHorizontal from '@lucide/svelte/icons/move-horizontal';
-import ListCheck from '@lucide/svelte/icons/list-check';
-
-import Key from '@lucide/svelte/icons/key';
-import Lock from '@lucide/svelte/icons/lock';
-import Mail from '@lucide/svelte/icons/mail';
-import File from '@lucide/svelte/icons/file';
 import type Bird from './sdk';
+import {
+  Pen,
+  Key,
+  Lock,
+  Mail,
+  File,
+  Type,
+  Hash,
+  Calculator,
+  ToggleRight,
+  Calendar,
+  MoveHorizontal,
+  ListCheck,
+} from '@lucide/svelte';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -49,6 +50,7 @@ export const IconMap = {
   Relation: MoveHorizontal,
   Select: ListCheck,
   File: File,
+  Markdown: Pen,
 };
 
 export function getIcon(field: Bird.Field) {

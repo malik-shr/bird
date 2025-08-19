@@ -24,6 +24,16 @@
     changeReference,
   } = $props();
   let TypeIcon = getIcon(field);
+
+  const basicTypes = [
+    'String',
+    'Float',
+    'Integer',
+    'Date',
+    'Boolean',
+    'File',
+    'Markdown',
+  ];
 </script>
 
 <div class="flex items-center gap-2">
@@ -31,7 +41,7 @@
     <TypeIcon size={15} /></Label
   >
 
-  {#if field.type === 'String' || field.type === 'Integer' || field.type === 'Float' || field.type === 'Date' || field.type === 'Boolean' || field.type === 'File'}
+  {#if basicTypes.includes(field.type)}
     <div class="flex items-center gap-2 w-full">
       <Input
         type="text"

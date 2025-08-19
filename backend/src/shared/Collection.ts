@@ -1,6 +1,6 @@
 import { Static } from 'elysia';
 import Field, { FieldProps } from './Field';
-import { FieldTypes } from '../apis/record/utils';
+import { FieldTypes } from './utils';
 import { Kysely } from 'kysely';
 import { RuleData } from '../apis/collection/handlers/createCollection';
 
@@ -56,9 +56,6 @@ export default class Collection {
       let builder = db.schema.createTable(this.name).ifNotExists();
 
       for (const field of this.fields) {
-        if (field.type === 'File') {
-          console.log(FieldTypes[field.type]);
-        }
         builder = builder.addColumn(
           field.name,
           FieldTypes[field.type],

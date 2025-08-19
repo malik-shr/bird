@@ -1,5 +1,5 @@
 import { Kysely } from 'kysely';
-import { FieldType } from '../apis/record/utils';
+import { FieldType } from './utils';
 
 type Option = {
   value: number;

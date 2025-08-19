@@ -1,5 +1,5 @@
 import { Kysely } from 'kysely';
-import { FieldsTable } from '../../shared/db.types';
+import { FieldsTable } from './db.types';
 import { DataTypeExpression } from 'kysely/dist/cjs/parser/data-type-parser';
 
 /** Get alls fields and validate in memory if fields of this collection exist, to prevent sql injection */
@@ -59,6 +59,7 @@ export const FieldTypes: { [key: string]: DataTypeExpression } = {
   Select: 'text',
   Relation: 'text',
   File: 'text',
+  Markdown: 'text',
 };
 
 export type FieldType = keyof typeof FieldTypes;

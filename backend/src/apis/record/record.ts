@@ -7,7 +7,7 @@ import { createRecord, RecordCreateBody } from './handlers/createRecord';
 
 import { sql } from 'kysely';
 import { authMiddleware } from '../auth/middleware/authMiddleware';
-import { isValidCollection, validateUserInput } from './utils';
+import { isValidCollection, validateUserInput } from '../../shared/utils';
 import { realtimeHandler } from './handlers/realtimeHandler';
 import Plugin from '@shared/Plugin';
 import { PluginContext } from '@shared/PluginContext';
