@@ -118,4 +118,9 @@ export namespace Bird {
       text: string;
     }[];
   };
+
+  export type Message = {
+    role: string;
+    content: string;
+  };
 }

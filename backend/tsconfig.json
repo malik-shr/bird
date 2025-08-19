@@ -3,7 +3,7 @@
     "paths": {
       "@core/*": ["./src/core/*"],
       "@shared/*": ["./src/shared/*"],
-      "@plugins/*": ["./src/plugins/*"]
+      "@apis/*": ["./src/apis/*"]
     },
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

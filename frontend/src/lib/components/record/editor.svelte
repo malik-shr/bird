@@ -2,7 +2,8 @@
   import EasyMDE from 'easymde';
   import { onMount } from 'svelte';
   import 'easymde/dist/easymde.min.css';
-  import { newEditor } from '$lib/editor';
+  import { newEditor } from '$lib/md-editor';
+  import DOMPurify from 'isomorphic-dompurify';
 
   let editor: EasyMDE;
 
@@ -12,7 +13,7 @@
     editor = newEditor(value);
 
     editor.codemirror.on('change', () => {
-      value = editor.value();
+      value = DOMPurify.sanitize(editor.value());
     });
   });
 </script>

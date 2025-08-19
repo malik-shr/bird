@@ -1,8 +1,15 @@
 import EasyMDE from 'easymde';
+import DOMPurify from 'isomorphic-dompurify';
 
 export function newEditor(initialValue: string) {
   return new EasyMDE({
     element: document.getElementById('markdown-editor')!,
+    renderingConfig: {
+      sanitizerFunction: (renderedHTML) => {
+        // Using DOMPurify and only allowing <b> tags
+        return DOMPurify.sanitize(renderedHTML, { ALLOWED_TAGS: ['b'] });
+      },
+    },
     initialValue: initialValue,
     toolbar: [
       'bold',

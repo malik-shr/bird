@@ -1,17 +1,19 @@
 <script lang="ts">
   import * as Collapsible from '$lib/components/ui/collapsible/index.js';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-  import Settings from '@lucide/svelte/icons/settings';
-
-  import FolderOpen from '@lucide/svelte/icons/folder-open';
-  import Folder from '@lucide/svelte/icons/folder';
 
   import NavSystem from './nav-system.svelte';
-  import UpsertCollectio from '../collection/upsert-collection.svelte';
   import { page } from '$app/state';
   import { collections } from '$lib/lib';
   import UpsertCollection from '../collection/upsert-collection.svelte';
+
+  import {
+    ChevronRightIcon,
+    Settings,
+    FolderOpen,
+    Folder,
+    Bot,
+  } from '@lucide/svelte';
 
   const systemItems = $derived($collections.filter((item) => item.is_system));
 
@@ -67,6 +69,17 @@
         </Sidebar.MenuItem>
       {/snippet}
     </Collapsible.Root>
+
+    <Sidebar.MenuItem>
+      <Sidebar.MenuButton>
+        {#snippet child({ props })}
+          <a href="/#/ai" {...props}>
+            <Bot />
+            <span>Ai</span>
+          </a>
+        {/snippet}
+      </Sidebar.MenuButton>
+    </Sidebar.MenuItem>
 
     <Sidebar.MenuItem>
       <Sidebar.MenuButton>

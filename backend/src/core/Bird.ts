@@ -10,6 +10,7 @@ import CollectionApi from '../apis/collection/collection';
 import { Kysely } from 'kysely';
 import { BunSqliteDialect } from 'kysely-bun-worker/normal';
 import FileApi from '../apis/file/file';
+import AiApi from '@apis/ai/ai';
 
 export class Bird extends Elysia {
   startTime: number;
@@ -41,7 +42,8 @@ export class Bird extends Elysia {
       new CollectionApi(this.ctx),
       new RecordApi(this.ctx),
       new AuthApi(this.ctx),
-      new FileApi(this.ctx)
+      new FileApi(this.ctx),
+      new AiApi(this.ctx)
     );
 
     this.setupDatabase();

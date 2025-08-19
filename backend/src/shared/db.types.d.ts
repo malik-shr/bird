@@ -43,6 +43,13 @@ export interface UserTable {
   role: number;
 }
 
+export interface MessagesTable {
+  id: string;
+  role: string;
+  content: string;
+  user: string;
+}
+
 declare global {
   interface DB {
     collections_meta: CollectionsTable;
@@ -50,6 +57,7 @@ declare global {
     auth_rules: AuthRulesTable;
     select_options: SelectOptionsTable;
     users: UserTable;
+    messages: MessagesTable;
     [key: string]: any;
   }
 }
