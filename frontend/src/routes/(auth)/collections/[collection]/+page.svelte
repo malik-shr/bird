@@ -14,11 +14,15 @@
   import type Bird from '$lib/sdk';
   import TableCell from '$lib/components/record/table/table-cell.svelte';
   import Button from '$lib/components/ui/button/button.svelte';
+  import Input from '$lib/components/ui/input/input.svelte';
+  import { toast, type ToastT } from 'svelte-sonner';
 
   let records: Bird.Record[] = $state([]);
   let columns: Bird.Field[] = $state([]);
   let tableColumns: ColumnDef<Bird.Record>[] = $state([]);
   let loading: boolean = $state(true);
+
+  let file = $state('');
 
   let collection_name: string = $state(page.params.collection!);
 
@@ -101,6 +105,48 @@
   async function exportCollection() {
     await bird.collections.export(collection_name);
   }
+
+  function handleFileChange(e: any) {
+    file = e.target.files[0];
+  }
+
+  async function importRecords(e: Event) {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    let progressToastId: any = null;
+
+    await bird.collection(collection_name).import(formData, (data) => {
+      let parsedData;
+      console.log(data);
+      try {
+        parsedData = JSON.parse(data);
+      } catch (error) {
+        console.error('Failed to parse progress data:', error);
+        return;
+      }
+
+      const completed = parsedData.completed;
+
+      if (progressToastId) {
+        // Update existing toast
+        toast.success('Import Progress', {
+          id: progressToastId,
+          description: parsedData.message,
+          duration: completed ? 2000 : Infinity,
+        });
+      } else {
+        // Create new toast
+        progressToastId = toast.success('Import Progress', {
+          description: parsedData.message,
+          duration: completed ? 2000 : Infinity,
+        });
+      }
+
+      fetchRecords(collection_name);
+    });
+  }
 </script>
 
 {#if !loading}
@@ -118,5 +164,11 @@
     </div>
 
     <DataTable data={records} columns={tableColumns} />
+    <form method="post" onsubmit={importRecords}>
+      <div class="flex gap-1 mt-5">
+        <Input type="file" name="file" onchange={handleFileChange} />
+        <Button type="submit">Import</Button>
+      </div>
+    </form>
   </div>
 {/if}

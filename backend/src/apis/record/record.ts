@@ -12,6 +12,7 @@ import { realtimeHandler } from './handlers/realtimeHandler';
 import Plugin from '@shared/Plugin';
 import { PluginContext } from '@shared/PluginContext';
 import { getCollectionBody, transformBody } from './utils';
+import { importRecords, importRecordsBody } from './handlers/importRecords';
 
 interface AuthRuleRow {
   viewRule: number;
@@ -92,6 +93,13 @@ export default class RecordApi implements Plugin {
 
             .get('/realtime', async (c) =>
               realtimeHandler(c.params.collection_name, this.ctx.db)
+            )
+
+            .post(
+              '/import',
+              (c) =>
+                importRecords(c.params.collection_name, c.body, this.ctx.db),
+              { body: importRecordsBody }
             )
 
             .guard(

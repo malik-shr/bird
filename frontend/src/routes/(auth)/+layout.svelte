@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import AppSidebar from '$lib/components/sidebar/app-sidebar.svelte';
   import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-  import { fetchCollections, user } from '$lib/lib';
+  import { fetchCollections } from '$lib/lib';
   import { onMount } from 'svelte';
 
   let { children } = $props();

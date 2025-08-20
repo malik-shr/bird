@@ -87,6 +87,22 @@ export default class RecordService {
     }
   }
 
+  async import(formdata: FormData, onMessage?: (data: string) => void) {
+    try {
+      await fetchEventSource(`${this.baseUrl}/import`, {
+        method: 'POST',
+        body: formdata,
+        onmessage(event) {
+          if (onMessage) {
+            onMessage(event.data);
+          }
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   async subscribe(onMessage: (event: MessageEvent) => void) {
     const token = localStorage.getItem('token');
 

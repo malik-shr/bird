@@ -61,11 +61,8 @@
     const fd = new FormData();
     for (const key in formData) {
       const val = formData[key];
-      if (val instanceof File) {
-        fd.append(key, val); // keep as file
-      } else if (val != null) {
-        fd.append(key, val); // convert everything else to string
-      }
+
+      fd.append(key, val);
     }
 
     if (record.id) {

@@ -68,10 +68,10 @@
 
   async function deleteCollection() {
     if (selectedCollectionName) {
-      await bird.collections.delete(selectedCollectionName);
       open = false;
       fetchCollections();
       goto(`/#/collections/${$collections[0].name}`);
+      await bird.collections.delete(selectedCollectionName);
     }
   }
 

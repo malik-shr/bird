@@ -28,18 +28,14 @@ export async function exportCollection(
 function arrayToCSV(data: Record<string, any>) {
   if (!data.length) return '';
 
-  // Get headers from the first object
   const headers = Object.keys(data[0]);
 
-  // Create header row
   const headerRow = headers.join(',');
 
-  // Create data rows
   const dataRows = data.map((obj: any) =>
     headers
       .map((header) => {
         const value = obj[header];
-        // Escape quotes and wrap in quotes if contains comma, quote, or newline
         if (
           typeof value === 'string' &&
           (value.includes(',') || value.includes('"') || value.includes('\n'))

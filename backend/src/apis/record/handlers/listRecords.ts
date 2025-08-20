@@ -56,7 +56,7 @@ export async function listRecords(collection_name: string, db: Kysely<DB>) {
     }
 
     query = query.select(selectFields);
-    const records = await query.execute();
+    const records = await query.limit(500).execute();
 
     return { records: records };
   } catch (e) {
