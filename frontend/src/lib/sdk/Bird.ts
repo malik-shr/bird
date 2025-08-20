@@ -1,3 +1,4 @@
+import AiService from './services/AiService';
 import { AuthService } from './services/AuthService';
 import CollectionService from './services/CollectionService';
 import FileService from './services/FileService';
@@ -21,6 +22,7 @@ export class Bird {
   collections: CollectionService;
   auth: AuthService;
   file: FileService;
+  ai: AiService;
 
   private recordServices: { [key: string]: RecordService } = {};
 
@@ -29,6 +31,7 @@ export class Bird {
     this.collections = new CollectionService(this);
     this.auth = new AuthService(this);
     this.file = new FileService(this);
+    this.ai = new AiService(this);
   }
 
   collection(collectionName: string) {

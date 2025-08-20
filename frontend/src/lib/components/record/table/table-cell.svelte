@@ -4,7 +4,7 @@
 
 {#if field.type === 'Boolean'}
   <span>
-    {value === 1 ? 'True' : 'False'}
+    {value === 'true' ? 'True' : 'False'}
   </span>
 {:else}
   <span>

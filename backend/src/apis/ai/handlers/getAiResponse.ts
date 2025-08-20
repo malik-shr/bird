@@ -6,7 +6,7 @@ export const aiRequest = t.Object({
   message: t.String(),
 });
 
-export async function* getAiResponse(
+export async function* promptResponse(
   message: string,
   user: UserTable,
   db: Kysely<DB>
@@ -31,14 +31,14 @@ export async function* getAiResponse(
       model: 'gpt-4o-mini',
       stream: true,
       messages: [
-        { role: 'system', content: 'Du bist ein hilfreicher Assistent.' },
+        { role: 'system', content: 'You are a helpful assistant.' },
         { role: 'user', content: message },
       ],
     }),
   });
 
   if (!response.body) {
-    yield sse({ event: 'error', data: 'Keine Stream-Response erhalten!' });
+    yield sse({ event: 'error', data: 'No streaming response received' });
     return;
   }
 
@@ -46,40 +46,64 @@ export async function* getAiResponse(
   const decoder = new TextDecoder();
   let assistantMessage = '';
 
+  let buffer = '';
+
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
 
-    const chunk = decoder.decode(value);
-    const lines = chunk.split('\n').filter((l) => l.trim() !== '');
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+
+    // keep the last line in the buffer (might be incomplete JSON)
+    buffer = lines.pop() ?? '';
 
     for (const line of lines) {
+      if (!line.trim()) continue;
+
       if (line === 'data: [DONE]') {
         await db
           .insertInto('messages')
           .values({
             id: crypto.randomUUID(),
-            role: 'system',
+            role: 'assistant',
             content: assistantMessage,
             user: user.id,
           })
           .execute();
+
         yield sse({ event: 'end', data: 'done' });
         return;
       }
 
       if (line.startsWith('data: ')) {
+        const jsonStr = line.slice(6);
+
         try {
-          const data = JSON.parse(line.slice(6));
+          const data = JSON.parse(jsonStr);
           const token = data.choices?.[0]?.delta?.content;
           if (token) {
             assistantMessage += token;
             yield sse({ event: 'message', data: token });
           }
         } catch (err) {
-          console.error('Fehler beim Parsen:', err, line);
+          console.error('JSON parse error, line:', jsonStr, err);
         }
       }
+    }
+  }
+
+  // flush any remaining buffer if needed
+  if (buffer.trim() && buffer.startsWith('data: ')) {
+    try {
+      const data = JSON.parse(buffer.slice(6));
+      const token = data.choices?.[0]?.delta?.content;
+      if (token) {
+        assistantMessage += token;
+        yield sse({ event: 'message', data: token });
+      }
+    } catch (err) {
+      console.error('Final buffer parse error:', buffer, err);
     }
   }
 }

@@ -2,7 +2,7 @@ import Collection from '@shared/Collection';
 import Plugin from '@shared/Plugin';
 import { PluginContext } from '@shared/PluginContext';
 import Elysia from 'elysia';
-import { aiRequest, getAiResponse } from './handlers/getAiResponse';
+import { aiRequest, promptResponse } from './handlers/getAiResponse';
 import { authMiddleware } from '../auth/middleware/authMiddleware';
 import { messages } from './tables';
 
@@ -27,7 +27,7 @@ export default class AiApi implements Plugin {
       (app) =>
         app.post(
           '/',
-          (ctx) => getAiResponse(ctx.body.message, ctx.user!, this.ctx.db),
+          (ctx) => promptResponse(ctx.body.message, ctx.user!, this.ctx.db),
           { body: aiRequest }
         )
     );

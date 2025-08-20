@@ -1,4 +1,4 @@
-import Elysia from 'elysia';
+import Elysia, { getSchemaValidator } from 'elysia';
 import { listRecords } from './handlers/listRecords';
 import { RecordUpdateBody, updateRecord } from './handlers/updateRecord';
 import { getRecord } from './handlers/getRecord';
@@ -7,10 +7,11 @@ import { createRecord, RecordCreateBody } from './handlers/createRecord';
 
 import { sql } from 'kysely';
 import { authMiddleware } from '../auth/middleware/authMiddleware';
-import { isValidCollection, validateUserInput } from '../../shared/utils';
+import { isValidCollection } from '../../shared/utils';
 import { realtimeHandler } from './handlers/realtimeHandler';
 import Plugin from '@shared/Plugin';
 import { PluginContext } from '@shared/PluginContext';
+import { getCollectionBody, transformBody } from './utils';
 
 interface AuthRuleRow {
   viewRule: number;
@@ -29,7 +30,7 @@ export default class RecordApi implements Plugin {
 
     this.app
       .use(authMiddleware(this.ctx.db))
-      .derive(async ({ params: { collection_name }, set }) => {
+      .derive(async ({ params: { collection_name } }) => {
         /** Validate collection_name otherways set request status forbidden*/
         if (!isValidCollection(collection_name, this.ctx.db)) {
           return { rules: null };
@@ -60,90 +61,102 @@ export default class RecordApi implements Plugin {
 
       .guard(
         {
-          beforeHandle: (ctx) => {
-            this.beforeRecord(ctx, 'viewRule');
-          },
-        },
-        (app) =>
-          app.get('/', (ctx) =>
-            listRecords(ctx.params.collection_name, this.ctx.db)
-          )
-      )
+          beforeHandle: (c) => {
+            let rule: keyof AuthRuleRow = 'viewRule';
 
-      .guard(
-        {
-          beforeHandle: (ctx) => {
-            this.beforeRecord(ctx, 'viewRule');
-          },
-        },
-        (app) =>
-          app.get('/realtime', async (ctx) =>
-            realtimeHandler(ctx.params.collection_name, this.ctx.db)
-          )
-      )
-
-      .guard(
-        {
-          beforeHandle: (ctx: any) => {
-            this.beforeRecord(ctx, 'createRule');
-          },
-        },
-        (app) =>
-          app.post(
-            '/',
-            async ({ body, params: { collection_name } }) =>
-              await createRecord(body, collection_name, this.ctx.db),
-            {
-              body: RecordCreateBody,
+            switch (c.request.method) {
+              case 'GET':
+                rule = 'viewRule';
+                break;
+              case 'POST':
+                rule = 'createRule';
+                break;
+              case 'PATCH':
+                rule = 'updateRule';
+                break;
+              case 'DELETE':
+                rule = 'deleteRule';
+                break;
             }
-          )
-      )
 
-      .guard(
-        {
-          beforeHandle: (ctx) => this.beforeRecord(ctx, 'viewRule'),
+            this.beforeRecord(ctx, rule);
+          },
         },
         (app) =>
-          app.get('/:id', ({ params: { collection_name, id } }) =>
-            getRecord(collection_name, id, this.ctx.db)
-          )
-      )
+          app
+            .get('/', (c) => listRecords(c.params.collection_name, this.ctx.db))
 
-      .guard(
-        {
-          beforeHandle: (ctx) => this.beforeRecord(ctx, 'updateRule'),
-        },
-        (app) =>
-          app.patch(
-            '/:id',
-            (ctx) =>
-              updateRecord(
-                ctx.body,
-                ctx.params.collection_name,
-                ctx.params.id,
-                this.ctx.db
-              ),
-            { body: RecordUpdateBody }
-          )
-      )
+            .get('/:id', (c) =>
+              getRecord(c.params.collection_name, c.params.id, this.ctx.db)
+            )
 
-      .guard(
-        {
-          beforeHandle: (ctx) => this.beforeRecord(ctx, 'deleteRule'),
-        },
-        (app) =>
-          app.delete('/:id', (ctx) =>
-            deleteRecord(ctx.params.collection_name, ctx.params.id, this.ctx.db)
-          )
+            .get('/realtime', async (c) =>
+              realtimeHandler(c.params.collection_name, this.ctx.db)
+            )
+
+            .guard(
+              {
+                beforeHandle: async (c) => {
+                  const values = transformBody(
+                    c.params.collection_name,
+                    c.body,
+                    this.ctx.db
+                  );
+                  const schema = await getCollectionBody(
+                    c.params.collection_name,
+                    this.ctx.db
+                  );
+
+                  if (!schema) {
+                    return (c.set.status = 'Unprocessable Content');
+                  }
+
+                  const validator = getSchemaValidator(schema, {});
+
+                  if (!validator.Check(values)) {
+                    return (c.set.status = 'Unprocessable Content');
+                  }
+                },
+              },
+              (app) =>
+                app
+                  .post(
+                    '/',
+                    async (c) =>
+                      await createRecord(
+                        c.body,
+                        c.params.collection_name,
+                        this.ctx.db
+                      ),
+                    {
+                      body: RecordCreateBody,
+                    }
+                  )
+                  .patch(
+                    '/:id',
+                    (c) =>
+                      updateRecord(
+                        c.body,
+                        c.params.collection_name,
+                        c.params.id,
+                        this.ctx.db
+                      ),
+                    { body: RecordUpdateBody }
+                  )
+            )
+
+            .delete('/:id', (c) =>
+              deleteRecord(c.params.collection_name, c.params.id, this.ctx.db)
+            )
       );
   }
 
-  beforeRecord(ctx: any, key: keyof AuthRuleRow) {
-    const userRole = ctx.user ? ctx.user.role : 0;
+  beforeRecord(c: any, key: keyof AuthRuleRow) {
+    const userRole = c.user ? c.user.role : 0;
 
-    if (ctx.authRules) {
-      if (ctx.authRules[key] > userRole) {
-        return (ctx.set.status = 'Unauthorized');
+    if (c.authRules) {
+      if (c.authRules[key] > userRole) {
+        return (c.set.status = 'Unauthorized');
       }
     }
   }

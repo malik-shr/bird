@@ -13,9 +13,7 @@
   import ToggleColumns from '$lib/components/record/table/toggle-columns.svelte';
   import type Bird from '$lib/sdk';
   import TableCell from '$lib/components/record/table/table-cell.svelte';
-  import Button, {
-    buttonVariants,
-  } from '$lib/components/ui/button/button.svelte';
+  import Button from '$lib/components/ui/button/button.svelte';
 
   let records: Bird.Record[] = $state([]);
   let columns: Bird.Field[] = $state([]);

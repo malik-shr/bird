@@ -64,7 +64,7 @@
       if (val instanceof File) {
         fd.append(key, val); // keep as file
       } else if (val != null) {
-        fd.append(key, String(val)); // convert everything else to string
+        fd.append(key, val); // convert everything else to string
       }
     }
 
