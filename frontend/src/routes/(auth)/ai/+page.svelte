@@ -26,7 +26,8 @@
   });
 
   onMount(async () => {
-    messages = await bird.collection('messages').getList();
+    const data = await bird.collection('messages').getList(0, 100);
+    messages = data?.records;
   });
 
   async function sendAiRequest(event: Event) {

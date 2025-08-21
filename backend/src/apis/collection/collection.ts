@@ -16,6 +16,7 @@ import {
 } from './tables';
 import Collection from '@shared/Collection';
 import { exportCollection } from './handlers/exportCollection';
+import truncateCollection from './handlers/truncateCollection';
 
 export default class CollectionApi implements Plugin {
   app;
@@ -50,14 +51,20 @@ export default class CollectionApi implements Plugin {
         viewCollection(collection_name, this.ctx.db)
       )
 
-      .delete('/:collection_name', async ({ params: { collection_name } }) =>
-        deleteCollection(collection_name, this.ctx.db)
-      )
-
       .get(
         '/:collection_name/export',
         async ({ params: { collection_name } }) =>
           exportCollection(collection_name, this.ctx.db)
+      )
+
+      .delete('/:collection_name', async ({ params: { collection_name } }) =>
+        deleteCollection(collection_name, this.ctx.db)
+      )
+
+      .delete(
+        '/:collection_name/truncate',
+        async ({ params: { collection_name } }) =>
+          truncateCollection(collection_name, this.ctx.db)
       );
   }
 }

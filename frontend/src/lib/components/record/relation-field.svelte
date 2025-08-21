@@ -11,7 +11,10 @@
 
   onMount(async () => {
     if (field.relationCollection) {
-      relations = await bird.collection(field.relationCollection).getList();
+      const data = await bird
+        .collection(field.relationCollection)
+        .getList(0, 12);
+      relations = data?.records;
     }
     loading = false;
   });

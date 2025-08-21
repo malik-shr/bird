@@ -88,6 +88,24 @@ export default class CollectionService {
     }
   }
 
+  async trucate(collectionName: string) {
+    try {
+      const data = await this.bird.send(
+        `${this.baseUrl}/${collectionName}/truncate`,
+        {
+          method: SendMethod.DELETE,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      return data.message;
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   async delete(collectionName: string) {
     try {
       const data = await this.bird.send(`${this.baseUrl}/${collectionName}`, {

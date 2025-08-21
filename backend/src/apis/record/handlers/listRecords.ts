@@ -1,7 +1,21 @@
 import { Kysely } from 'kysely';
 
-export async function listRecords(collection_name: string, db: Kysely<DB>) {
+export async function listRecords(
+  collection_name: string,
+  page: string,
+  page_size: string,
+  db: Kysely<DB>
+) {
   try {
+    const MAX_PAGE_SIZE = 100;
+
+    const parsedPage = parseInt(page);
+    const parsedPageSize = parseInt(page_size);
+
+    if (parsedPageSize > MAX_PAGE_SIZE) {
+      return Error('The maximum page size is 100');
+    }
+
     const selectFields: string[] = [];
     let joinCounter = 0;
     const collection_id = db
@@ -56,9 +70,17 @@ export async function listRecords(collection_name: string, db: Kysely<DB>) {
     }
 
     query = query.select(selectFields);
-    const records = await query.limit(500).execute();
+    const records = await query
+      .offset(parsedPage * parsedPageSize)
+      .limit(parsedPageSize)
+      .execute();
 
-    return { records: records };
+    const totalCount = await db
+      .selectFrom(collection_name)
+      .select(({ fn }) => fn.countAll().as('total_count'))
+      .executeTakeFirstOrThrow();
+
+    return { records: records, totalCount: totalCount.total_count };
   } catch (e) {
     console.error(e);
   }

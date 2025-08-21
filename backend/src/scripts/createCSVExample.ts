@@ -1,21 +1,15 @@
 import { writeFileSync } from 'fs';
 
 // File path
-const filePath = './output.csv';
+const filePath = 'bird_data/output.csv';
 
 // CSV header
-const headers = ['id', 'field1', 'field2', 'field3', 'field4'];
+const headers = ['field1', 'field2', 'field3', 'field4'];
 writeFileSync(filePath, headers.join(',') + '\n'); // write header
 
-// Function to generate a unique id (simple version)
-function generateId(index: number) {
-  return `id-${index}`;
-}
-
 // Generate 100,000 rows
-for (let i = 1; i <= 100_000; i++) {
+for (let i = 1; i <= 1_000_000; i++) {
   const row = [
-    generateId(i),
     `field1_value_${i}`,
     `field2_value_${i}`,
     `field3_value_${i}`,

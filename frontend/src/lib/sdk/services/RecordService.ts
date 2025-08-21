@@ -28,22 +28,19 @@ export default class RecordService {
     }
   }
 
-  async getList(
-    id: string = '',
-    limit = 100,
-    offset = 0,
-    fields = [],
-    filter = []
-  ) {
+  async getList(page = 0, pageSize = 100) {
     try {
-      const data = await this.bird.send(this.baseUrl, {
-        method: SendMethod.GET,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const data = await this.bird.send(
+        `${this.baseUrl}?page=${page}&page_size=${pageSize}`,
+        {
+          method: SendMethod.GET,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      return data.records;
+      return { records: data.records, totalCount: data.totalCount };
     } catch (e) {
       console.error(e);
     }

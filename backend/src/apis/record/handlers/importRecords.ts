@@ -34,35 +34,39 @@ export async function* importRecords(
       .where('collection', '=', collection.id)
       .execute();
 
+    let autoGenerateId = false;
     const file = Bun.file(filePath);
 
     const content = await file.text();
 
     const lines = content.trim().split('\n');
 
-    const headers = lines[0].split(',');
+    let headers = lines[0].split(',');
 
     for (let i = 0; i < headers.length; i++) {
       headers[i] = headers[i].trim();
+    }
+
+    if (!headers.includes('id')) {
+      headers = ['id', ...headers];
+      autoGenerateId = true;
     }
 
     const fieldNames = fields.map((item) => item.name);
 
-    for (let i = 0; i < fieldNames.length; i++) {
-      if (fieldNames[i] !== headers[i]) {
-        throw Error('Unvalid Field signature');
-      }
+    if (!ArrayEquals(fieldNames, headers)) {
+      throw Error('Unvalid Field signature');
     }
 
     const data = new Array(lines.length - 2);
 
-    for (let i = 0; i < headers.length; i++) {
-      headers[i] = headers[i].trim();
-    }
-
     for (let i = 1; i < lines.length; i++) {
-      const entries = lines[i].split(',');
+      let entries = lines[i].split(',');
       const row: Record<string, string> = {};
+
+      if (autoGenerateId) {
+        entries = [crypto.randomUUID(), ...entries];
+      }
 
       for (let j = 0; j < entries.length; j++) {
         const entry = entries[j].trim();
@@ -72,7 +76,7 @@ export async function* importRecords(
       data[i - 1] = row;
     }
 
-    const batchSize = 500;
+    const batchSize = Math.floor(999 / fieldNames.length);
 
     for (let i = 0; i < data.length; i += batchSize) {
       const batch = data.slice(i, i + batchSize);
@@ -81,23 +85,33 @@ export async function* importRecords(
 
       yield sse({
         data: {
-          message: `${(i + batchSize / data.length) * 100}%`,
+          progress: `${((i + batchSize) / data.length) * 100}`,
           completed: false,
         },
       });
     }
+
+    yield sse({
+      data: { message: 'Imported Records successfully', completed: true },
+    });
 
     const endTime = performance.now();
     const totalTime = Math.round(endTime - startTime);
 
     console.log(`Imported ${data.length} Records in ${totalTime} ms`);
 
-    yield sse({
-      data: { message: 'Imported Records successfully', completed: true },
-    });
-
     return { message: 'Imported Records successfully' };
   } catch (e) {
     console.error(e);
   }
+}
+
+function ArrayEquals(arr1: string[], arr2: string[]) {
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) {
+      return false;
+    }
+  }
+
+  return true;
 }

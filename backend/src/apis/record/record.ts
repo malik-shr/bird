@@ -85,7 +85,14 @@ export default class RecordApi implements Plugin {
         },
         (app) =>
           app
-            .get('/', (c) => listRecords(c.params.collection_name, this.ctx.db))
+            .get('/', (c) =>
+              listRecords(
+                c.params.collection_name,
+                c.query.page,
+                c.query.page_size,
+                this.ctx.db
+              )
+            )
 
             .get('/:id', (c) =>
               getRecord(c.params.collection_name, c.params.id, this.ctx.db)

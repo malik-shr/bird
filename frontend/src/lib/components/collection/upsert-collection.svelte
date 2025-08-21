@@ -66,6 +66,15 @@
     }
   }
 
+  async function truncateCollection() {
+    if (selectedCollectionName) {
+      open = false;
+      fetchCollections();
+      await bird.collections.trucate(selectedCollectionName);
+      goto(`/#/collections/${selectedCollectionName}`);
+    }
+  }
+
   async function deleteCollection() {
     if (selectedCollectionName) {
       open = false;
@@ -102,6 +111,11 @@
           >{selectedCollectionName ? 'Edit Collection' : 'Create Collection'}
         </span>
         {#if selectedCollectionName}
+          <Button
+            variant="link"
+            class="text-destructive"
+            onclick={truncateCollection}>Truncate</Button
+          >
           <Button
             variant="link"
             class="text-destructive"

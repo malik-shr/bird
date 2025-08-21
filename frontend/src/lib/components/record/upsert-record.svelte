@@ -78,7 +78,7 @@
 </script>
 
 {#if loading}
-  <div>...Loading</div>
+  <Button variant="ghost">Loading...</Button>
 {:else}
   <Sheet.Root {open}>
     <Sheet.Trigger

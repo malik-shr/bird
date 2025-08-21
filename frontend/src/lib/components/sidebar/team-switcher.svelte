@@ -4,8 +4,6 @@
   import { useSidebar } from '$lib/components/ui/sidebar/index.js';
   import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
   import GalleryVerticalEndIcon from '@lucide/svelte/icons/gallery-vertical-end';
-  import PlusIcon from '@lucide/svelte/icons/plus';
-  import UpsertRecord from '../record/upsert-record.svelte';
 
   const sidebar = useSidebar();
 </script>

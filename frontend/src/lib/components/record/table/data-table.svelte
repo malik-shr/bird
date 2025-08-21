@@ -27,38 +27,52 @@
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 12 });
   let rowSelection = $state<RowSelectionState>({});
   let columnVisibility = $state<VisibilityState>({});
+  let pageCount = $state<number>(-1); // -1 means "unknown" until first fetch
+  let loading = $state(true);
 
-  async function refetchData() {
+  // 👇 Fetch from backend whenever pagination changes
+  async function refetchData(pageNumber: number) {
+    loading = true;
     if (page.params.collection) {
-      data = await bird.collection(page.params.collection).getList();
+      // assume bird.collection().getList(page, pageSize) returns { items, totalCount }
+      const res = await bird
+        .collection(page.params.collection)
+        .getList(pageNumber, 12);
+
+      data = res?.records; // current 12 rows
+      pageCount = Math.ceil(res?.totalCount / pagination.pageSize);
     }
+    loading = false;
   }
 
+  $effect(() => {
+    refetchData(pagination.pageIndex);
+  });
+
   const table = createSvelteTable({
+    manualPagination: true,
+
+    // 👇 use a getter so pageCount is always reactive
+    get pageCount() {
+      return pageCount;
+    },
+
     get data() {
       return data;
     },
     columns,
     onRowSelectionChange: (updater) => {
-      if (typeof updater === 'function') {
-        rowSelection = updater(rowSelection);
-      } else {
-        rowSelection = updater;
-      }
+      rowSelection =
+        typeof updater === 'function' ? updater(rowSelection) : updater;
     },
     onPaginationChange: (updater) => {
-      if (typeof updater === 'function') {
-        pagination = updater(pagination);
-      } else {
-        pagination = updater;
-      }
+      loading = true;
+      pagination =
+        typeof updater === 'function' ? updater(pagination) : updater;
     },
     onColumnVisibilityChange: (updater) => {
-      if (typeof updater === 'function') {
-        columnVisibility = updater(columnVisibility);
-      } else {
-        columnVisibility = updater;
-      }
+      columnVisibility =
+        typeof updater === 'function' ? updater(columnVisibility) : updater;
     },
     state: {
       get pagination() {
@@ -71,7 +85,6 @@
         return rowSelection;
       },
     },
-
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
@@ -97,27 +110,31 @@
         {/each}
       </Table.Header>
       <Table.Body>
-        {#each table.getRowModel().rows as row (row.id)}
-          <Table.Row data-state={row.getIsSelected() && 'selected'}>
-            {#each row.getVisibleCells() as cell (cell.id)}
-              <Table.Cell>
-                <FlexRender
-                  content={cell.column.columnDef.cell}
-                  context={cell.getContext()}
-                />
+        {#if !loading}
+          {#each table.getRowModel().rows as row (row.id)}
+            <Table.Row data-state={row.getIsSelected() && 'selected'}>
+              {#each row.getVisibleCells() as cell (cell.id)}
+                <Table.Cell>
+                  <FlexRender
+                    content={cell.column.columnDef.cell}
+                    context={cell.getContext()}
+                  />
+                </Table.Cell>
+              {/each}
+            </Table.Row>
+          {:else}
+            <Table.Row>
+              <Table.Cell colspan={columns.length} class="h-24 text-center">
+                No results.
               </Table.Cell>
-            {/each}
-          </Table.Row>
-        {:else}
-          <Table.Row>
-            <Table.Cell colspan={columns.length} class="h-24 text-center">
-              No results.
-            </Table.Cell>
-          </Table.Row>
-        {/each}
+            </Table.Row>
+          {/each}
+        {/if}
       </Table.Body>
     </Table.Root>
   </div>
+
+  <!-- 🔹 Pagination controls -->
   <div class="flex items-center justify-end space-x-2 py-4">
     <Button
       variant="outline"
@@ -127,6 +144,7 @@
     >
       Previous
     </Button>
+    <span>Page {pagination.pageIndex + 1} of {pageCount}</span>
     <Button
       variant="outline"
       size="sm"
@@ -136,16 +154,17 @@
       Next
     </Button>
   </div>
+
   <div class="flex items-center text-muted-foreground flex-1 text-sm">
-    <span
-      >{table.getFilteredSelectedRowModel().rows.length} of{' '}
-      {table.getFilteredRowModel().rows.length} row(s) selected</span
-    >
+    <span>
+      {table.getFilteredSelectedRowModel().rows.length} of{' '}
+      {table.getFilteredRowModel().rows.length} row(s) selected
+    </span>
 
     {#if table.getFilteredSelectedRowModel().rows.length > 0}
       <DeletePanel
         rows={table.getFilteredSelectedRowModel().rows}
-        {refetchData}
+        refetchData={() => refetchData(0)}
       />
     {/if}
   </div>
