@@ -83,9 +83,15 @@ export async function* importRecords(
 
       await db.insertInto(collection_name).values(batch).execute();
 
+      let progress = ((i + batchSize) / data.length) * 100;
+
+      if (progress > 100) {
+        progress = 100;
+      }
+
       yield sse({
         data: {
-          progress: `${((i + batchSize) / data.length) * 100}`,
+          progress: progress,
           completed: false,
         },
       });

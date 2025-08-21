@@ -8,7 +8,7 @@ const headers = ['field1', 'field2', 'field3', 'field4'];
 writeFileSync(filePath, headers.join(',') + '\n'); // write header
 
 // Generate 100,000 rows
-for (let i = 1; i <= 1_000_000; i++) {
+for (let i = 1; i <= 100; i++) {
   const row = [
     `field1_value_${i}`,
     `field2_value_${i}`,

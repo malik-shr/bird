@@ -40,7 +40,12 @@
         .getList(pageNumber, 12);
 
       data = res?.records; // current 12 rows
+
       pageCount = Math.ceil(res?.totalCount / pagination.pageSize);
+
+      if (pageCount === 0) {
+        pageCount = 1;
+      }
     }
     loading = false;
   }
