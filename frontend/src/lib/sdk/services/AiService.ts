@@ -47,7 +47,6 @@ export default class AiService {
           if (event.event === 'message' && event.data) {
             onMessage(event.data);
           } else if (event.event === 'end' && event.data === 'done') {
-            console.log('Streaming completed');
             if (onComplete) onComplete();
           }
         },

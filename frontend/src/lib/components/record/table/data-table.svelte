@@ -30,7 +30,6 @@
   let pageCount = $state<number>(-1); // -1 means "unknown" until first fetch
   let loading = $state(true);
 
-  // 👇 Fetch from backend whenever pagination changes
   async function refetchData(pageNumber: number) {
     loading = true;
     if (page.params.collection) {

@@ -1,62 +1,32 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { bird } from '$lib/lib';
-  import type Bird from '$lib/sdk';
   import { onMount, tick } from 'svelte';
   import * as Card from '$lib/components/ui/card/index.js';
   import DOMPurify from 'isomorphic-dompurify';
   import { marked } from 'marked';
   import Input from '$lib/components/ui/input/input.svelte';
+  import { MessageStateClass } from './MessageState.svelte';
 
-  let messages: Bird.Message[] = $state([]);
+  const messageState = new MessageStateClass();
   let message = $state('');
   let bottomElement: HTMLDivElement;
 
-  async function scrollToBottom() {
-    await tick(); // Wait for DOM to update
-    if (bottomElement) {
-      bottomElement.scrollIntoView({ behavior: 'smooth' });
-    }
-  }
-
   $effect(() => {
-    if (messages.length > 0) {
+    if (messageState.messages.length > 0) {
       scrollToBottom();
     }
   });
 
   onMount(async () => {
     const data = await bird.collection('messages').getList(0, 100);
-    messages = data?.records;
+    messageState.messages = data?.records;
   });
 
-  async function sendAiRequest(event: Event) {
-    event.preventDefault();
-    if (!message.trim()) return;
-
-    messages = [...messages, { role: 'user', content: message }];
-    const userMessage = message;
-    message = '';
-
-    messages = [...messages, { role: 'assistant', content: '' }];
-    let aiMessage = '';
-
-    try {
-      await bird.ai.prompt(
-        userMessage,
-
-        (data: string) => {
-          aiMessage += data;
-
-          messages = [...messages];
-          messages[messages.length - 1] = {
-            role: 'assistant',
-            content: aiMessage,
-          };
-        }
-      );
-    } catch (error) {
-      console.error('Failed to send AI request:', error);
+  async function scrollToBottom() {
+    await tick(); // Wait for DOM to update
+    if (bottomElement) {
+      bottomElement.scrollIntoView({ behavior: 'smooth' });
     }
   }
 </script>
@@ -69,7 +39,7 @@
     <Card.Content>
       <div class="overflow-y-scroll min-h-[600px] max-h-[600px] mt-10">
         <div class="gap-10 flex flex-col mx-5">
-          {#each messages as msg}
+          {#each messageState.messages as msg}
             {#if msg.role === 'user'}
               <div
                 class="border-1 rounded-md p-4 bg-gray-100 w-60/100 self-end"
@@ -89,7 +59,13 @@
       </div>
     </Card.Content>
     <Card.Footer class="flex-col gap-2 w-full">
-      <form onsubmit={sendAiRequest} class="w-full">
+      <form
+        onsubmit={(e) => {
+          messageState.sendAiRequest(e, message);
+          message = '';
+        }}
+        class="w-full"
+      >
         <div class="flex my-10 gap-2 items-center">
           <Input bind:value={message} />
           <Button type="submit">Send</Button>

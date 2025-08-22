@@ -14,20 +14,14 @@
   import MarkdownInput from './inputs/markdown-input.svelte';
   import BooleanInput from './inputs/boolean-input.svelte';
   import SelectInput from './inputs/select-input.svelte';
+  import type { CollectionStateClass } from '../../../routes/(auth)/collections/[collection]/CollectionState.svelte';
 
   interface Props {
-    columns: Bird.Field[];
-    collection: string;
+    collectionState: CollectionStateClass;
     record_id?: string | null;
-    fetchRecords: (collection_name: string) => Promise<void>;
   }
 
-  let {
-    columns: fields,
-    collection,
-    record_id = null,
-    fetchRecords,
-  }: Props = $props();
+  let { collectionState, record_id = null }: Props = $props();
 
   let record: Bird.Record = $state({});
   let formData: Bird.Record = $state({});
@@ -44,10 +38,12 @@
 
   async function load() {
     if (record_id) {
-      record = await bird.collection(collection).getOne(record_id);
+      record = await bird
+        .collection(collectionState.collection_name)
+        .getOne(record_id);
       formData = Object.assign({}, record);
     } else {
-      formData = assignRecordFormData(fields);
+      formData = assignRecordFormData(collectionState.fields);
     }
 
     loading = false;
@@ -66,14 +62,16 @@
     }
 
     if (record.id) {
-      await bird.collection(collection).update(record.id, fd);
+      await bird
+        .collection(collectionState.collection_name)
+        .update(record.id, fd);
     } else {
-      await bird.collection(collection).create(fd);
+      await bird.collection(collectionState.collection_name).create(fd);
     }
 
     open = false;
 
-    await fetchRecords(collection);
+    await collectionState.fetchRecords(collectionState.collection_name);
   }
 </script>
 
@@ -99,7 +97,7 @@
       </Sheet.Header>
 
       <div class="grid gap-4 py-4 mx-4">
-        {#each fields as column}
+        {#each collectionState.fields as column}
           <div class="grid grid-cols-4 items-center gap-4">
             {#if column.type === 'String' || column.type === 'Float' || column.type === 'Integer' || column.type === 'Date'}
               <BaseInput bind:value={formData[column.name]} {column} />
