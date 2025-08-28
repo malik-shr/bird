@@ -12,7 +12,7 @@
 
   async function logout() {
     await bird.auth.logout();
-    goto('#/login');
+    goto('login');
   }
 </script>
 

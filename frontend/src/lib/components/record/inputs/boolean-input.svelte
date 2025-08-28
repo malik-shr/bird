@@ -1,9 +1,15 @@
 <script lang="ts">
   import { Switch } from '$lib/components/ui/switch/index.js';
-  import { Label } from '$lib/components/ui/label/index.js';
+  import BaseInput from './base-input.svelte';
 
-  let { column, value = $bindable() } = $props();
+  let { field, value = $bindable() } = $props();
 </script>
 
-<Label for={column.name}>{column.name}</Label>
-<Switch id={column.name} name={column.name} bind:checked={value} />
+<BaseInput {field}>
+  <Switch
+    id={field.name}
+    name={field.name}
+    bind:checked={value}
+    required={field.isRequired}
+  />
+</BaseInput>

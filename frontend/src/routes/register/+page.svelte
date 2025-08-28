@@ -18,7 +18,7 @@
       formObject['password'],
       formObject['confirmPassword']
     );
-    goto('/#/login');
+    goto('/login');
   }
 </script>
 
@@ -45,5 +45,5 @@
     <Button type="submit">Register</Button>
   </form>
 
-  <p>Already have an account? <a href="/#/login">Login</a></p>
+  <p>Already have an account? <a href="/login">Login</a></p>
 </div>

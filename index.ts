@@ -1,4 +1,4 @@
-import { Bird } from './core/Bird';
+import { Bird } from '@core/Bird';
 
 export default Bird;
 

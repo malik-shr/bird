@@ -5,9 +5,9 @@
 
   onMount(() => {
     if ($user === null) {
-      goto('/#/login');
+      goto('/login');
     } else {
-      goto('/#/collections');
+      goto('/collections');
     }
   });
 </script>

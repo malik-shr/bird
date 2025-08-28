@@ -50,7 +50,7 @@
                       : ''}
                   >
                     {#snippet child({ props })}
-                      <a href={`/#/collections/${subItem.name}`} {...props}>
+                      <a href={`/collections/${subItem.name}`} {...props}>
                         <Folder />
                         <span>{subItem.name}</span>
                       </a>
@@ -73,7 +73,7 @@
     <Sidebar.MenuItem>
       <Sidebar.MenuButton>
         {#snippet child({ props })}
-          <a href="/#/ai" {...props}>
+          <a href="/ai" {...props}>
             <Bot />
             <span>Ai</span>
           </a>
@@ -84,7 +84,7 @@
     <Sidebar.MenuItem>
       <Sidebar.MenuButton>
         {#snippet child({ props })}
-          <a href="/#/settings" {...props}>
+          <a href="/settings" {...props}>
             <Settings />
             <span>Settings</span>
           </a>

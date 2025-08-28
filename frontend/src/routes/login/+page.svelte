@@ -8,7 +8,7 @@
 
   onMount(async () => {
     if ($user !== null) {
-      goto('/#/collections');
+      goto('/collections');
     }
   });
 
@@ -19,7 +19,7 @@
     const formObject = Object.fromEntries(formData.entries());
 
     await bird.auth.login(formObject.username, formObject.password);
-    goto('/#/collections');
+    goto('/collections');
   }
 </script>
 
@@ -38,5 +38,5 @@
     <Button type="submit">Login</Button>
   </form>
 
-  <p>No Account? <a href="/#/register">Register</a></p>
+  <p>No Account? <a href="/register">Register</a></p>
 </div>

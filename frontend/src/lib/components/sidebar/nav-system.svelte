@@ -36,7 +36,7 @@
                   : ''}
               >
                 {#snippet child({ props })}
-                  <a href={`/#/collections/${subItem.name}`} {...props}>
+                  <a href={`/collections/${subItem.name}`} {...props}>
                     <FolderLock />
                     <span>{subItem.name}</span>
                   </a>

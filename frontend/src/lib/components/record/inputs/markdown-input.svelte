@@ -1,10 +1,20 @@
 <script lang="ts">
-  import { Label } from '$lib/components/ui/label/index.js';
+  import Input from '$lib/components/ui/input/input.svelte';
   import EditorDialog from '../editor-dialog.svelte';
+  import BaseInput from './base-input.svelte';
 
-  let { column, value = $bindable() } = $props();
+  let { field, value = $bindable() } = $props();
 </script>
 
-<Label for={column.name} class="text-right">{column.name}</Label>
+<BaseInput {field}>
+  <Input
+    id={field.name}
+    name={field.name}
+    bind:value
+    type="text"
+    disabled={field.name === 'id'}
+    required={field.isRequired}
+  />
 
-<EditorDialog bind:value field={column} />
+  <EditorDialog bind:value {field} />
+</BaseInput>

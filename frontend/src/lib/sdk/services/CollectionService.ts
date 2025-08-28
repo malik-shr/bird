@@ -11,10 +11,12 @@ export default class CollectionService {
 
   async list() {
     try {
+      const token = localStorage.getItem('token');
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.GET,
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -31,10 +33,12 @@ export default class CollectionService {
     ruleData: Bird.RuleData
   ) {
     try {
+      const token = localStorage.getItem('token');
       const data = await this.bird.send(this.baseUrl, {
         method: SendMethod.POST,
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
         body: {
           table_name: table_name,
@@ -52,10 +56,12 @@ export default class CollectionService {
 
   async columns(collectionName: string) {
     try {
+      const token = localStorage.getItem('token');
       const data = await this.bird.send(`${this.baseUrl}/${collectionName}`, {
         method: SendMethod.GET,
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
 

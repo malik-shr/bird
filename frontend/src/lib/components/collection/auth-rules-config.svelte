@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Button, buttonVariants } from '$lib/components/ui/button/index.js';
   import * as Card from '$lib/components/ui/card/index.js';
   import { Input } from '$lib/components/ui/input/index.js';
   import { Label } from '$lib/components/ui/label/index.js';
@@ -15,7 +14,13 @@
   <Card.Content class="grid gap-6 overflow-y-scroll ">
     <div class="grid gap-3">
       <Label for="viewRule">View Rule</Label>
-      <Input id="viewRule" type="number" bind:value={authRules['viewRule']} />
+      <Input
+        id="viewRule"
+        type="number"
+        bind:value={authRules['viewRule']}
+        min="0"
+        max="6"
+      />
     </div>
     <div class="grid gap-3">
       <Label for="createRule">Create Rule</Label>
@@ -23,6 +28,8 @@
         id="createRule"
         type="number"
         bind:value={authRules['createRule']}
+        min="0"
+        max="6"
       />
     </div>
     <div class="grid gap-3">
@@ -31,6 +38,8 @@
         id="updateRule"
         type="number"
         bind:value={authRules['updateRule']}
+        min="0"
+        max="6"
       />
     </div>
     <div class="grid gap-3">
@@ -39,6 +48,8 @@
         id="deleteRule"
         type="number"
         bind:value={authRules['deleteRule']}
+        min="0"
+        max="6"
       />
     </div>
   </Card.Content>

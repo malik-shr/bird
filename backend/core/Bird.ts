@@ -2,8 +2,8 @@ import Elysia from 'elysia';
 import { cors } from '@elysiajs/cors';
 import pc from 'picocolors';
 import { staticPlugin } from '@elysiajs/static';
-import { PluginContext } from '@shared/PluginContext';
-import Plugin from '@shared/Plugin';
+import type { PluginContext } from '@shared/PluginContext';
+import type Plugin from '@shared/Plugin';
 import AuthApi from '../apis/auth/auth';
 import RecordApi from '../apis/record/record';
 import CollectionApi from '../apis/collection/collection';
@@ -23,12 +23,21 @@ export class Bird extends Elysia {
 
     this.startTime = performance.now();
     this.use(cors());
+    // Serve actual static files first
+    // Serve static files
+    // Serve static files first
     this.use(
       staticPlugin({
-        assets: '../frontend/build',
-        prefix: '/',
+        assets: 'frontend/dist',
+        prefix: '',
       })
-    );
+    ).get('/*', async ({ path }) => {
+      const filePath = `frontend/dist/${path}`;
+      if (await Bun.file(filePath).exists()) {
+        return Bun.file(filePath);
+      }
+      return Bun.file('frontend/dist/index.html');
+    });
 
     this.db = new Kysely<DB>({
       dialect: new BunSqliteDialect({ url: 'bird_data/data.db' }),

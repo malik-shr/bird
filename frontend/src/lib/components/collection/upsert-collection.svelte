@@ -46,7 +46,7 @@
   async function createCollectionAction() {
     await bird.collections.create(collection_name, fields, 'base', authRules);
     fetchCollections();
-    goto(`/#/collections/${collection_name}`);
+    goto(`/collections/${collection_name}`);
     open = false;
   }
 
@@ -71,7 +71,7 @@
       open = false;
       fetchCollections();
       await bird.collections.trucate(selectedCollectionName);
-      goto(`/#/collections/${selectedCollectionName}`);
+      goto(`/collections/${selectedCollectionName}`);
     }
   }
 
@@ -79,7 +79,7 @@
     if (selectedCollectionName) {
       open = false;
       fetchCollections();
-      goto(`/#/collections/${$collections[0].name}`);
+      goto(`/collections/${$collections[0].name}`);
       await bird.collections.delete(selectedCollectionName);
     }
   }
@@ -124,7 +124,11 @@
         {/if}</Sheet.Title
       >
     </Sheet.Header>
-    <div class="flex w-full flex-col gap-6">
+    <form
+      id="upsertCollection"
+      onsubmit={createCollectionAction}
+      class="flex w-full flex-col gap-6"
+    >
       <Tabs.Root value="collection">
         <Tabs.List>
           <Tabs.Trigger value="collection">Collection</Tabs.Trigger>
@@ -142,9 +146,9 @@
           <AuthRulesConfig bind:authRules />
         </Tabs.Content>
       </Tabs.Root>
-    </div>
+    </form>
     <Sheet.Footer>
-      <Button onclick={createCollectionAction} variant="outline"
+      <Button type="submit" form="upsertCollection" variant="outline"
         >{selectedCollectionName
           ? 'Update Collection'
           : 'Create Collection'}</Button

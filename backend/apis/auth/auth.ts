@@ -1,12 +1,12 @@
 import swagger from '@elysiajs/swagger';
-import Plugin from '@shared/Plugin';
-import { PluginContext } from '@shared/PluginContext';
+import type Plugin from '@shared/Plugin';
+import type { PluginContext } from '@shared/PluginContext';
 import { authMiddleware } from './middleware/authMiddleware';
 import { login, loginBody } from './handlers/login';
 import { me } from './handlers/me';
 import { users } from './tables';
 import { register, registerBody } from './handlers/register';
-import Elysia, { sse } from 'elysia';
+import Elysia from 'elysia';
 import Collection from '@shared/Collection';
 import { realtTimeHandler } from './handlers/realtimeHandler';
 

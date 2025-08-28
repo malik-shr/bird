@@ -56,7 +56,6 @@
   const table = createSvelteTable({
     manualPagination: true,
 
-    // 👇 use a getter so pageCount is always reactive
     get pageCount() {
       return pageCount;
     },

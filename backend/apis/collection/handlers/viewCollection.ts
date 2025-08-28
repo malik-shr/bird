@@ -14,6 +14,12 @@ export async function viewCollection(collection_name: string, db: Kysely<DB>) {
       .where('collection', '=', collection_id)
       .execute();
 
+    const authRules = await db
+      .selectFrom('auth_rules')
+      .selectAll()
+      .where('collection', '=', collection_id)
+      .execute();
+
     const fields: Field[] = [];
 
     for (const field of fieldResponse) {
@@ -39,7 +45,7 @@ export async function viewCollection(collection_name: string, db: Kysely<DB>) {
       );
     }
 
-    return { fields: fields };
+    return { fields, authRules };
   } catch (e) {
     console.error(e);
   }

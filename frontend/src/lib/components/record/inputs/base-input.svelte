@@ -1,17 +1,14 @@
 <script lang="ts">
-  import { Input } from '$lib/components/ui/input/index.js';
-  import { Label } from '$lib/components/ui/label/index.js';
-  import { getInputType } from '../utils';
+  import Label from '$lib/components/ui/label/label.svelte';
 
-  let { column, value = $bindable() } = $props();
+  let { field, children } = $props();
 </script>
 
-<Label for={column.name} class="text-right">{column.name}</Label>
-<Input
-  id={column.name}
-  name={column.name}
-  bind:value
-  class="col-span-3"
-  type={getInputType(column)}
-  disabled={column.name === 'id'}
-/>
+<div class="flex">
+  <Label for={field.name} class="text-right">{field.name}</Label>
+  {#if field.isRequired}
+    <span class="text-red-700">*</span>
+  {/if}
+</div>
+
+{@render children?.()}

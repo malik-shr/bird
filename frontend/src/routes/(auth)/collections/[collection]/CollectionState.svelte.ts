@@ -84,7 +84,7 @@ export class CollectionStateClass implements CollectionState {
         cell: ({ row }) => {
           return renderComponent(UpsertRecord, {
             collectionState: this,
-            record_id: String(row.original.id),
+            record: row.original,
           });
         },
       },

@@ -8,6 +8,12 @@
     "jsx": "react-jsx",
     "allowJs": true,
 
+    "paths": {
+      "@shared/*": ["./backend/shared/*"],
+      "@apis/*": ["./backend/apis/*"],
+      "@core/*": ["./backend/core/*"]
+    },
+
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

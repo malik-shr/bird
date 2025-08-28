@@ -9,21 +9,20 @@
   import RelationField from './relation-field.svelte';
   import type Bird from '$lib/sdk';
   import { assignRecordFormData } from './utils';
-  import BaseInput from './inputs/base-input.svelte';
   import FileInput from './inputs/file-input.svelte';
   import MarkdownInput from './inputs/markdown-input.svelte';
   import BooleanInput from './inputs/boolean-input.svelte';
   import SelectInput from './inputs/select-input.svelte';
   import type { CollectionStateClass } from '../../../routes/(auth)/collections/[collection]/CollectionState.svelte';
+  import TextInput from './inputs/text-input.svelte';
 
   interface Props {
     collectionState: CollectionStateClass;
-    record_id?: string | null;
+    record?: Bird.Record | null;
   }
 
-  let { collectionState, record_id = null }: Props = $props();
+  let { collectionState, record = null }: Props = $props();
 
-  let record: Bird.Record = $state({});
   let formData: Bird.Record = $state({});
   let loading = $state(true);
   let collection_name = $derived(page.params.collection);
@@ -37,10 +36,7 @@
   });
 
   async function load() {
-    if (record_id) {
-      record = await bird
-        .collection(collectionState.collection_name)
-        .getOne(record_id);
+    if (record) {
       formData = Object.assign({}, record);
     } else {
       formData = assignRecordFormData(collectionState.fields);
@@ -61,7 +57,7 @@
       fd.append(key, val);
     }
 
-    if (record.id) {
+    if (record) {
       await bird
         .collection(collectionState.collection_name)
         .update(record.id, fd);
@@ -80,11 +76,11 @@
 {:else}
   <Sheet.Root {open}>
     <Sheet.Trigger
-      class={buttonVariants({ variant: !record.id ? 'default' : 'secondary' })}
+      class={buttonVariants({ variant: !record ? 'default' : 'secondary' })}
       onclick={() => {
         open = true;
       }}
-      >{#if record.id}
+      >{#if record}
         <Button variant="ghost"><Pen /></Button>
       {:else}
         <span>Create Record</span>
@@ -92,32 +88,35 @@
     >
     <Sheet.Content side="right">
       <Sheet.Header>
-        <Sheet.Title>{!record.id ? 'Create Record' : 'Edit Record'}</Sheet.Title
-        >
+        <Sheet.Title>{!record ? 'Create Record' : 'Edit Record'}</Sheet.Title>
       </Sheet.Header>
 
-      <div class="grid gap-4 py-4 mx-4">
-        {#each collectionState.fields as column}
+      <form
+        id="upsertRecord"
+        class="grid gap-4 py-4 mx-4"
+        onsubmit={createRecordAction}
+      >
+        {#each collectionState.fields as field}
           <div class="grid grid-cols-4 items-center gap-4">
-            {#if column.type === 'String' || column.type === 'Float' || column.type === 'Integer' || column.type === 'Date'}
-              <BaseInput bind:value={formData[column.name]} {column} />
-            {:else if column.type === 'File'}
-              <FileInput bind:value={formData[column.name]} {column} />
-            {:else if column.type === 'Markdown'}
-              <MarkdownInput bind:value={formData[column.name]} {column} />
-            {:else if column.type === 'Boolean'}
-              <BooleanInput bind:value={formData[column.name]} {column} />
-            {:else if column.type === 'Select'}
-              <SelectInput bind:value={formData[column.name]} {column} />
-            {:else if column.type === 'Relation'}
-              <RelationField value={formData[column.name]} field={column} />
+            {#if field.type === 'String' || field.type === 'Float' || field.type === 'Integer' || field.type === 'Date'}
+              <TextInput bind:value={formData[field.name]} {field} />
+            {:else if field.type === 'File'}
+              <FileInput bind:value={formData[field.name]} {field} />
+            {:else if field.type === 'Markdown'}
+              <MarkdownInput bind:value={formData[field.name]} {field} />
+            {:else if field.type === 'Boolean'}
+              <BooleanInput bind:value={formData[field.name]} {field} />
+            {:else if field.type === 'Select'}
+              <SelectInput bind:value={formData[field.name]} {field} />
+            {:else if field.type === 'Relation'}
+              <RelationField value={formData[field.name]} {field} />
             {/if}
           </div>
         {/each}
-      </div>
+      </form>
       <Sheet.Footer>
-        <Button onclick={createRecordAction}
-          >{!record.id ? 'Create Record' : 'Update Record'}</Button
+        <Button type="submit" form="upsertRecord"
+          >{!record ? 'Create Record' : 'Update Record'}</Button
         >
       </Sheet.Footer>
     </Sheet.Content>

@@ -1,22 +1,28 @@
 {
   "name": "bird",
+  "version": "1.0.0",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "scripts": {
-    "build": "bun run build.ts",
-    "dev:frontend": "cd frontend && bun run dev",
-    "dev:backend": "cd backend && bun run dev",
-    "dev": "concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
-    "start": "./dist/server"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "bun run --watch index.ts",
+    "make": "bun build --compile ./index.ts --outfile dist/bird"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.3.3",
+    "@elysiajs/jwt": "^1.3.3",
+    "@elysiajs/static": "^1.3.0",
+    "@elysiajs/swagger": "^1.3.1",
+    "dotenv": "^17.2.1",
+    "elysia": "^1.3.20",
+    "kysely": "^0.28.5",
+    "kysely-bun-worker": "^1.2.1",
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
     "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.8.3"
-  },
-  "dependencies": {
-    "concurrently": "^9.2.0"
   }
 }
