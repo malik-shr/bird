@@ -1,0 +1,22 @@
+public enum FieldType
+{
+    Text,
+    Number,
+    Boolean,
+    Date,
+    DateTime,
+    Email,
+    Phone,
+    Url,
+    Password,
+    TextArea,
+    Select,
+    MultiSelect,
+    File,
+    Image,
+    Json,
+    Relation,
+    Formula,
+    Count,
+    Lookup
+}

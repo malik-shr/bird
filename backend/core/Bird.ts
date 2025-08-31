@@ -11,6 +11,10 @@ import { Kysely } from 'kysely';
 import { BunSqliteDialect } from 'kysely-bun-worker/normal';
 import FileApi from '../apis/file/file';
 import AiApi from '@apis/ai/ai';
+import { existsSync, mkdirSync } from 'fs';
+import { join } from 'path';
+
+const frontendFolder = join(import.meta.dir, '../../frontend/dist');
 
 export class Bird extends Elysia {
   startTime: number;
@@ -22,22 +26,22 @@ export class Bird extends Elysia {
     super();
 
     this.startTime = performance.now();
-    this.use(cors());
-    // Serve actual static files first
-    // Serve static files
-    // Serve static files first
-    this.use(
-      staticPlugin({
-        assets: 'frontend/dist',
-        prefix: '',
-      })
-    ).get('/*', async ({ path }) => {
-      const filePath = `frontend/dist/${path}`;
-      if (await Bun.file(filePath).exists()) {
-        return Bun.file(filePath);
-      }
-      return Bun.file('frontend/dist/index.html');
-    });
+    this.initDataFolder();
+
+    this.use(cors())
+      .use(staticPlugin({ assets: frontendFolder, prefix: '' }))
+      .get('/*', async ({ path }) => {
+        const filePath = join(frontendFolder, path);
+
+        console.log(frontendFolder);
+
+        if (existsSync(filePath)) {
+          return Bun.file(filePath);
+        }
+
+        // fallback to index.html for SPA routing
+        return Bun.file(join(frontendFolder, 'index.html'));
+      });
 
     this.db = new Kysely<DB>({
       dialect: new BunSqliteDialect({ url: 'bird_data/data.db' }),
@@ -57,6 +61,17 @@ export class Bird extends Elysia {
 
     this.setupDatabase();
     this.registerRoutes();
+  }
+
+  private initDataFolder() {
+    const dirPath = 'bird_data';
+
+    if (!existsSync(dirPath)) {
+      mkdirSync(dirPath, { recursive: true });
+      console.log('Directory created!');
+    } else {
+      console.log('Directory already exists.');
+    }
   }
 
   private async setupDatabase() {

@@ -78,7 +78,8 @@ export class AuthService {
       },
       onmessage(msg) {
         const parsed = JSON.parse(msg.data);
-        onMessage(parsed);
+
+        onMessage(parsed.Result);
       },
     });
   }
