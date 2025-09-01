@@ -1,14 +1,26 @@
-using System.Reflection.Metadata.Ecma335;
+using Microsoft.AspNetCore.Mvc;
+using SqlKata.Execution;
 
-namespace Bird.Core
+namespace Bird.Controllers
 {
-    public class Auth
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
-        public async Task<object> Me()
+        private readonly QueryFactory _db;
+         
+        public AuthController(QueryFactory db)
+        {
+            _db = db;
+        }
+
+        [HttpGet("me")]
+        public object Me()
         {
             return new { user = new { username = "bird", email = "bird@web.de", disabled = false, role = 6 } };
         }
-        
+
+        [HttpGet("realtime")]
         public async IAsyncEnumerable<string> RealTimeHandler()
         {
             while (true)

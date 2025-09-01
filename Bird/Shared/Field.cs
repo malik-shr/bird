@@ -48,14 +48,14 @@ public class Field
         Id = props.Id ?? IdGenerator.GenerateShortUuid();
     }
 
-    public async Task<bool> ExistsAsync(string collectionId, QueryFactory db)
+    public bool Exists(string collectionId, QueryFactory db)
     {
         try
         {
-            var result = await db.Query("fields_meta as f")
+            var result = db.Query("fields_meta as f")
                 .Where("f.name", Name)
                 .Where("f.collection", collectionId)
-                .CountAsync<int>();
+                .Count<int>();
 
             return result > 0;
         }
@@ -66,14 +66,14 @@ public class Field
         }
     }
 
-    public async Task InsertMetaDataAsync(string collectionId, QueryFactory db)
+    public void InsertMetaData(string collectionId, QueryFactory db)
     {
-        if (!await ExistsAsync(collectionId, db))
+        if (!Exists(collectionId, db))
         {
             try
             {
-                await db.Query("fields_meta")
-                    .InsertAsync(new
+                db.Query("fields_meta")
+                    .Insert(new
                     {
                         id = Id,
                         name = Name,
@@ -90,8 +90,8 @@ public class Field
                 {
                     foreach (var option in Options)
                     {
-                        await db.Query("select_options")
-                            .InsertAsync(new
+                        db.Query("select_options")
+                            .Insert(new
                             {
                                 id = Guid.NewGuid().ToString(),
                                 collection = collectionId,

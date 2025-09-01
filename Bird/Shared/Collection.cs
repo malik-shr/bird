@@ -61,13 +61,13 @@ namespace Bird.Shared
 
         }
 
-        public async Task InsertMetaData(QueryFactory db)
+        public void InsertMetaData(QueryFactory db)
         {
             if (!exists(db))
             {
-                await db
+                 db
                 .Query("collections_meta")
-                .InsertAsync(
+                .Insert(
                     new
                     {
                         id = id,
@@ -81,13 +81,13 @@ namespace Bird.Shared
 
                 foreach (var field in fields)
                 {
-                    await field.InsertMetaDataAsync(id, db);
+                    field.InsertMetaData(id, db);
                 }
             }
 
         }
 
-        private Boolean exists(QueryFactory db)
+        private bool exists(QueryFactory db)
         {
 
             var result = db

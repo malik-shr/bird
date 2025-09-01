@@ -1,108 +1,101 @@
+
 using Bird.Shared;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Expressions;
 using SqlKata.Execution;
 
-namespace Bird.Core
+namespace Bird.Controllers
 {
-    public record CollectionMeta
+    public record CreateRecordBody(Dictionary<string, object> values);
+    
+    [ApiController]
+    [Route("api/collections/{collectionName}/[controller]")]
+    public class RecordsController : ControllerBase
     {
-        public string id { get; init; }
-        public string name { get; init; }
-        public string type { get; init; }
-        public string relation_alias { get; init; }
-    }
-
-    public record FieldMeta
-    {
-        public string id { get; init; }
-        public string name { get; init; }
-        public string type { get; init; }
-        public string relation_collection { get; init; }
-        public string collection { get; init; }
-        public bool is_required { get; init; }
-        public bool is_primary_key { get; init; }
-        public bool is_hidden { get; init; }
-        public bool is_unique { get; init; }
-    }
-
-
-    public class Record
-    {
-        public async Task createRecord(Dictionary<string, object> values, string collectionName, QueryFactory db)
+        private readonly QueryFactory _db;
+         
+        public RecordsController(QueryFactory db)
         {
-            var collection = await db
+            _db = db;
+        }
+
+        [HttpPost]
+        public void CreateRecord(CreateRecordBody body, [FromRoute] string collectionName)
+        {
+            var collection = _db
                 .Query("collections_meta")
                 .Select("*")
                 .Where("name", collectionName)
                 .Take(1)
-                .GetAsync<CollectionMeta>();
+                .First<CollectionMeta>();
 
-            if (collection.First().type == "base")
+            if (collection.type == "base")
             {
                 Console.WriteLine("Wrong Collection type");
             }
 
             var id = IdGenerator.GenerateShortUuid();
 
-            var fields = await db.Query("fields_meta").Select("*").Where("collection", "=", collection.First().id).GetAsync<FieldMeta>();
+            var fields =  _db.Query("fields_meta").Select("*").Where("collection", "=", collection.id).Get<FieldMeta>();
 
             foreach (var field in fields)
             {
-                var value = values[field.name];
+                var value = body.values[field.name];
 
                 if (field.type == "File" && value is FileInfo file)
                 {
                     var filePath = $"bird_data/storage/{collectionName}/{id}/{file.Name}";
                     file.CopyTo(filePath, overwrite: true);
 
-                    values[field.name] = $"{collectionName}/{id}/{file.Name}";
+                    body.values[field.name] = $"{collectionName}/{id}/{file.Name}";
                 }
             }
 
-            values["id"] = id;
-            await db.Query(collectionName).InsertAsync(values);
+            body.values["id"] = id;
+            _db.Query(collectionName).Insert(body.values);
         }
 
-        public async Task DeleteRecord(string collectionName, string id, QueryFactory db)
+        [HttpDelete("{id}")]
+        public void DeleteRecord(string collectionName, string id)
         {
-            await db.Query(collectionName).AsDelete().Where("id", id).DeleteAsync();
+            _db.Query(collectionName).AsDelete().Where("id", id);
         }
 
-        public async Task<dynamic> GetRecord(string collectionName, string id, QueryFactory db)
+        [HttpGet("{id}")]
+        public dynamic GetRecord([FromRoute] string collectionName, [FromRoute] string id)
         {
-            var record = await db
+            var record = _db
                 .Query(collectionName)
                 .Select("*")
                 .Where("id", id)
                 .Take(1)
-                .GetAsync();
+                .First();
 
-            return record.First();
+            return record;
         }
 
-        public async Task<object> ListRecords(string collectionName, string page, string pageSize, QueryFactory db)
+        [HttpGet]
+        public object ListRecords([FromRoute] string collectionName,  [FromQuery] int page = 1, [FromQuery] int pageSize = 12)
         {
-            var parsedPage = int.Parse(page);
-            var parsedPageSize = int.Parse(pageSize);
-
             List<string> selectFields = [];
             var joinCounter = 0;
 
-            var collectionResponse = await db
+            var collection = _db
                 .Query("collections_meta")
                 .Select("id")
                 .Where("name", collectionName)
-                .GetAsync<CollectionMeta>();
+                .First<CollectionMeta>();
 
-            var collection = collectionResponse.First();
 
-            var query = db.Query(collectionName);
 
-            var fields = await db
+            var query = _db.Query(collectionName);
+
+            var fields = _db
                 .Query("fields_meta")
                 .Select()
                 .WhereFalse("is_hidden")
                 .Where("collection", collection.id)
-                .GetAsync<FieldMeta>();
+                .Get<FieldMeta>();
 
             foreach (var field in fields)
             {
@@ -114,11 +107,11 @@ namespace Bird.Core
                     $"ref_{joinCounter}.id"
                     );
 
-                    var relationCollectionMeta = await db
+                    var relationCollectionMeta = _db
                     .Query("collections_meta")
                     .Select()
                     .Where("name", field.relation_collection)
-                    .GetAsync<CollectionMeta>();
+                    .Get<CollectionMeta>();
 
                     selectFields.Add(
                     $"ref_{joinCounter}.{relationCollectionMeta.First().relation_alias} as {field.name}"
@@ -146,24 +139,19 @@ namespace Bird.Core
                 }
             }
 
-            Console.WriteLine(parsedPageSize + "\n\n\n\n\n");
-            Console.WriteLine(parsedPage * parsedPageSize + "\n\n\n\n\n");
-
             query = query.Select();
-            var records = await query
+            var records = query
                 // .Offset(parsedPage * parsedPageSize)
                 // .Limit(parsedPageSize)
-                .GetAsync();
+                .Get();
 
-            var totalCount = await db
+            var totalCount = _db
                     .Query(collectionName)
                     .Select("id")
                     .AsCount()
-                    .GetAsync<Length>();
+                    .First<Length>();
 
-            return new { records, totalCount = totalCount.First().count };
+            return new { records, totalCount = totalCount.count };
         }
-
-
     }
 }
